@@ -1,10 +1,11 @@
 {
   "name": "wetland",
-  "version": "0.0.1",
-  "description": "Coming soon.",
-  "main": "index.js",
+  "version": "0.1.0",
+  "description": "An enterprise grade ORM for Node.js loosely based on the JPA spec.",
+  "main": "./build/src/index.js",
+  "typings": "./lib/foo.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha build/test/unit && nyc check-coverage --lines 95 --functions 95 --branches 95"
   },
   "repository": {
     "type": "git",
@@ -15,5 +16,21 @@
   "bugs": {
     "url": "https://github.com/SpoonX/wetland/issues"
   },
-  "homepage": "https://github.com/SpoonX/wetland#readme"
+  "homepage": "https://github.com/SpoonX/wetland#readme",
+  "dependencies": {
+    "@types/chai": "^3.4.30",
+    "@types/knex": "0.0.32",
+    "@types/mocha": "^2.2.29",
+    "homefront": "^1.2.0",
+    "knex": "^0.11.10",
+    "reflect-metadata": "^0.1.3"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.0.1",
+    "nyc": "^7.1.0",
+    "reflect-metadata": "^0.1.3",
+    "sqlite3": "^3.1.4",
+    "typescript": "^2.1.0-dev.20160807"
+  }
 }

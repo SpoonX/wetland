@@ -1,0 +1,17 @@
+rlib-cov
+*.seed
+*.log
+*.out
+*.pid
+npm-debug.log
+*~
+*#
+.DS_STORE
+.netbeans
+nbproject
+node_modules
+.idea
+.node_history
+.nyc_output
+.vscode
+notes.md
