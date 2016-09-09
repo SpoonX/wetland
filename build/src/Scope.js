@@ -136,7 +136,7 @@ class Scope {
      * @returns {Scope}
      */
     clear() {
-        this.unitOfWork.rollback();
+        this.unitOfWork.clear();
         return this;
     }
 }

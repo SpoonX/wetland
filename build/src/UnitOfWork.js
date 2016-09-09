@@ -18,7 +18,7 @@ class UnitOfWork {
      */
     constructor(entityManager) {
         this.entityManager = entityManager;
-        this.rollback();
+        this.clear();
     }
     /**
      * Register an object as "new".
@@ -105,7 +105,7 @@ class UnitOfWork {
             .then(() => this.deleteDeleted())
             .then(() => this.commitOrRollback(true))
             .then(() => this.refreshDirty())
-            .then(() => this.rollback())
+            .then(() => this.clear())
             .catch(() => this.commitOrRollback(false));
     }
     /**
@@ -247,7 +247,7 @@ class UnitOfWork {
      *
      * @returns {UnitOfWork}
      */
-    rollback() {
+    clear() {
         this.deletedObjects = new ArrayCollection_1.ArrayCollection;
         this.newObjects = new ArrayCollection_1.ArrayCollection;
         this.transactions = {};
