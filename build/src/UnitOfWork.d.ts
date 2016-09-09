@@ -165,5 +165,5 @@ export declare class UnitOfWork {
      *
      * @returns {UnitOfWork}
      */
-    rollback(): UnitOfWork;
+    clear(): UnitOfWork;
 }

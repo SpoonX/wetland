@@ -175,7 +175,7 @@ export class Scope {
    * @returns {Scope}
    */
   public clear(): Scope {
-    this.unitOfWork.rollback();
+    this.unitOfWork.clear();
 
     return this;
   }

@@ -52,7 +52,7 @@ export class UnitOfWork {
   /**
    * @type {{}|null}
    */
-  private transactions: Object | null;
+  private transactions: Object;
 
   /**
    * Create a new UnitOfWork.
@@ -62,7 +62,7 @@ export class UnitOfWork {
   public constructor(entityManager: Scope) {
     this.entityManager = entityManager;
 
-    this.rollback();
+    this.clear();
   }
 
   /**
@@ -163,7 +163,7 @@ export class UnitOfWork {
       .then(() => this.deleteDeleted())
       .then(() => this.commitOrRollback(true))
       .then(() => this.refreshDirty())
-      .then(() => this.rollback())
+      .then(() => this.clear())
       .catch(() => this.commitOrRollback(false));
   }
 
@@ -333,7 +333,7 @@ export class UnitOfWork {
    *
    * @returns {UnitOfWork}
    */
-  public rollback(): UnitOfWork {
+  public clear(): UnitOfWork {
     this.deletedObjects = new ArrayCollection;
     this.newObjects     = new ArrayCollection;
     this.transactions   = {};
