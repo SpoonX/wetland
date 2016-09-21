@@ -13,9 +13,15 @@ export class EntityProxy {
   public static patch(entity: EntityInterface, unitOfWork: UnitOfWork): Object {
     return new Proxy<Object>(entity, <Object> {
       set: (target: Object, property: string, value: any) => {
+
+        // Allow for skipping dirty check.
+        if (typeof value === 'object' && '_skipDirty' in value) {
+          return target[property] = value._skipDirty;
+        }
+
         unitOfWork.registerDirty(target, property);
 
-        target[property] = value;
+        return target[property] = value;
       }
     });
   }
