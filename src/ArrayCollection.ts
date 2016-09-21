@@ -1,7 +1,7 @@
 /**
  * Represents Array collections.
  */
-export class ArrayCollection extends Array {
+export class ArrayCollection<T> extends Array {
 
   /**
    * Add items to the collection when not already in the collection.
@@ -10,7 +10,7 @@ export class ArrayCollection extends Array {
    *
    * @returns this Fluent interface
    */
-  add(...items:Array<any>): ArrayCollection {
+  add(...items: Array<any>): ArrayCollection<T> {
     items.forEach(item => {
       if (!this.includes(item)) {
         this.push(item);
@@ -27,7 +27,7 @@ export class ArrayCollection extends Array {
    *
    * @returns this Fluent interface
    */
-  remove(...items:Array<any>): ArrayCollection {
+  remove(...items: Array<any>): ArrayCollection<T> {
     items.forEach(item => {
       let itemIndex = this.indexOf(item);
 
