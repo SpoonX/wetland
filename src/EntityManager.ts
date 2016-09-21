@@ -49,7 +49,7 @@ export class EntityManager {
    *
    * @returns {Function}
    */
-  public getEntity(name: string): Function {
+  public getEntity(name: string): {new ()} {
     let entity = this.entities[name];
 
     if (!entity) {
@@ -109,15 +109,15 @@ export class EntityManager {
    *
    * @returns {EntityInterface|null}
    */
-  public resolveEntityReference(hint: EntityInterface | string | {}): EntityInterface | null {
+  public resolveEntityReference(hint: EntityInterface | string | {}): {new ()} {
     if (typeof hint === 'string') {
-      return this.entities[hint];
+      return this.getEntity(hint);
     }
 
     if (typeof hint === 'object') {
-      return hint.constructor;
+      return hint.constructor as {new ()};
     }
 
-    return typeof hint === 'function' ? hint : null;
+    return typeof hint === 'function' ? hint as {new ()} : null;
   }
 }
