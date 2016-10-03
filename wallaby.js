@@ -5,17 +5,23 @@ module.exports = function(w) {
       'test/resource/**/*.ts'
     ],
     tests        : [
+      'test/helper.ts',
       'test/**/*.test.ts'
     ],
     env          : {
-      type: 'node',
+      type  : 'node',
       runner: 'node'
     },
+    workers      : {
+      recycle: true
+    },
     testFramework: 'mocha',
-    debug        : true,
+    debug        : false,
     compilers    : {
-      '**/*.ts': w.compilers.typeScript({module: 'commonjs', "experimentalDecorators": true,
-        "emitDecoratorMetadata": true})
+      '**/*.ts': w.compilers.typeScript({
+        module                 : 'commonjs', "experimentalDecorators": true,
+        "emitDecoratorMetadata": true
+      })
     }
   };
 };
