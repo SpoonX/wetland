@@ -112,6 +112,10 @@ export class Wetland {
    * @returns {Wetland}
    */
   public registerStore(store: string, config: PoolConfig | ReplicationConfig | SingleConfig): Wetland {
+    if (this.config.fetch('debug')) {
+      config.debug = true;
+    }
+
     this.stores[store] = new Store(store, config);
 
     // The first registered store is the default store.
