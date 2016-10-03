@@ -94,6 +94,9 @@ class Wetland {
      * @returns {Wetland}
      */
     registerStore(store, config) {
+        if (this.config.fetch('debug')) {
+            config.debug = true;
+        }
         this.stores[store] = new Store_1.Store(store, config);
         // The first registered store is the default store.
         this.config.fetchOrPut('defaultStore', store);

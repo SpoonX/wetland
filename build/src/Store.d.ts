@@ -132,15 +132,18 @@ export interface Connection {
     [key: string]: any;
 }
 export interface SingleConfig {
+    debug?: boolean;
     connection: Connection;
     client?: string;
 }
 export interface PoolConfig {
+    debug?: boolean;
     client: string;
     connections: Array<Connection>;
     [key: string]: any;
 }
 export interface ReplicationConfig {
+    debug?: boolean;
     client: string;
     connections: {
         master?: Array<Connection>;
