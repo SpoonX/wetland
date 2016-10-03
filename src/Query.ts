@@ -2,12 +2,6 @@ import * as knex from 'knex';
 import {Hydrator} from './Hydrator';
 
 export class Query {
-  /**
-   * Log all queries when true.
-   *
-   * @type {boolean}
-   */
-  private debug: Boolean = false;
 
   /**
    * @type {Hydrator}
@@ -31,27 +25,11 @@ export class Query {
   }
 
   /**
-   * Enable debugging for this query.
-   *
-   * @returns {Query}
-   */
-  public enableDebugging(): Query {
-    this.debug = true;
-
-    return this;
-  }
-
-  /**
    * Execute the query.
    *
    * @returns {Promise<[]>}
    */
   public execute(): Promise<Array<Object>> {
-    // @todo Change this to a module-wide debug mode that sets up listeners. https://github.com/SpoonX/wetland/issues/35
-    if (this.debug) {
-      console.log(this.getSQL());
-    }
-
     return this.statement.then();
   }
 

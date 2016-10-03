@@ -4,12 +4,6 @@ import * as knex from 'knex';
 import { Hydrator } from './Hydrator';
 export declare class Query {
     /**
-     * Log all queries when true.
-     *
-     * @type {boolean}
-     */
-    private debug;
-    /**
      * @type {Hydrator}
      */
     private hydrator;
@@ -24,12 +18,6 @@ export declare class Query {
      * @param {Hydrator}          hydrator
      */
     constructor(statement: knex.QueryBuilder, hydrator: Hydrator);
-    /**
-     * Enable debugging for this query.
-     *
-     * @returns {Query}
-     */
-    enableDebugging(): Query;
     /**
      * Execute the query.
      *

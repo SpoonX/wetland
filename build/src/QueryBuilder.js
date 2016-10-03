@@ -441,15 +441,6 @@ class QueryBuilder {
         return this;
     }
     /**
-     * Enable debugging for the query.
-     *
-     * @returns {QueryBuilder}
-     */
-    debug() {
-        this.query.enableDebugging();
-        return this;
-    }
-    /**
      * Map provided values to columns.
      *
      * @param {{}[]} values

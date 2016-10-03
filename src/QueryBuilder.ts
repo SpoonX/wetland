@@ -570,17 +570,6 @@ export class QueryBuilder<T> {
   }
 
   /**
-   * Enable debugging for the query.
-   *
-   * @returns {QueryBuilder}
-   */
-  debug(): this {
-    this.query.enableDebugging();
-
-    return this;
-  }
-
-  /**
    * Map provided values to columns.
    *
    * @param {{}[]} values

@@ -290,12 +290,6 @@ export declare class QueryBuilder<T> {
      */
     where(criteria: Object): this;
     /**
-     * Enable debugging for the query.
-     *
-     * @returns {QueryBuilder}
-     */
-    debug(): this;
-    /**
      * Map provided values to columns.
      *
      * @param {{}[]} values
