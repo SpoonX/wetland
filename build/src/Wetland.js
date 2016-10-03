@@ -16,11 +16,22 @@ class Wetland {
         /**
          * @type {Homefront}
          */
-        this.config = new homefront_1.Homefront;
+        this.config = new homefront_1.Homefront({
+            debug: false,
+            defaultStore: 'default',
+            entityManager: {
+                refreshCreated: true,
+                refreshUpdated: true
+            }
+        });
         /**
          * @type {{}}
          */
         this.stores = {};
+        this.setupExitListeners();
+        if (!config) {
+            return;
+        }
         this.config.merge(config);
         let stores = this.config.fetch('stores');
         let entities = this.config.fetch('entities');
@@ -116,6 +127,30 @@ class Wetland {
      */
     getManager() {
         return this.manager.createScope();
+    }
+    /**
+     * Destroy all active connections.
+     *
+     * @returns {Promise<any>}
+     */
+    destroyConnections() {
+        let destroys = [];
+        Object.getOwnPropertyNames(this.stores).forEach(storeName => {
+            let connections = this.stores[storeName].getConnections();
+            connections[Store_1.Store.ROLE_SLAVE].forEach(connection => {
+                destroys.push(connection.destroy().then());
+            });
+            connections[Store_1.Store.ROLE_MASTER].forEach(connection => {
+                destroys.push(connection.destroy().then());
+            });
+        });
+        return Promise.all(destroys);
+    }
+    /**
+     * set of listeners for the exit event.
+     */
+    setupExitListeners() {
+        process.on('beforeExit', () => this.destroyConnections());
     }
 }
 exports.Wetland = Wetland;

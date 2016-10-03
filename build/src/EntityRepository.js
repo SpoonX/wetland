@@ -1,6 +1,7 @@
 "use strict";
 const Mapping_1 = require('./Mapping');
 const QueryBuilder_1 = require('./QueryBuilder');
+const Store_1 = require('./Store');
 class EntityRepository {
     /**
      * Construct a new EntityRepository.
@@ -22,30 +23,57 @@ class EntityRepository {
      * @returns {QueryBuilder}
      */
     getQueryBuilder(alias, statement) {
-        alias = alias || this.mapping.getEntityName();
-        let query = this.entityManager.createQuery(this.entity, alias, statement);
-        return new QueryBuilder_1.QueryBuilder(this.entityManager, query, this.mapping, alias);
+        alias = alias || this.mapping.getTableName();
+        if (!statement) {
+            let connection = this.entityManager.getStore(this.entity).getConnection(Store_1.Store.ROLE_SLAVE);
+            statement = connection(`${Mapping_1.Mapping.forEntity(this.entity).getTableName()} as ${alias}`);
+        }
+        return new QueryBuilder_1.QueryBuilder(this.entityManager, statement, this.mapping, alias);
     }
     /**
      * Find entities based on provided criteria.
      *
-     * @param criteria  {{}}
-     * @param {*}       [orderBy]
-     * @param {number}  [limit]
-     * @param {number}  [offset]
+     * @param {{}}          criteria
+     * @param {FindOptions} [options]
      *
      * @returns {Promise<Array>}
      */
-    find(criteria = {}, orderBy, limit, offset) {
-        let queryBuilder = this.getQueryBuilder().where(criteria);
-        if (orderBy) {
-            queryBuilder.orderBy(orderBy);
+    find(criteria, options = {}) {
+        options.alias = options.alias || this.mapping.getTableName();
+        let queryBuilder = this.getQueryBuilder(options.alias).select(options.alias);
+        if (criteria) {
+            queryBuilder.where(criteria);
         }
-        if (limit) {
-            queryBuilder.limit(limit);
+        if (options.debug) {
+            queryBuilder.debug();
         }
-        if (offset) {
-            queryBuilder.offset(offset);
+        if (options.orderBy) {
+            queryBuilder.orderBy(options.orderBy);
+        }
+        if (options.limit) {
+            queryBuilder.limit(options.limit);
+        }
+        if (options.offset) {
+            queryBuilder.offset(options.offset);
+        }
+        if (options.join && Array.isArray(options.join)) {
+            options.join.forEach(join => {
+                let column = join;
+                let alias = join;
+                if (typeof join === 'object') {
+                    column = Object.keys(join)[0];
+                    alias = join[column];
+                }
+                else if (join.indexOf('.') > -1) {
+                    alias = join.split('.')[1];
+                }
+                queryBuilder.leftJoin(column, alias).select(alias);
+            });
+        }
+        if (options.join && !Array.isArray(options.join)) {
+            Object.getOwnPropertyNames(options.join).forEach(column => {
+                queryBuilder.leftJoin(column, options.join[column]).select(options.join[column]);
+            });
         }
         return queryBuilder.getQuery().getResult();
     }
@@ -53,16 +81,17 @@ class EntityRepository {
      * Find a single entity.
      *
      * @param {{}|number|string}  criteria
-     * @param {number}            [orderBy]
-     * @param {number}            [offset]
+     * @param {FindOptions}       [options]
      *
      * @returns {Promise<Object>}
      */
-    findOne(criteria = {}, orderBy, offset) {
+    findOne(criteria = {}, options = {}) {
+        options.alias = options.alias || this.mapping.getTableName();
         if (typeof criteria === 'number' || typeof criteria === 'string') {
-            criteria = { [this.mapping.getPrimaryKeyField()]: criteria };
+            criteria = { [options.alias + '.' + this.mapping.getPrimaryKeyField()]: criteria };
         }
-        return this.find(criteria, orderBy, 1, offset).then(result => result[0]);
+        options.limit = 1;
+        return this.find(criteria, options).then(result => result[0]);
     }
 }
 exports.EntityRepository = EntityRepository;

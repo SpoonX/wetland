@@ -1,6 +1,30 @@
 /// <reference types="chai" />
 import { Homefront } from 'homefront';
-export declare class Mapping {
+import { EntityRepository } from './EntityRepository';
+import { EntityManager } from './EntityManager';
+import { Scope } from './Scope';
+import { EntityCtor } from './EntityInterface';
+export declare class Mapping<T> {
+    /**
+     * @type {string}
+     */
+    static RELATION_ONE_TO_MANY: string;
+    /**
+     * @type {string}
+     */
+    static RELATION_MANY_TO_MANY: string;
+    /**
+     * @type {string}
+     */
+    static RELATION_MANY_TO_ONE: string;
+    /**
+     * @type {string}
+     */
+    static RELATION_ONE_TO_ONE: string;
+    /**
+     * @type {string}
+     */
+    static CASCADE_PERSIST: string;
     /**
      * The mapping data.
      *
@@ -10,39 +34,47 @@ export declare class Mapping {
     /**
      * Entity this mapping is for.
      *
-     * @type {Function}
+     * @type {EntityCtor}
      */
     private target;
     /**
      * Get the mapping for a specific entity.
      *
-     * @param {Function} entity
+     * @param {EntityCtor} target
      *
      * @return {Mapping}
      */
-    static forEntity(entity: Function | Object): Mapping;
+    static forEntity<T>(target: EntityCtor<T> | T): Mapping<T>;
     /**
      * Create a new mapping.
      *
-     * @param {Function} entity
+     * @param {EntityCtor} entity
      */
-    constructor(entity: Function);
+    constructor(entity: EntityCtor<T>);
+    /**
+     * Get the target this mapping is for.
+     *
+     * @returns {EntityCtor}
+     */
+    getTarget(): EntityCtor<T>;
     /**
      * Map a field to this property. Examples:
      *
      *  mapping.field('username', {type: 'string', length: 255});
      *  mapping.field('password', {type: 'string', name: 'passwd'});
      *
-     * @param {string} property
-     * @param {{}}     options
+     * @param {string}       property
+     * @param {FieldOptions} options
      *
      * @return {Mapping}
      */
-    field(property: string, options: {
-        type: string;
-        size?: number;
-        [key: string]: any;
-    }): Mapping;
+    field(property: string, options: FieldOptions): this;
+    /**
+     * Get the repository class for this mapping's entity.
+     *
+     * @returns {EntityRepository}
+     */
+    getRepository(): new (...args: any[]) => EntityRepository<T>;
     /**
      * Get the column name for a property.
      *
@@ -51,6 +83,14 @@ export declare class Mapping {
      * @returns {string|null}
      */
     getColumnName(property: any): string | null;
+    /**
+     * Get the options for provided `property` (field).
+     *
+     * @param {string} property
+     *
+     * @returns {FieldOptions}
+     */
+    getField(property: string): FieldOptions;
     /**
      * Get the property name for a column name
      *
@@ -69,14 +109,6 @@ export declare class Mapping {
      */
     private mapColumn(column, property);
     /**
-     * Get the columns for this mapping. Optionally prepend it with an alias.
-     *
-     * @param {string} [alias]
-     *
-     * @returns {Array}
-     */
-    getColumns(alias?: string): Array<string>;
-    /**
      * Map an entity. Examples:
      *
      *  mapping.entity();
@@ -86,7 +118,7 @@ export declare class Mapping {
      *
      * @return {Mapping}
      */
-    entity(options?: Object): Mapping;
+    entity(options?: Object): this;
     /**
      * Map an index. Examples:
      *
@@ -106,7 +138,7 @@ export declare class Mapping {
      *
      * @return {Mapping}
      */
-    index(indexName: string | Array<string>, fields?: string | Array<string>): Mapping;
+    index(indexName: string | Array<string>, fields?: string | Array<string>): this;
     /**
      * Map a property to be the primary key. Example:
      *
@@ -116,7 +148,7 @@ export declare class Mapping {
      *
      * @return {Mapping}
      */
-    id(property: string): Mapping;
+    id(property: string): this;
     /**
      * Get the column name for the primary key.
      *
@@ -139,11 +171,23 @@ export declare class Mapping {
      */
     getFieldName(property: string, defaultValue?: any): string;
     /**
+     * Get the fields for mapped entity.
+     *
+     * @returns {FieldOptions[]}
+     */
+    getFields(): Array<FieldOptions>;
+    /**
      * Get the name of the entity.
      *
      * @returns {string}
      */
     getEntityName(): string;
+    /**
+     * Get the name of the table.
+     *
+     * @returns {string}
+     */
+    getTableName(): string;
     /**
      * Get the name of the store mapped to this entity.
      *
@@ -161,7 +205,7 @@ export declare class Mapping {
      *
      * @return {Mapping}
      */
-    generatedValue(property: string, type: string): Mapping;
+    generatedValue(property: string, type: string): this;
     /**
      * Map a unique constraint.
      *
@@ -182,4 +226,147 @@ export declare class Mapping {
      * @return {Mapping}
      */
     uniqueConstraint(constraintName: string | Array<string>, fields?: string | Array<string>): this;
+    /**
+     * Set cascade values.
+     *
+     * @param {string}    property
+     * @param {string[]}  cascades
+     *
+     * @returns {Mapping}
+     */
+    cascade(property: string, cascades: Array<string>): this;
+    /**
+     * Add a relation to the mapping.
+     *
+     * @param {string}       property
+     * @param {Relationship} options
+     *
+     * @returns {Mapping}
+     */
+    addRelation(property: string, options: Relationship): this;
+    /**
+     * Does property exist as relation.
+     *
+     * @param {string} property
+     *
+     * @returns {boolean}
+     */
+    isRelation(property: string): boolean;
+    /**
+     * Get the relations for mapped entity.
+     *
+     * @returns {{}}
+     */
+    getRelations(): {
+        [key: string]: Relationship;
+    };
+    /**
+     * Map a relationship.
+     *
+     * @param {string}        property
+     * @param {Relationship}  options
+     *
+     * @returns {Mapping}
+     */
+    oneToOne(property: string, options: Relationship): this;
+    /**
+     * Map a relationship.
+     *
+     * @param {string}        property
+     * @param {Relationship}  options
+     *
+     * @returns {Mapping}
+     */
+    oneToMany(property: string, options: Relationship): this;
+    /**
+     * Map a relationship.
+     *
+     * @param {string}        property
+     * @param {Relationship}  options
+     *
+     * @returns {Mapping}
+     */
+    manyToOne(property: string, options: Relationship): this;
+    /**
+     * Map a relationship.
+     *
+     * @param {string}        property
+     * @param {Relationship}  options
+     *
+     * @returns {Mapping}
+     */
+    manyToMany(property: string, options: Relationship): this;
+    /**
+     * Register a join table.
+     *
+     * @param {string}    property
+     * @param {JoinTable} options
+     *
+     * @returns {Mapping}
+     */
+    joinTable(property: string, options: JoinTable): this;
+    /**
+     * Register a join column.
+     *
+     * @param {string}    property
+     * @param {JoinTable} options
+     *
+     * @returns {Mapping}
+     */
+    joinColumn(property: string, options: JoinColumn): this;
+    /**
+     * Get the join column for the relationship mapped via property.
+     *
+     * @param {string} property
+     *
+     * @returns {JoinColumn}
+     */
+    getJoinColumn(property: string): JoinColumn;
+    /**
+     * Get the join table for the relationship mapped via property.
+     *
+     * @param {string}              property
+     * @param {EntityManager|Scope} entityManager
+     *
+     * @returns {JoinTable}
+     */
+    getJoinTable(property: string, entityManager?: EntityManager | Scope): JoinTable;
+    /**
+     * Extend the options of a field. This allows us to allow a unspecified order in defining mappings.
+     *
+     * @param {string} property
+     * @param {{}}     additional
+     *
+     * @returns {Mapping}
+     */
+    extendField(property: string, additional: Object): this;
+}
+export interface FieldOptions {
+    type: string;
+    size?: number;
+    name?: string;
+    cascades?: Array<string>;
+    relationship?: Relationship;
+    joinColumn?: JoinColumn;
+    joinTable?: JoinTable;
+    [key: string]: any;
+}
+export interface JoinTable {
+    name: string;
+    joinColumns?: Array<JoinColumn>;
+    inverseJoinColumns?: Array<JoinColumn>;
+}
+export interface JoinColumn {
+    referencedColumnName: string;
+    name: string;
+    unique?: boolean;
+    nullable?: boolean;
+}
+export interface Relationship {
+    targetEntity: string | {
+        new ();
+    };
+    type?: string;
+    inversedBy?: string;
+    mappedBy?: string;
 }

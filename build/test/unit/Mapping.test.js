@@ -1,12 +1,9 @@
 "use strict";
 const Mapping_1 = require("../../src/Mapping");
-const EntityRepository_1 = require("../../src/EntityRepository");
-const resource = require("../resource/decorator/index");
-class Bar extends EntityRepository_1.EntityRepository {
-}
+const Simple_1 = require('../resource/entity/Simple');
 describe('Mapping', () => {
     describe('static .forEntity()', () => {
-        let mapping = Mapping_1.Mapping.forEntity(resource.Field);
+        let mapping = Mapping_1.Mapping.forEntity(Simple_1.Simple);
         class Group {
         }
         class User {

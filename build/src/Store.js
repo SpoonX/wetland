@@ -56,9 +56,6 @@ class Store {
         else if (typeof config.connection === 'object') {
             this.registerConnection(config);
         }
-        else {
-            throw new Error('Invalid store config provided. Expected connections or connection.');
-        }
         return this;
     }
     /**
@@ -172,9 +169,24 @@ class Store {
         return this;
     }
 }
+/**
+ * @type {string}
+ */
 Store.MODE_SINGLE = 'single';
+/**
+ * @type {string}
+ */
 Store.MODE_POOL = 'pool';
+/**
+ * @type {string}
+ */
 Store.MODE_REPLICATION = 'replication';
+/**
+ * @type {string}
+ */
 Store.ROLE_MASTER = 'master';
+/**
+ * @type {string}
+ */
 Store.ROLE_SLAVE = 'slave';
 exports.Store = Store;

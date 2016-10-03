@@ -1,6 +1,8 @@
 "use strict";
-var EntityHydrator_1 = require('./EntityHydrator');
-exports.EntityHydrator = EntityHydrator_1.EntityHydrator;
+var Hydrator_1 = require('./Hydrator');
+exports.Hydrator = Hydrator_1.Hydrator;
+var IdentityMap_1 = require('./IdentityMap');
+exports.IdentityMap = IdentityMap_1.IdentityMap;
 var EntityProxy_1 = require('./EntityProxy');
 exports.EntityProxy = EntityProxy_1.EntityProxy;
 var MetaData_1 = require('./MetaData');

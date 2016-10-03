@@ -1,16 +1,17 @@
 "use strict";
-const Store_1 = require("../../src/Store");
-const chai_1 = require("chai");
+const Store_1 = require('../../src/Store');
+const chai_1 = require('chai');
+const path = require('path');
+let tmpTestDir = path.join(__dirname, '../.tmp');
 function storeConnection(name) {
     return {
         client: 'sqlite3',
         useNullAsDefault: true,
         connection: {
-            filename: `./${name}.sqlite`
+            filename: `${tmpTestDir}/${name}.sqlite`
         }
     };
 }
-// @todo create tmp dir and clean afterwards (needed for sqlite thingy).
 describe('Store', () => {
     describe('.constructor()', () => {
         it('should setup a store', () => {
@@ -39,8 +40,8 @@ describe('Store', () => {
                 client: 'sqlite3',
                 useNullAsDefault: true,
                 connections: [
-                    { filename: './registerWithPool-1.sqlite' },
-                    { filename: './registerWithPool-2.sqlite' }
+                    { filename: tmpTestDir + '/registerWithPool-1.sqlite' },
+                    { filename: tmpTestDir + '/registerWithPool-2.sqlite' }
                 ]
             };
             let replication = {
@@ -48,13 +49,13 @@ describe('Store', () => {
                 useNullAsDefault: true,
                 connections: {
                     master: [
-                        { filename: './registerWithReplication-master-1.sqlite' },
-                        { filename: './registerWithReplication-master-2.sqlite' }
+                        { filename: tmpTestDir + '/registerWithReplication-master-1.sqlite' },
+                        { filename: tmpTestDir + '/registerWithReplication-master-2.sqlite' }
                     ],
                     slave: [
-                        { filename: './registerWithReplication-slave-1.sqlite' },
-                        { filename: './registerWithReplication-slave-2.sqlite' },
-                        { filename: './registerWithReplication-slave-3.sqlite' }
+                        { filename: tmpTestDir + '/registerWithReplication-slave-1.sqlite' },
+                        { filename: tmpTestDir + '/registerWithReplication-slave-2.sqlite' },
+                        { filename: tmpTestDir + '/registerWithReplication-slave-3.sqlite' }
                     ]
                 }
             };
@@ -67,12 +68,6 @@ describe('Store', () => {
             chai_1.assert.strictEqual(connections[Store_1.Store.ROLE_SLAVE][0], connections[Store_1.Store.ROLE_MASTER][0]); // Single
             chai_1.assert.strictEqual(connections[Store_1.Store.ROLE_SLAVE][1], connections[Store_1.Store.ROLE_MASTER][1]); // Pool
             chai_1.assert.strictEqual(connections[Store_1.Store.ROLE_SLAVE][2], connections[Store_1.Store.ROLE_MASTER][2]); // Pool
-        });
-        it('should throw an error on invalid type', () => {
-            chai_1.expect(function () {
-                let store = new Store_1.Store('test');
-                store.register({});
-            }).to.throw(Error);
         });
     });
     describe('.registerConnection()', () => {
@@ -111,8 +106,8 @@ describe('Store', () => {
                 client: 'sqlite3',
                 useNullAsDefault: true,
                 connections: [
-                    { filename: './registerPool-1.sqlite' },
-                    { filename: './registerPool-2.sqlite' }
+                    { filename: tmpTestDir + '/registerPool-1.sqlite' },
+                    { filename: tmpTestDir + '/registerPool-2.sqlite' }
                 ]
             };
             store.registerPool(pool);
@@ -131,11 +126,11 @@ describe('Store', () => {
                 useNullAsDefault: true,
                 connections: {
                     master: [
-                        { filename: './registerReplication-master-1.sqlite' }
+                        { filename: tmpTestDir + '/registerReplication-master-1.sqlite' }
                     ],
                     slave: [
-                        { filename: './registerReplication-slave-1.sqlite' },
-                        { filename: './registerReplication-slave-2.sqlite' }
+                        { filename: tmpTestDir + '/registerReplication-slave-1.sqlite' },
+                        { filename: tmpTestDir + '/registerReplication-slave-2.sqlite' }
                     ]
                 }
             };

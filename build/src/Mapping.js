@@ -6,7 +6,7 @@ class Mapping {
     /**
      * Create a new mapping.
      *
-     * @param {Function} entity
+     * @param {EntityCtor} entity
      */
     constructor(entity) {
         /**
@@ -22,12 +22,12 @@ class Mapping {
     /**
      * Get the mapping for a specific entity.
      *
-     * @param {Function} entity
+     * @param {EntityCtor} target
      *
      * @return {Mapping}
      */
-    static forEntity(entity) {
-        entity = MetaData_1.MetaData.getConstructor(entity);
+    static forEntity(target) {
+        let entity = MetaData_1.MetaData.getConstructor(target);
         let metadata = MetaData_1.MetaData.forTarget(entity);
         if (!metadata.fetch('mapping')) {
             metadata.put('mapping', new Mapping(entity));
@@ -35,13 +35,21 @@ class Mapping {
         return metadata.fetch('mapping');
     }
     /**
+     * Get the target this mapping is for.
+     *
+     * @returns {EntityCtor}
+     */
+    getTarget() {
+        return this.target;
+    }
+    /**
      * Map a field to this property. Examples:
      *
      *  mapping.field('username', {type: 'string', length: 255});
      *  mapping.field('password', {type: 'string', name: 'passwd'});
      *
-     * @param {string} property
-     * @param {{}}     options
+     * @param {string}       property
+     * @param {FieldOptions} options
      *
      * @return {Mapping}
      */
@@ -51,6 +59,14 @@ class Mapping {
         return this;
     }
     /**
+     * Get the repository class for this mapping's entity.
+     *
+     * @returns {EntityRepository}
+     */
+    getRepository() {
+        return this.mapping.fetch('entity.repository');
+    }
+    /**
      * Get the column name for a property.
      *
      * @param {string} property
@@ -58,7 +74,21 @@ class Mapping {
      * @returns {string|null}
      */
     getColumnName(property) {
-        return this.mapping.fetch(`fields.${property}.name`, null);
+        return this.getField(property).name;
+    }
+    /**
+     * Get the options for provided `property` (field).
+     *
+     * @param {string} property
+     *
+     * @returns {FieldOptions}
+     */
+    getField(property) {
+        let field = this.mapping.fetch(`fields.${property}`);
+        if (!field) {
+            throw new Error(`Unknown field "${property}" supplied.`);
+        }
+        return field;
     }
     /**
      * Get the property name for a column name
@@ -83,19 +113,6 @@ class Mapping {
         return this;
     }
     /**
-     * Get the columns for this mapping. Optionally prepend it with an alias.
-     *
-     * @param {string} [alias]
-     *
-     * @returns {Array}
-     */
-    getColumns(alias = null) {
-        let fields = this.mapping.fetch('fields');
-        return Object.getOwnPropertyNames(fields).map(field => {
-            return (alias ? alias + '.' : '') + fields[field].name;
-        });
-    }
-    /**
      * Map an entity. Examples:
      *
      *  mapping.entity();
@@ -108,7 +125,8 @@ class Mapping {
     entity(options = {}) {
         let defaultMapping = {
             repository: EntityRepository_1.EntityRepository,
-            name: this.target.name.toLowerCase(),
+            name: this.target.name,
+            tableName: this.target.name.toLowerCase(),
             store: null
         };
         homefront_1.Homefront.merge(this.mapping.fetchOrPut(`entity`, defaultMapping), options);
@@ -154,7 +172,7 @@ class Mapping {
      */
     id(property) {
         this.mapping.put('primary', property);
-        homefront_1.Homefront.merge(this.mapping.fetchOrPut(`fields.${property}`, {}), { primary: true });
+        this.extendField(property, { primary: true });
         return this;
     }
     /**
@@ -189,12 +207,28 @@ class Mapping {
         return this.mapping.fetch(`fields.${property}.name`, defaultValue);
     }
     /**
+     * Get the fields for mapped entity.
+     *
+     * @returns {FieldOptions[]}
+     */
+    getFields() {
+        return this.mapping.fetch('fields', null);
+    }
+    /**
      * Get the name of the entity.
      *
      * @returns {string}
      */
     getEntityName() {
         return this.mapping.fetch('entity.name');
+    }
+    /**
+     * Get the name of the table.
+     *
+     * @returns {string}
+     */
+    getTableName() {
+        return this.mapping.fetch('entity.tableName');
     }
     /**
      * Get the name of the store mapped to this entity.
@@ -248,5 +282,211 @@ class Mapping {
         indexes.push({ name: constraintName, fields });
         return this;
     }
+    /**
+     * Set cascade values.
+     *
+     * @param {string}    property
+     * @param {string[]}  cascades
+     *
+     * @returns {Mapping}
+     */
+    cascade(property, cascades) {
+        return this.extendField(property, { cascades: cascades });
+    }
+    /**
+     * Add a relation to the mapping.
+     *
+     * @param {string}       property
+     * @param {Relationship} options
+     *
+     * @returns {Mapping}
+     */
+    addRelation(property, options) {
+        this.extendField(property, { relationship: options });
+        homefront_1.Homefront.merge(this.mapping.fetchOrPut('relations', {}), { [property]: options });
+        return this;
+    }
+    /**
+     * Does property exist as relation.
+     *
+     * @param {string} property
+     *
+     * @returns {boolean}
+     */
+    isRelation(property) {
+        return !!this.mapping.fetch(`relations.${property}`);
+    }
+    /**
+     * Get the relations for mapped entity.
+     *
+     * @returns {{}}
+     */
+    getRelations() {
+        return this.mapping.fetch('relations');
+    }
+    /**
+     * Map a relationship.
+     *
+     * @param {string}        property
+     * @param {Relationship}  options
+     *
+     * @returns {Mapping}
+     */
+    oneToOne(property, options) {
+        return this.addRelation(property, {
+            type: Mapping.RELATION_ONE_TO_ONE,
+            targetEntity: options.targetEntity,
+            inversedBy: options.inversedBy,
+            mappedBy: options.mappedBy
+        });
+    }
+    /**
+     * Map a relationship.
+     *
+     * @param {string}        property
+     * @param {Relationship}  options
+     *
+     * @returns {Mapping}
+     */
+    oneToMany(property, options) {
+        return this.addRelation(property, {
+            targetEntity: options.targetEntity,
+            type: Mapping.RELATION_ONE_TO_MANY,
+            mappedBy: options.mappedBy
+        });
+    }
+    /**
+     * Map a relationship.
+     *
+     * @param {string}        property
+     * @param {Relationship}  options
+     *
+     * @returns {Mapping}
+     */
+    manyToOne(property, options) {
+        return this.addRelation(property, {
+            targetEntity: options.targetEntity,
+            type: Mapping.RELATION_MANY_TO_ONE,
+            inversedBy: options.inversedBy
+        });
+    }
+    /**
+     * Map a relationship.
+     *
+     * @param {string}        property
+     * @param {Relationship}  options
+     *
+     * @returns {Mapping}
+     */
+    manyToMany(property, options) {
+        return this.addRelation(property, {
+            targetEntity: options.targetEntity,
+            type: Mapping.RELATION_MANY_TO_MANY,
+            inversedBy: options.inversedBy,
+            mappedBy: options.mappedBy
+        });
+    }
+    /**
+     * Register a join table.
+     *
+     * @param {string}    property
+     * @param {JoinTable} options
+     *
+     * @returns {Mapping}
+     */
+    joinTable(property, options) {
+        this.extendField(property, { joinTable: options });
+        return this;
+    }
+    /**
+     * Register a join column.
+     *
+     * @param {string}    property
+     * @param {JoinTable} options
+     *
+     * @returns {Mapping}
+     */
+    joinColumn(property, options) {
+        this.extendField(property, { joinColumn: options });
+        return this;
+    }
+    /**
+     * Get the join column for the relationship mapped via property.
+     *
+     * @param {string} property
+     *
+     * @returns {JoinColumn}
+     */
+    getJoinColumn(property) {
+        let field = this.getField(property);
+        if (!field.joinColumn) {
+            field.joinColumn = {
+                name: `${property}_id`,
+                referencedColumnName: 'id',
+                unique: false,
+                nullable: true
+            };
+        }
+        return field.joinColumn;
+    }
+    /**
+     * Get the join table for the relationship mapped via property.
+     *
+     * @param {string}              property
+     * @param {EntityManager|Scope} entityManager
+     *
+     * @returns {JoinTable}
+     */
+    getJoinTable(property, entityManager) {
+        let field = this.getField(property);
+        if (!field.joinTable) {
+            if (!entityManager) {
+                return null;
+            }
+            let relationMapping = Mapping.forEntity(entityManager.resolveEntityReference(field.relationship.targetEntity));
+            let ownTableName = this.getTableName();
+            let withTableName = relationMapping.getTableName();
+            let ownPrimary = this.getPrimaryKeyField();
+            let withPrimary = relationMapping.getPrimaryKeyField();
+            field.joinTable = {
+                name: `${ownTableName}_${withTableName}`,
+                joinColumns: [{ referencedColumnName: ownPrimary, name: `${ownTableName}_id` }],
+                inverseJoinColumns: [{ referencedColumnName: withPrimary, name: `${withTableName}_id` }]
+            };
+        }
+        return field.joinTable;
+    }
+    /**
+     * Extend the options of a field. This allows us to allow a unspecified order in defining mappings.
+     *
+     * @param {string} property
+     * @param {{}}     additional
+     *
+     * @returns {Mapping}
+     */
+    extendField(property, additional) {
+        homefront_1.Homefront.merge(this.mapping.fetchOrPut(`fields.${property}`, {}), additional);
+        return this;
+    }
 }
+/**
+ * @type {string}
+ */
+Mapping.RELATION_ONE_TO_MANY = 'oneToMany';
+/**
+ * @type {string}
+ */
+Mapping.RELATION_MANY_TO_MANY = 'manyToMany';
+/**
+ * @type {string}
+ */
+Mapping.RELATION_MANY_TO_ONE = 'manyToOne';
+/**
+ * @type {string}
+ */
+Mapping.RELATION_ONE_TO_ONE = 'oneToOne';
+/**
+ * @type {string}
+ */
+Mapping.CASCADE_PERSIST = 'persist';
 exports.Mapping = Mapping;

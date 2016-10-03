@@ -1,14 +1,13 @@
-/// <reference types="chai" />
-import { UnitOfWork } from './UnitOfWork';
-import { EntityInterface } from './EntityInterface';
+import { ProxyInterface } from './EntityInterface';
+import { Scope } from './Scope';
 export declare class EntityProxy {
     /**
      * Patch provided entity with a proxy to track changes.
      *
      * @param {EntityInterface} entity
-     * @param {UnitOfWork}      unitOfWork
+     * @param {Scope}           entityManager
      *
      * @returns {Object}
      */
-    static patch(entity: EntityInterface, unitOfWork: UnitOfWork): Object;
+    static patchEntity<T>(entity: T, entityManager: Scope): T & ProxyInterface;
 }

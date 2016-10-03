@@ -1,8 +1,8 @@
-/// <reference types="chai" />
 import { Mapping } from './Mapping';
 import { Wetland } from './Wetland';
-import { Scope } from './Scope';
+import { Scope, Entity } from './Scope';
 import { EntityInterface } from './EntityInterface';
+import { Homefront } from 'homefront';
 /**
  * The main entity manager for wetland.
  * This distributes scopes and supplies some core methods.
@@ -28,6 +28,12 @@ export declare class EntityManager {
      */
     constructor(wetland: Wetland);
     /**
+     * Get the wetland config.
+     *
+     * @returns {Homefront}
+     */
+    getConfig(): Homefront;
+    /**
      * Create a new entity manager scope.
      *
      * @returns {Scope}
@@ -40,7 +46,9 @@ export declare class EntityManager {
      *
      * @returns {Function}
      */
-    getEntity(name: string): Function;
+    getEntity(name: string): {
+        new ();
+    };
     /**
      * Register an entity with the entity manager.
      *
@@ -56,7 +64,7 @@ export declare class EntityManager {
      *
      * @returns {Mapping}
      */
-    getMapping(entity: EntityInterface | string | Object): Mapping;
+    getMapping<T>(entity: T): Mapping<T>;
     /**
      * Register multiple entities with the entity manager.
      *
@@ -72,5 +80,7 @@ export declare class EntityManager {
      *
      * @returns {EntityInterface|null}
      */
-    resolveEntityReference(hint: EntityInterface | string | {}): EntityInterface | null;
+    resolveEntityReference(hint: Entity): {
+        new ();
+    };
 }

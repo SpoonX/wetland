@@ -1,12 +1,18 @@
+/// <reference types="knex" />
 /// <reference types="chai" />
+import * as knex from 'knex';
 import { Query } from './Query';
 import { Mapping } from './Mapping';
 import { Scope } from './Scope';
-export declare class QueryBuilder {
+export declare class QueryBuilder<T> {
     /**
      * @type {Query}
      */
     private query;
+    /**
+     * @type {boolean}
+     */
+    private prepared;
     /**
      * @type {string}
      */
@@ -19,6 +25,14 @@ export declare class QueryBuilder {
      * @type {{}}
      */
     private statement;
+    /**
+     * @type {Array}
+     */
+    private selects;
+    /**
+     * @type {Array}
+     */
+    private orderBys;
     /**
      * @type {Mapping}
      */
@@ -36,14 +50,116 @@ export declare class QueryBuilder {
      */
     private functions;
     /**
+     * @type {string[]}
+     */
+    private singleJoinTypes;
+    /**
+     * @type {Hydrator}
+     */
+    private hydrator;
+    /**
+     * @type {{}}
+     */
+    private aliased;
+    /**
      * Construct a new QueryBuilder.
      *
-     * @param {Scope}   entityManager
-     * @param {Query}   query
-     * @param {Mapping} mapping
-     * @param {string}  alias
+     * @param {Scope}             entityManager
+     * @param {knex.QueryBuilder} statement
+     * @param {Mapping}           mapping
+     * @param {string}            alias
      */
-    constructor(entityManager: Scope, query: Query, mapping: Mapping, alias: string);
+    constructor(entityManager: Scope, statement: knex.QueryBuilder, mapping: Mapping<T>, alias: string);
+    /**
+     * Create an alias.
+     *
+     * @param {string} target
+     *
+     * @returns {string}
+     */
+    createAlias(target: string): string;
+    /**
+     * Perform a join.
+     *
+     * @param {string} joinMethod
+     * @param {string} column
+     * @param {string} targetAlias
+     *
+     * @returns {QueryBuilder}
+     */
+    join(joinMethod: string, column: string, targetAlias: string): this;
+    /**
+     * Perform a join.
+     *
+     * @param {string} column
+     * @param {string} targetAlias
+     *
+     * @returns {QueryBuilder}
+     */
+    leftJoin(column: string, targetAlias: string): this;
+    /**
+     * Perform a join.
+     *
+     * @param {string} column
+     * @param {string} targetAlias
+     *
+     * @returns {QueryBuilder}
+     */
+    innerJoin(column: string, targetAlias: string): this;
+    /**
+     * Perform a join.
+     *
+     * @param {string} column
+     * @param {string} targetAlias
+     *
+     * @returns {QueryBuilder}
+     */
+    leftOuterJoin(column: string, targetAlias: string): this;
+    /**
+     * Perform a join.
+     *
+     * @param {string} column
+     * @param {string} targetAlias
+     *
+     * @returns {QueryBuilder}
+     */
+    rightJoin(column: string, targetAlias: string): this;
+    /**
+     * Perform a join.
+     *
+     * @param {string} column
+     * @param {string} targetAlias
+     *
+     * @returns {QueryBuilder}
+     */
+    rightOuterJoin(column: string, targetAlias: string): this;
+    /**
+     * Perform a join.
+     *
+     * @param {string} column
+     * @param {string} targetAlias
+     *
+     * @returns {QueryBuilder}
+     */
+    outerJoin(column: string, targetAlias: string): this;
+    /**
+     * Perform a join.
+     *
+     * @param {string} column
+     * @param {string} targetAlias
+     *
+     * @returns {QueryBuilder}
+     */
+    fullOuterJoin(column: string, targetAlias: string): this;
+    /**
+     * Perform a join.
+     *
+     * @param {string} column
+     * @param {string} targetAlias
+     *
+     * @returns {QueryBuilder}
+     */
+    crossJoin(column: string, targetAlias: string): this;
     /**
      * Get the Query.
      *
@@ -63,7 +179,35 @@ export declare class QueryBuilder {
      */
     select(alias: Array<string> | string | {
         [key: string]: string;
-    }): QueryBuilder;
+    }): this;
+    /**
+     * Make sure all changes have been applied to the query.
+     *
+     * @returns {QueryBuilder}
+     */
+    prepare(): this;
+    /**
+     * Apply the staged selects to the query.
+     *
+     * @returns {QueryBuilder}
+     */
+    private applySelects();
+    /**
+     * Apply a select to the query.
+     *
+     * @param {[]} propertyAlias
+     *
+     * @returns {QueryBuilder}
+     */
+    private applySelect(propertyAlias);
+    /**
+     * Apply a regular select (no functions).
+     *
+     * @param {string} propertyAlias
+     *
+     * @returns {QueryBuilder}
+     */
+    private applyRegularSelect(propertyAlias);
     /**
      * Signal an insert.
      *
@@ -72,7 +216,7 @@ export declare class QueryBuilder {
      *
      * @returns {QueryBuilder}
      */
-    insert(values: any, returning?: string): QueryBuilder;
+    insert(values: any, returning?: string): this;
     /**
      * Signal an update.
      *
@@ -81,7 +225,7 @@ export declare class QueryBuilder {
      *
      * @returns {QueryBuilder}
      */
-    update(values: any, returning?: any): QueryBuilder;
+    update(values: any, returning?: any): this;
     /**
      * Set the limit.
      *
@@ -89,7 +233,7 @@ export declare class QueryBuilder {
      *
      * @returns {QueryBuilder}
      */
-    limit(limit: any): QueryBuilder;
+    limit(limit: any): this;
     /**
      * Set the offset.
      *
@@ -97,7 +241,7 @@ export declare class QueryBuilder {
      *
      * @returns {QueryBuilder}
      */
-    offset(offset: any): QueryBuilder;
+    offset(offset: any): this;
     /**
      * Set the order by.
      *
@@ -111,13 +255,28 @@ export declare class QueryBuilder {
      *
      * @returns {QueryBuilder}
      */
-    orderBy(orderBy: string | Array<string> | Object, direction?: any): QueryBuilder;
+    orderBy(orderBy: string | Array<string> | Object, direction?: any): this;
+    /**
+     * Apply order by to the query.
+     *
+     * @param {string|string[]|{}} orderBy
+     * @param {string}             [direction]
+     *
+     * @returns {QueryBuilder}
+     */
+    private applyOrderBy(orderBy, direction?);
+    /**
+     * Apply order-by statements to the query.
+     *
+     * @returns {QueryBuilder}
+     */
+    private applyOrderBys();
     /**
      * Signal a delete.
      *
      * @returns {QueryBuilder}
      */
-    remove(): QueryBuilder;
+    remove(): this;
     /**
      * Sets the where clause.
      *
@@ -129,7 +288,13 @@ export declare class QueryBuilder {
      *
      * @returns {QueryBuilder}
      */
-    where(criteria: Object): QueryBuilder;
+    where(criteria: Object): this;
+    /**
+     * Enable debugging for the query.
+     *
+     * @returns {QueryBuilder}
+     */
+    debug(): this;
     /**
      * Map provided values to columns.
      *

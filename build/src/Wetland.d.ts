@@ -21,7 +21,7 @@ export declare class Wetland {
      *
      * @param {{}} config
      */
-    constructor(config: Object);
+    constructor(config?: Object);
     /**
      * Get the wetland config.
      *
@@ -78,4 +78,14 @@ export declare class Wetland {
      * @returns {Scope}
      */
     getManager(): Scope;
+    /**
+     * Destroy all active connections.
+     *
+     * @returns {Promise<any>}
+     */
+    destroyConnections(): Promise<any>;
+    /**
+     * set of listeners for the exit event.
+     */
+    private setupExitListeners();
 }

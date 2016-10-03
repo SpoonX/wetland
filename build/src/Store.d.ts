@@ -2,10 +2,25 @@
 /// <reference types="knex" />
 import * as knex from 'knex';
 export declare class Store {
+    /**
+     * @type {string}
+     */
     static MODE_SINGLE: string;
+    /**
+     * @type {string}
+     */
     static MODE_POOL: string;
+    /**
+     * @type {string}
+     */
     static MODE_REPLICATION: string;
+    /**
+     * @type {string}
+     */
     static ROLE_MASTER: string;
+    /**
+     * @type {string}
+     */
     static ROLE_SLAVE: string;
     /**
      * @type {{}}

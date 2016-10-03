@@ -1,7 +1,7 @@
 /**
  * Represents Array collections.
  */
-export declare class ArrayCollection extends Array {
+export declare class ArrayCollection<T> extends Array {
     /**
      * Add items to the collection when not already in the collection.
      *
@@ -9,7 +9,7 @@ export declare class ArrayCollection extends Array {
      *
      * @returns this Fluent interface
      */
-    add(...items: Array<any>): ArrayCollection;
+    add(...items: Array<any>): ArrayCollection<T>;
     /**
      * Remove items from the collection when part of the collection.
      *
@@ -17,5 +17,5 @@ export declare class ArrayCollection extends Array {
      *
      * @returns this Fluent interface
      */
-    remove(...items: Array<any>): ArrayCollection;
+    remove(...items: Array<any>): ArrayCollection<T>;
 }
