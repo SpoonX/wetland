@@ -87,7 +87,6 @@ class EntityProxy {
                 },
                 deleteProperty: (collection, key) => {
                     if (isProxyActive()) {
-                        console.log(key, collection[key]);
                         unitOfWork.registerCollectionChange(UnitOfWork_1.UnitOfWork.RELATIONSHIP_REMOVED, entityProxy, property, collection[key]);
                     }
                     collection.splice(parseInt(key, 10), 1);
