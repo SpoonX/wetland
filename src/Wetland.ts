@@ -13,19 +13,32 @@ export class Wetland {
   /**
    * @type {Homefront}
    */
-  private config: Homefront = new Homefront;
+  private config: Homefront = new Homefront({
+    debug        : false, // @todo use.
+    defaultStore : 'default',
+    entityManager: {
+      refreshCreated: true,
+      refreshUpdated: true
+    }
+  });
 
   /**
    * @type {{}}
    */
-  private stores: Object = {};
+  private stores: {[key: string]: Store} = {};
 
   /**
    * Construct a new wetland instance.
    *
    * @param {{}} config
    */
-  public constructor(config: Object) {
+  public constructor(config?: Object) {
+    this.setupExitListeners();
+
+    if (!config) {
+      return;
+    }
+
     this.config.merge(config);
 
     let stores   = this.config.fetch('stores');
@@ -140,5 +153,35 @@ export class Wetland {
    */
   public getManager(): Scope {
     return this.manager.createScope();
+  }
+
+  /**
+   * Destroy all active connections.
+   *
+   * @returns {Promise<any>}
+   */
+  public destroyConnections(): Promise<any> {
+    let destroys = [];
+
+    Object.getOwnPropertyNames(this.stores).forEach(storeName => {
+      let connections = this.stores[storeName].getConnections();
+
+      connections[Store.ROLE_SLAVE].forEach(connection => {
+        destroys.push(connection.destroy().then());
+      });
+
+      connections[Store.ROLE_MASTER].forEach(connection => {
+        destroys.push(connection.destroy().then());
+      });
+    });
+
+    return Promise.all(destroys);
+  }
+
+  /**
+   * set of listeners for the exit event.
+   */
+  private setupExitListeners() {
+    process.on('beforeExit', () => this.destroyConnections());
   }
 }

@@ -1,25 +1,18 @@
-import {Mapping} from './Mapping';
-import {Scope} from './Scope';
-import {EntityProxy} from './EntityProxy';
-import {EntityHydrator} from './EntityHydrator';
 import * as knex from 'knex';
+import {Hydrator} from './Hydrator';
 
 export class Query {
+  /**
+   * Log all queries when true.
+   *
+   * @type {boolean}
+   */
+  private debug: Boolean = false;
 
   /**
-   * @type {{}}}
+   * @type {Hydrator}
    */
-  private mappings: {[key: string]: Mapping};
-
-  /**
-   * @type {string}
-   */
-  private alias: string;
-
-  /**
-   * @type {Scope}
-   */
-  private entityManager: Scope;
+  private hydrator: Hydrator;
 
   /**
    * @type {{}}
@@ -30,44 +23,20 @@ export class Query {
    * Construct a new Query.
    *
    * @param {knex.QueryBuilder} statement
-   * @param {Scope}             entityManager
+   * @param {Hydrator}          hydrator
    */
-  public constructor(statement: knex.QueryBuilder, entityManager: Scope) {
-    this.statement     = statement;
-    this.entityManager = entityManager;
+  public constructor(statement: knex.QueryBuilder, hydrator: Hydrator) {
+    this.statement = statement;
+    this.hydrator  = hydrator;
   }
 
   /**
-   * Get the statement (knex instance).
-   *
-   * @returns {knex.QueryBuilder}
-   */
-  public getStatement(): knex.QueryBuilder {
-    return this.statement;
-  }
-
-  /**
-   * Set mappings.
-   *
-   * @param {{}} mappings
-   *
-   * @returns {Query} Fluent interface
-   */
-  public setMappings(mappings: {[key: string]: Mapping}): Query {
-    this.mappings = mappings;
-
-    return this;
-  }
-
-  /**
-   * Set the alias for the host.
-   *
-   * @param {string} alias
+   * Enable debugging for this query.
    *
    * @returns {Query}
    */
-  public setAlias(alias: string): Query {
-    this.alias = alias;
+  public enableDebugging(): Query {
+    this.debug = true;
 
     return this;
   }
@@ -78,6 +47,11 @@ export class Query {
    * @returns {Promise<[]>}
    */
   public execute(): Promise<Array<Object>> {
+    // @todo Change this to a module-wide debug mode that sets up listeners. https://github.com/SpoonX/wetland/issues/35
+    if (this.debug) {
+      console.log(this.getSQL());
+    }
+
     return this.statement.then();
   }
 
@@ -102,33 +76,7 @@ export class Query {
    * @returns {Promise<{}[]>}
    */
   public getResult(): Promise<Array<Object>> {
-    return this.execute().then(result => this.hydrateEntities(result, this.alias));
-  }
-
-  /**
-   * Hydrate provided rows to entities.
-   *
-   * @param {{}[]}   rows
-   * @param {string} alias
-   *
-   * @returns {{}[]}
-   */
-  private hydrateEntities(rows: Array<Object>, alias: string): Array<Object> {
-    return rows.map(row => this.hydrateEntity(row, alias));
-  }
-
-  /**
-   * Hydrate an entity.
-   *
-   * @param {{}}     row
-   * @param {string} alias
-   *
-   * @returns {{}}
-   */
-  private hydrateEntity(row: Object, alias: string): Object {
-    let EntityClass = this.entityManager.getEntity(this.mappings[alias].getEntityName());
-
-    return EntityProxy.patch(EntityHydrator.fromSchema(row, EntityClass), this.entityManager.getUnitOfWork());
+    return this.execute().then(result => this.hydrator.hydrateAll(result));
   }
 
   /**
@@ -138,5 +86,14 @@ export class Query {
    */
   public getSQL(): string {
     return this.statement.toString();
+  }
+
+  /**
+   * Get the statement for this query.
+   *
+   * @returns {knex.QueryBuilder}
+   */
+  public getStatement(): knex.QueryBuilder {
+    return this.statement;
   }
 }

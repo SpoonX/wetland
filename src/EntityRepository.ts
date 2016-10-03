@@ -2,8 +2,10 @@ import {Mapping} from './Mapping';
 import {QueryBuilder} from './QueryBuilder';
 import * as knex from 'knex';
 import {Scope} from './Scope';
+import {Store} from './Store';
+import {EntityCtor} from './EntityInterface';
 
-export class EntityRepository {
+export class EntityRepository<T> {
 
   /**
    * @type {Scope}
@@ -13,12 +15,12 @@ export class EntityRepository {
   /**
    * @type {{}}
    */
-  private entity: Object;
+  private entity: EntityCtor<T>;
 
   /**
    * @type {Mapping}
    */
-  private mapping: Mapping;
+  private mapping: Mapping<T>;
 
   /**
    * Construct a new EntityRepository.
@@ -26,7 +28,7 @@ export class EntityRepository {
    * @param {Scope} entityManager
    * @param {{}}    entity
    */
-  public constructor(entityManager: Scope, entity: Object) {
+  public constructor(entityManager: Scope, entity: EntityCtor<T>) {
     this.entityManager = entityManager;
     this.entity        = entity;
     this.mapping       = Mapping.forEntity(entity);
@@ -40,36 +42,70 @@ export class EntityRepository {
    *
    * @returns {QueryBuilder}
    */
-  public getQueryBuilder(alias?: string, statement?: knex.QueryBuilder): QueryBuilder {
-    alias     = alias || this.mapping.getEntityName();
-    let query = this.entityManager.createQuery(this.entity, alias, statement);
+  public getQueryBuilder(alias?: string, statement?: knex.QueryBuilder): QueryBuilder<T> {
+    alias = alias || this.mapping.getTableName();
 
-    return new QueryBuilder(this.entityManager, query, this.mapping, alias);
+    if (!statement) {
+      let connection = this.entityManager.getStore(this.entity).getConnection(Store.ROLE_SLAVE);
+
+      statement = connection(`${Mapping.forEntity(this.entity).getTableName()} as ${alias}`);
+    }
+
+    return new QueryBuilder(this.entityManager, statement, this.mapping, alias);
   }
 
   /**
    * Find entities based on provided criteria.
    *
-   * @param criteria  {{}}
-   * @param {*}       [orderBy]
-   * @param {number}  [limit]
-   * @param {number}  [offset]
+   * @param {{}}          criteria
+   * @param {FindOptions} [options]
    *
    * @returns {Promise<Array>}
    */
-  public find(criteria = {}, orderBy?: any, limit?: number, offset?: number): Promise<Array<Object>> {
-    let queryBuilder = this.getQueryBuilder().where(criteria);
+  public find(criteria: Object|null, options: FindOptions = {}): Promise<Array<T>> {
+    options.alias    = options.alias || this.mapping.getTableName();
+    let queryBuilder = this.getQueryBuilder(options.alias).select(options.alias);
 
-    if (orderBy) {
-      queryBuilder.orderBy(orderBy);
+    if (criteria) {
+      queryBuilder.where(criteria);
     }
 
-    if (limit) {
-      queryBuilder.limit(limit);
+    if (options.debug) {
+      queryBuilder.debug();
     }
 
-    if (offset) {
-      queryBuilder.offset(offset);
+    if (options.orderBy) {
+      queryBuilder.orderBy(options.orderBy);
+    }
+
+    if (options.limit) {
+      queryBuilder.limit(options.limit);
+    }
+
+    if (options.offset) {
+      queryBuilder.offset(options.offset);
+    }
+
+    if (options.join && Array.isArray(options.join)) {
+      options.join.forEach(join => {
+        let column = join as string;
+        let alias  = join as string;
+
+        if (typeof join === 'object') {
+          column = Object.keys(join)[0];
+          alias  = join[column];
+        } else if (join.indexOf('.') > -1) {
+          alias  = join.split('.')[1];
+        }
+
+        queryBuilder.leftJoin(column, alias).select(alias);
+      });
+    }
+
+    if (options.join && !Array.isArray(options.join)) {
+      Object.getOwnPropertyNames(options.join).forEach(column => {
+        queryBuilder.leftJoin(column, options.join[column]).select(options.join[column]);
+      });
     }
 
     return queryBuilder.getQuery().getResult();
@@ -79,16 +115,28 @@ export class EntityRepository {
    * Find a single entity.
    *
    * @param {{}|number|string}  criteria
-   * @param {number}            [orderBy]
-   * @param {number}            [offset]
+   * @param {FindOptions}       [options]
    *
    * @returns {Promise<Object>}
    */
-  public findOne(criteria: {} | number | string = {}, orderBy?: any, offset?: number): Promise<Object> {
+  public findOne(criteria: {} | number | string = {}, options: FindOptions = {}): Promise<T> {
+    options.alias = options.alias || this.mapping.getTableName();
+
     if (typeof criteria === 'number' || typeof criteria === 'string') {
-      criteria = {[this.mapping.getPrimaryKeyField()]: criteria}
+      criteria = {[options.alias + '.' + this.mapping.getPrimaryKeyField()]: criteria}
     }
 
-    return this.find(criteria, orderBy, 1, offset).then(result => result[0]);
+    options.limit = 1;
+
+    return this.find(criteria, options).then(result => result[0]);
   }
+}
+
+export interface FindOptions {
+  orderBy?: any,
+  alias?: string,
+  limit?: number,
+  offset?: number,
+  debug?: boolean,
+  join?: {} | Array<string|{}>
 }

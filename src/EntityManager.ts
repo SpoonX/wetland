@@ -1,7 +1,8 @@
 import {Mapping} from './Mapping';
 import {Wetland} from './Wetland';
-import {Scope} from './Scope';
+import {Scope, Entity} from './Scope';
 import {EntityInterface} from './EntityInterface';
+import {Homefront} from 'homefront';
 
 /**
  * The main entity manager for wetland.
@@ -34,6 +35,15 @@ export class EntityManager {
   }
 
   /**
+   * Get the wetland config.
+   *
+   * @returns {Homefront}
+   */
+  public getConfig(): Homefront {
+    return this.wetland.getConfig();
+  }
+
+  /**
    * Create a new entity manager scope.
    *
    * @returns {Scope}
@@ -49,7 +59,7 @@ export class EntityManager {
    *
    * @returns {Function}
    */
-  public getEntity(name: string): Function {
+  public getEntity(name: string): {new ()} {
     let entity = this.entities[name];
 
     if (!entity) {
@@ -70,7 +80,7 @@ export class EntityManager {
     this.entities[this.getMapping(entity).getEntityName()] = entity;
 
     if (typeof entity.setMapping === 'function') {
-      entity.setMapping(Mapping.forEntity(entity));
+      entity.setMapping(Mapping.forEntity(this.resolveEntityReference(entity)));
     }
 
     return this;
@@ -83,7 +93,7 @@ export class EntityManager {
    *
    * @returns {Mapping}
    */
-  public getMapping(entity: EntityInterface | string | Object): Mapping {
+  public getMapping<T>(entity: T): Mapping<T> {
     return Mapping.forEntity(this.resolveEntityReference(entity));
   }
 
@@ -109,15 +119,15 @@ export class EntityManager {
    *
    * @returns {EntityInterface|null}
    */
-  public resolveEntityReference(hint: EntityInterface | string | {}): EntityInterface | null {
+  public resolveEntityReference(hint: Entity): {new ()} {
     if (typeof hint === 'string') {
-      return this.entities[hint];
+      return this.getEntity(hint);
     }
 
     if (typeof hint === 'object') {
-      return hint.constructor;
+      return hint.constructor as {new ()};
     }
 
-    return typeof hint === 'function' ? hint : null;
+    return typeof hint === 'function' ? hint as {new ()} : null;
   }
 }

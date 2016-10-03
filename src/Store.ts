@@ -1,12 +1,30 @@
 import * as knex from 'knex';
 
 export class Store {
-  public static MODE_SINGLE      = 'single';
-  public static MODE_POOL        = 'pool';
+  /**
+   * @type {string}
+   */
+  public static MODE_SINGLE = 'single';
+
+  /**
+   * @type {string}
+   */
+  public static MODE_POOL = 'pool';
+
+  /**
+   * @type {string}
+   */
   public static MODE_REPLICATION = 'replication';
 
+  /**
+   * @type {string}
+   */
   public static ROLE_MASTER = 'master';
-  public static ROLE_SLAVE  = 'slave';
+
+  /**
+   * @type {string}
+   */
+  public static ROLE_SLAVE = 'slave';
 
   /**
    * @type {{}}
@@ -76,8 +94,6 @@ export class Store {
       this.registerReplication(config as ReplicationConfig);
     } else if (typeof (config as SingleConfig).connection === 'object') {
       this.registerConnection(config as SingleConfig);
-    } else {
-      throw new Error('Invalid store config provided. Expected connections or connection.');
     }
 
     return this;

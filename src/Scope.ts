@@ -1,13 +1,13 @@
 import {UnitOfWork} from './UnitOfWork';
 import {EntityManager} from './EntityManager';
-import {EntityInterface} from './EntityInterface';
+import {EntityInterface, ProxyInterface, EntityCtor} from './EntityInterface';
 import {EntityRepository} from './EntityRepository';
 import {Mapping} from './Mapping';
-import {Query} from './Query';
 import {Store} from './Store';
 import {Wetland} from './Wetland';
-import {EntityHydrator} from './EntityHydrator';
-import * as knex from 'knex';
+import {Hydrator} from './Hydrator';
+import {Homefront} from 'homefront';
+import {EntityProxy} from './EntityProxy';
 
 export class Scope {
 
@@ -41,16 +41,56 @@ export class Scope {
   /**
    * Proxy method the entityManager getRepository method.
    *
-   * @param {string|Function|Object} entity
+   * @param {Entity} entity
    *
    * @returns {EntityRepository}
    */
-  public getRepository(entity: string|Function|Object): EntityRepository {
-    let entityReference = this.manager.resolveEntityReference(entity);
-    let entityMapping   = Mapping.forEntity(entityReference).mapping;
-    let Repository      = entityMapping.fetch('entity.repository');
+  public getRepository<T>(entity: EntityCtor<T>): EntityRepository<T> {
+    let entityReference = this.manager.resolveEntityReference(entity) as EntityCtor<T>;
+    let Repository      = Mapping.forEntity(entityReference).getRepository();
 
     return new Repository(this, entityReference);
+  }
+
+  /**
+   * Get the wetland config.
+   *
+   * @returns {Homefront}
+   */
+  public getConfig(): Homefront {
+    return this.manager.getConfig();
+  }
+
+  /**
+   * Get a reference to a persisted row without actually loading it.
+   *
+   * @param {Entity} entity
+   * @param {*}      primaryKeyValue
+   *
+   * @returns {EntityInterface}
+   */
+  public getReference(entity: Entity, primaryKeyValue: any): EntityInterface {
+    let ReferenceClass    = this.resolveEntityReference(entity);
+    let reference         = new ReferenceClass;
+    let primaryKey        = Mapping.forEntity(ReferenceClass).getPrimaryKey();
+    reference[primaryKey] = primaryKeyValue;
+
+    // @todo catch mutations and throw an error. This entity may not be altered.
+    // Not super important, but it's a nice-to-have as it is stricter.
+    this.unitOfWork.registerClean(reference);
+
+    return reference;
+  }
+
+  /**
+   * Resolve provided value to an entity reference.
+   *
+   * @param {EntityInterface|string|{}} hint
+   *
+   * @returns {EntityInterface|null}
+   */
+  public resolveEntityReference(hint: Entity): {new ()} {
+    return this.manager.resolveEntityReference(hint);
   }
 
   /**
@@ -62,18 +102,18 @@ export class Scope {
    */
   public refresh(...entity: Array<EntityInterface>): Promise<any> {
     let refreshes = [];
+    let hydrator  = new Hydrator(this);
 
     entity.forEach(toRefresh => {
-      let primaryKeyName = Mapping.forEntity(toRefresh).getPrimaryKey();
+      let entityCtor     = this.resolveEntityReference(toRefresh);
+      let primaryKeyName = Mapping.forEntity(entityCtor).getPrimaryKey();
       let primaryKey     = toRefresh[primaryKeyName];
-      let refresh        = this.getRepository(toRefresh).getQueryBuilder()
+      let refresh        = this.getRepository(entityCtor).getQueryBuilder()
         .where({[primaryKeyName]: primaryKey})
         .limit(1)
         .getQuery()
         .execute()
-        .then(freshData => {
-          EntityHydrator.fromSchema(freshData[0], toRefresh);
-        });
+        .then(freshData => hydrator.fromSchema(freshData[0], toRefresh));
 
       refreshes.push(refresh);
     });
@@ -90,26 +130,6 @@ export class Scope {
    */
   public getEntity(name: string): Function {
     return this.manager.getEntity(name);
-  }
-
-  /**
-   * Create a new Query.
-   *
-   * @param {{}}                entity
-   * @param {string}            alias
-   * @param {knex.QueryBuilder} statement
-   * @param {string}            [role]
-   *
-   * @returns {Query}
-   */
-  public createQuery(entity: Object, alias: string, statement: knex.QueryBuilder, role?: string): Query {
-    if (!statement) {
-      let connection = this.getStore(entity).getConnection(role || Store.ROLE_SLAVE);
-
-      statement = connection(`${Mapping.forEntity(entity).getEntityName()} as ${alias}`);
-    }
-
-    return new Query(statement, this);
   }
 
   /**
@@ -130,6 +150,32 @@ export class Scope {
    */
   public getUnitOfWork(): UnitOfWork {
     return this.unitOfWork;
+  }
+
+  /**
+   * Attach an entity (proxy it).
+   *
+   * @param {EntityInterface} entity
+   *
+   * @returns {EntityInterface&ProxyInterface}
+   */
+  public attach(entity: EntityInterface): ProxyInterface {
+    return EntityProxy.patchEntity(entity, this);
+  }
+
+  /**
+   * Detach an entity (remove proxy, and clear from unit of work).
+   *
+   * @param {ProxyInterface} entity
+   *
+   * @returns {EntityInterface}
+   */
+  public detach(entity: ProxyInterface): EntityInterface {
+    entity.deactivateProxying();
+
+    this.unitOfWork.clear(entity);
+
+    return entity.getTarget();
   }
 
   /**
@@ -165,8 +211,8 @@ export class Scope {
    *
    * @return {Promise}
    */
-  public flush(): Promise<any> {
-    return this.unitOfWork.commit();
+  public flush(skipClean: boolean = false): Promise<any> {
+    return this.unitOfWork.commit(skipClean);
   }
 
   /**
@@ -180,3 +226,5 @@ export class Scope {
     return this;
   }
 }
+
+export type Entity = string | {new ()} | EntityInterface;
