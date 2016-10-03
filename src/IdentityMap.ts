@@ -1,5 +1,5 @@
 import {Mapping} from './Mapping';
-import {EntityInterface} from './EntityInterface';
+import {EntityInterface, ProxyInterface} from './EntityInterface';
 
 export class IdentityMap {
   /**
@@ -31,11 +31,12 @@ export class IdentityMap {
    * Register an entity with the map.
    *
    * @param {EntityInterface} entity
+   * @param {ProxyInterface}  proxy
    *
    * @returns {IdentityMap}
    */
-  public register(entity: EntityInterface) {
-    this.getMapForEntity(entity)[entity[Mapping.forEntity(entity).getPrimaryKey()]] = entity;
+  public register(entity: EntityInterface, proxy: ProxyInterface): IdentityMap {
+    this.getMapForEntity(entity)[entity[Mapping.forEntity(entity).getPrimaryKey()]] = proxy;
 
     return this;
   }
@@ -48,7 +49,7 @@ export class IdentityMap {
    *
    * @returns {EntityInterface|null}
    */
-  public fetch(entity: EntityInterface | Function, primaryKey: any): EntityInterface | null {
+  public fetch(entity: EntityInterface | Function, primaryKey: any): EntityInterface | ProxyInterface | null {
     return this.getMapForEntity(entity)[primaryKey] || null;
   }
 }

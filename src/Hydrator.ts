@@ -3,7 +3,8 @@ import {Mapping} from './Mapping';
 import {ArrayCollection} from './ArrayCollection';
 import {EntityProxy} from './EntityProxy';
 import {UnitOfWork} from './UnitOfWork';
-import {EntityInterface} from './EntityInterface';
+import {EntityInterface, ProxyInterface} from './EntityInterface';
+import {Scope, Entity} from './Scope';
 
 /**
  * Hydrate results into entities.
@@ -38,12 +39,20 @@ export class Hydrator {
   private unitOfWork: UnitOfWork;
 
   /**
+   * Reference to the entityManager scope.
+   *
+   * @type {Scope}
+   */
+  private entityManager: Scope;
+
+  /**
    * Construct a new hydrator.
    *
-   * @param {UnitOfWork} unitOfWork
+   * @param {Scope} entityManager
    */
-  public constructor(unitOfWork: UnitOfWork) {
-    this.unitOfWork = unitOfWork;
+  public constructor(entityManager: Scope) {
+    this.unitOfWork    = entityManager.getUnitOfWork();
+    this.entityManager = entityManager;
   }
 
   /**
@@ -54,9 +63,10 @@ export class Hydrator {
    *
    * @returns {EntityInterface|Function|{new()}}
    */
-  public static fromSchema(values: Object, EntityClass: EntityInterface | Function | {new ()}): EntityInterface {
+  public fromSchema(values: Object, EntityClass: EntityInterface | Function | {new ()}): ProxyInterface {
     let mapping = Mapping.forEntity(EntityClass);
     let entity  = typeof EntityClass === 'function' ? new (EntityClass as {new ()}) : EntityClass;
+    entity      = EntityProxy.patchEntity(entity as EntityInterface, this.entityManager);
 
     Object.getOwnPropertyNames(values).forEach(column => {
       let property = mapping.getPropertyName(column);
@@ -96,7 +106,7 @@ export class Hydrator {
    *
    * @returns {Recipe}
    */
-  public addRecipe(parent: null | string, alias: string, mapping: Mapping, joinType?: string, property?: string): Recipe {
+  public addRecipe(parent: null | string, alias: string, mapping: Mapping<Entity>, joinType?: string, property?: string): Recipe {
     let primaryKey        = mapping.getPrimaryKey();
     let primaryKeyAliased = `${alias}.${primaryKey}`;
     let recipe            = {
@@ -143,7 +153,7 @@ export class Hydrator {
    * @returns {ArrayCollection}
    */
   public hydrateAll(rows: Array<Object>): ArrayCollection<EntityInterface> {
-    let entities = new ArrayCollection();
+    let entities = new ArrayCollection;
 
     rows.forEach(row => {
       let hydrated = this.hydrate(row, this.recipe);
@@ -164,20 +174,28 @@ export class Hydrator {
    *
    * @returns {EntityInterface}
    */
-  public hydrate(row: Object, recipe: Recipe): EntityInterface {
+  public hydrate(row: Object, recipe: Recipe): ProxyInterface {
     if (!recipe.hydrate) {
       return null;
     }
 
-    let entity = this.identityMap.fetch(recipe.entity, row[recipe.primaryKey.alias]);
+    let entity = this.identityMap.fetch(recipe.entity, row[recipe.primaryKey.alias]) as ProxyInterface;
 
     if (!entity) {
       entity = this.applyMapping(recipe, row);
+
+      if (!entity) {
+        return null;
+      }
     }
 
     if (recipe.joins) {
       this.hydrateJoins(recipe, row, entity);
     }
+
+    this.unitOfWork.registerClean(entity);
+
+    entity.activateProxying();
 
     return entity;
   }
@@ -189,14 +207,10 @@ export class Hydrator {
    * @param {{}}              row
    * @param {EntityInterface} entity
    */
-  private hydrateJoins(recipe: Recipe, row: Object, entity: EntityInterface): void {
+  private hydrateJoins(recipe: Recipe, row: Object, entity: ProxyInterface): void {
     Object.getOwnPropertyNames(recipe.joins).forEach(alias => {
       let joinRecipe = recipe.joins[alias];
       let hydrated   = this.hydrate(row, joinRecipe);
-
-      if (!hydrated) {
-        return;
-      }
 
       if (joinRecipe.type === 'single') {
         entity[joinRecipe.property] = {_skipDirty: hydrated};
@@ -204,8 +218,9 @@ export class Hydrator {
         return;
       }
 
-      if (!Array.isArray(entity[joinRecipe.property])) {
-        entity[joinRecipe.property] = {_skipDirty: new ArrayCollection}
+      // If not hydrated, at least set null value on property (above)
+      if (!hydrated) {
+        return;
       }
 
       entity[joinRecipe.property].add(hydrated);
@@ -220,7 +235,11 @@ export class Hydrator {
    *
    * @returns {EntityInterface}
    */
-  private applyMapping(recipe: Recipe, row: Object): EntityInterface {
+  private applyMapping(recipe: Recipe, row: Object): ProxyInterface {
+    if (!row[recipe.primaryKey.alias]) {
+      return null;
+    }
+
     let entity                         = new recipe.entity;
     entity[recipe.primaryKey.property] = row[recipe.primaryKey.alias];
 
@@ -229,9 +248,11 @@ export class Hydrator {
       entity[property] = row[alias];
     });
 
-    let patched = EntityProxy.patch(entity, this.unitOfWork);
+    this.unitOfWork.registerClean(entity, true);
 
-    this.identityMap.register(patched);
+    let patched = EntityProxy.patchEntity(entity, this.entityManager);
+
+    this.identityMap.register(entity, patched);
 
     return patched;
   }

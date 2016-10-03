@@ -44,14 +44,14 @@ export class Criteria {
    *
    * @type {Mapping}
    */
-  private hostMapping: Mapping;
+  private hostMapping: Mapping<any>;
 
   /**
    * Mappings for entities (joins).
    *
    * @type {{}}
    */
-  private mappings: {[key: string]: Mapping};
+  private mappings: {[key: string]: Mapping<any>};
 
   /**
    * Statement to apply criteria to.
@@ -61,6 +61,13 @@ export class Criteria {
   private statement: knex.QueryBuilder;
 
   /**
+   * Criteria staged to apply.
+   *
+   * @type {Array}
+   */
+  private staged: Array<Object> = [];
+
+  /**
    * Construct a new Criteria parser.
    * @constructor
    *
@@ -68,10 +75,38 @@ export class Criteria {
    * @param {Mapping}           hostMapping
    * @param {{}}                [mappings]
    */
-  public constructor(statement: knex.QueryBuilder, hostMapping: Mapping, mappings?: {[key: string]: Mapping}) {
+  public constructor(statement: knex.QueryBuilder, hostMapping: Mapping<any>, mappings?: {[key: string]: Mapping<any>}) {
     this.statement   = statement;
     this.mappings    = mappings || {};
     this.hostMapping = hostMapping;
+  }
+
+  /**
+   * Stage criteria to be applied later.
+   *
+   * @param {{}} criteria
+   *
+   * @returns {Criteria}
+   */
+  public stage(criteria: Object): Criteria {
+    this.staged.push(criteria);
+
+    return this;
+  }
+
+  /**
+   * Apply staged criteria.
+   *
+   * @returns {Criteria}
+   */
+  public applyStaged(): Criteria {
+    this.staged.forEach(criteria => {
+      this.apply(criteria);
+    });
+
+    this.staged = [];
+
+    return this;
   }
 
   /**
@@ -81,8 +116,10 @@ export class Criteria {
    * @param {knex.QueryBuilder} [statement]
    * @param {string}            [parentKey]
    * @param {string}            [parentKnexMethodName]
+   *
+   * @return Criteria
    */
-  public apply(criteria: Object, statement?: knex.QueryBuilder, parentKey?: string, parentKnexMethodName?: string) {
+  public apply(criteria: Object, statement?: knex.QueryBuilder, parentKey?: string, parentKnexMethodName?: string): Criteria {
     statement = statement || this.statement;
 
     Object.keys(criteria).forEach(key => {
@@ -111,6 +148,8 @@ export class Criteria {
 
       return statement[parentKnexMethodName || 'where'](key, operator, value);
     });
+
+    return this;
   }
 
   /**

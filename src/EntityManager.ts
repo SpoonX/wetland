@@ -1,7 +1,8 @@
 import {Mapping} from './Mapping';
 import {Wetland} from './Wetland';
-import {Scope} from './Scope';
+import {Scope, Entity} from './Scope';
 import {EntityInterface} from './EntityInterface';
+import {Homefront} from 'homefront';
 
 /**
  * The main entity manager for wetland.
@@ -31,6 +32,15 @@ export class EntityManager {
    */
   public constructor(wetland: Wetland) {
     this.wetland = wetland;
+  }
+
+  /**
+   * Get the wetland config.
+   *
+   * @returns {Homefront}
+   */
+  public getConfig(): Homefront {
+    return this.wetland.getConfig();
   }
 
   /**
@@ -70,7 +80,7 @@ export class EntityManager {
     this.entities[this.getMapping(entity).getEntityName()] = entity;
 
     if (typeof entity.setMapping === 'function') {
-      entity.setMapping(Mapping.forEntity(entity));
+      entity.setMapping(Mapping.forEntity(this.resolveEntityReference(entity)));
     }
 
     return this;
@@ -83,7 +93,7 @@ export class EntityManager {
    *
    * @returns {Mapping}
    */
-  public getMapping(entity: EntityInterface | string | Object): Mapping {
+  public getMapping<T>(entity: T): Mapping<T> {
     return Mapping.forEntity(this.resolveEntityReference(entity));
   }
 
@@ -109,7 +119,7 @@ export class EntityManager {
    *
    * @returns {EntityInterface|null}
    */
-  public resolveEntityReference(hint: EntityInterface | string | {}): {new ()} {
+  public resolveEntityReference(hint: Entity): {new ()} {
     if (typeof hint === 'string') {
       return this.getEntity(hint);
     }

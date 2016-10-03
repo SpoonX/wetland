@@ -6,5 +6,19 @@ export interface EntityInterface {
    *
    * @param mapping
    */
-  setMapping?(mapping: Mapping): void;
+  setMapping?(mapping: Mapping<any>): void;
 }
+
+export interface ProxyInterface extends EntityInterface {
+  isEntityProxy?: boolean;
+
+  activateProxying?(): ProxyInterface;
+
+  deactivateProxying?(): ProxyInterface;
+
+  getTarget?(): EntityInterface;
+
+  isProxyingActive?(): boolean;
+}
+
+export type EntityCtor<T> = new (...args: any[]) => T;
