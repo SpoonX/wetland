@@ -75,8 +75,7 @@ export class Scope {
     let primaryKey        = Mapping.forEntity(ReferenceClass).getPrimaryKey();
     reference[primaryKey] = primaryKeyValue;
 
-    // @todo catch mutations and throw an error. This entity may not be altered.
-    // Not super important, but it's a nice-to-have as it is stricter.
+    // Not super important, but it's a nice-to-have to prevent mutations on the reference as it is stricter.
     this.unitOfWork.registerClean(reference);
 
     return reference;
