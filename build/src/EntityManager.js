@@ -28,6 +28,14 @@ class EntityManager {
         this.wetland = wetland;
     }
     /**
+     * Get the wetland config.
+     *
+     * @returns {Homefront}
+     */
+    getConfig() {
+        return this.wetland.getConfig();
+    }
+    /**
      * Create a new entity manager scope.
      *
      * @returns {Scope}
@@ -59,7 +67,7 @@ class EntityManager {
     registerEntity(entity) {
         this.entities[this.getMapping(entity).getEntityName()] = entity;
         if (typeof entity.setMapping === 'function') {
-            entity.setMapping(Mapping_1.Mapping.forEntity(entity));
+            entity.setMapping(Mapping_1.Mapping.forEntity(this.resolveEntityReference(entity)));
         }
         return this;
     }
@@ -95,7 +103,7 @@ class EntityManager {
      */
     resolveEntityReference(hint) {
         if (typeof hint === 'string') {
-            return this.entities[hint];
+            return this.getEntity(hint);
         }
         if (typeof hint === 'object') {
             return hint.constructor;

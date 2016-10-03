@@ -1,9 +1,10 @@
-/// <reference types="chai" />
 /// <reference types="knex" />
+/// <reference types="chai" />
 import { QueryBuilder } from './QueryBuilder';
 import * as knex from 'knex';
 import { Scope } from './Scope';
-export declare class EntityRepository {
+import { EntityCtor } from './EntityInterface';
+export declare class EntityRepository<T> {
     /**
      * @type {Scope}
      */
@@ -22,7 +23,7 @@ export declare class EntityRepository {
      * @param {Scope} entityManager
      * @param {{}}    entity
      */
-    constructor(entityManager: Scope, entity: Object);
+    constructor(entityManager: Scope, entity: EntityCtor<T>);
     /**
      * Get a new query builder.
      *
@@ -31,26 +32,31 @@ export declare class EntityRepository {
      *
      * @returns {QueryBuilder}
      */
-    getQueryBuilder(alias?: string, statement?: knex.QueryBuilder): QueryBuilder;
+    getQueryBuilder(alias?: string, statement?: knex.QueryBuilder): QueryBuilder<T>;
     /**
      * Find entities based on provided criteria.
      *
-     * @param criteria  {{}}
-     * @param {*}       [orderBy]
-     * @param {number}  [limit]
-     * @param {number}  [offset]
+     * @param {{}}          criteria
+     * @param {FindOptions} [options]
      *
      * @returns {Promise<Array>}
      */
-    find(criteria?: {}, orderBy?: any, limit?: number, offset?: number): Promise<Array<Object>>;
+    find(criteria: Object | null, options?: FindOptions): Promise<Array<T>>;
     /**
      * Find a single entity.
      *
      * @param {{}|number|string}  criteria
-     * @param {number}            [orderBy]
-     * @param {number}            [offset]
+     * @param {FindOptions}       [options]
      *
      * @returns {Promise<Object>}
      */
-    findOne(criteria?: {} | number | string, orderBy?: any, offset?: number): Promise<Object>;
+    findOne(criteria?: {} | number | string, options?: FindOptions): Promise<T>;
+}
+export interface FindOptions {
+    orderBy?: any;
+    alias?: string;
+    limit?: number;
+    offset?: number;
+    debug?: boolean;
+    join?: {} | Array<string | {}>;
 }

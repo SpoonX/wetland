@@ -1,21 +1,18 @@
 /// <reference types="knex" />
 /// <reference types="chai" />
-import { Mapping } from './Mapping';
-import { Scope } from './Scope';
 import * as knex from 'knex';
+import { Hydrator } from './Hydrator';
 export declare class Query {
     /**
-     * @type {{}}}
+     * Log all queries when true.
+     *
+     * @type {boolean}
      */
-    private mappings;
+    private debug;
     /**
-     * @type {string}
+     * @type {Hydrator}
      */
-    private alias;
-    /**
-     * @type {Scope}
-     */
-    private entityManager;
+    private hydrator;
     /**
      * @type {{}}
      */
@@ -24,33 +21,15 @@ export declare class Query {
      * Construct a new Query.
      *
      * @param {knex.QueryBuilder} statement
-     * @param {Scope}             entityManager
+     * @param {Hydrator}          hydrator
      */
-    constructor(statement: knex.QueryBuilder, entityManager: Scope);
+    constructor(statement: knex.QueryBuilder, hydrator: Hydrator);
     /**
-     * Get the statement (knex instance).
-     *
-     * @returns {knex.QueryBuilder}
-     */
-    getStatement(): knex.QueryBuilder;
-    /**
-     * Set mappings.
-     *
-     * @param {{}} mappings
-     *
-     * @returns {Query} Fluent interface
-     */
-    setMappings(mappings: {
-        [key: string]: Mapping;
-    }): Query;
-    /**
-     * Set the alias for the host.
-     *
-     * @param {string} alias
+     * Enable debugging for this query.
      *
      * @returns {Query}
      */
-    setAlias(alias: string): Query;
+    enableDebugging(): Query;
     /**
      * Execute the query.
      *
@@ -70,27 +49,15 @@ export declare class Query {
      */
     getResult(): Promise<Array<Object>>;
     /**
-     * Hydrate provided rows to entities.
-     *
-     * @param {{}[]}   rows
-     * @param {string} alias
-     *
-     * @returns {{}[]}
-     */
-    private hydrateEntities(rows, alias);
-    /**
-     * Hydrate an entity.
-     *
-     * @param {{}}     row
-     * @param {string} alias
-     *
-     * @returns {{}}
-     */
-    private hydrateEntity(row, alias);
-    /**
      * Get the SQL query for current query.
      *
      * @returns {string}
      */
     getSQL(): string;
+    /**
+     * Get the statement for this query.
+     *
+     * @returns {knex.QueryBuilder}
+     */
+    getStatement(): knex.QueryBuilder;
 }

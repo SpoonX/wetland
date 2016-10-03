@@ -43,9 +43,38 @@ class Criteria {
          * @type {{}}
          */
         this.operatorKnexMethod = { and: 'where', or: 'orWhere' };
+        /**
+         * Criteria staged to apply.
+         *
+         * @type {Array}
+         */
+        this.staged = [];
         this.statement = statement;
         this.mappings = mappings || {};
         this.hostMapping = hostMapping;
+    }
+    /**
+     * Stage criteria to be applied later.
+     *
+     * @param {{}} criteria
+     *
+     * @returns {Criteria}
+     */
+    stage(criteria) {
+        this.staged.push(criteria);
+        return this;
+    }
+    /**
+     * Apply staged criteria.
+     *
+     * @returns {Criteria}
+     */
+    applyStaged() {
+        this.staged.forEach(criteria => {
+            this.apply(criteria);
+        });
+        this.staged = [];
+        return this;
     }
     /**
      * Apply provided criteria to the statement.
@@ -54,6 +83,8 @@ class Criteria {
      * @param {knex.QueryBuilder} [statement]
      * @param {string}            [parentKey]
      * @param {string}            [parentKnexMethodName]
+     *
+     * @return Criteria
      */
     apply(criteria, statement, parentKey, parentKnexMethodName) {
         statement = statement || this.statement;
@@ -76,6 +107,7 @@ class Criteria {
             key = this.mapToColumn(parentKey || key);
             return statement[parentKnexMethodName || 'where'](key, operator, value);
         });
+        return this;
     }
     /**
      * Map a property to a column name.

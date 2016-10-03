@@ -37,6 +37,12 @@ export declare class Criteria {
      */
     private statement;
     /**
+     * Criteria staged to apply.
+     *
+     * @type {Array}
+     */
+    private staged;
+    /**
      * Construct a new Criteria parser.
      * @constructor
      *
@@ -44,9 +50,23 @@ export declare class Criteria {
      * @param {Mapping}           hostMapping
      * @param {{}}                [mappings]
      */
-    constructor(statement: knex.QueryBuilder, hostMapping: Mapping, mappings?: {
-        [key: string]: Mapping;
+    constructor(statement: knex.QueryBuilder, hostMapping: Mapping<any>, mappings?: {
+        [key: string]: Mapping<any>;
     });
+    /**
+     * Stage criteria to be applied later.
+     *
+     * @param {{}} criteria
+     *
+     * @returns {Criteria}
+     */
+    stage(criteria: Object): Criteria;
+    /**
+     * Apply staged criteria.
+     *
+     * @returns {Criteria}
+     */
+    applyStaged(): Criteria;
     /**
      * Apply provided criteria to the statement.
      *
@@ -54,8 +74,10 @@ export declare class Criteria {
      * @param {knex.QueryBuilder} [statement]
      * @param {string}            [parentKey]
      * @param {string}            [parentKnexMethodName]
+     *
+     * @return Criteria
      */
-    apply(criteria: Object, statement?: knex.QueryBuilder, parentKey?: string, parentKnexMethodName?: string): void;
+    apply(criteria: Object, statement?: knex.QueryBuilder, parentKey?: string, parentKnexMethodName?: string): Criteria;
     /**
      * Map a property to a column name.
      *

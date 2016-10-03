@@ -1,13 +1,11 @@
 /// <reference types="chai" />
-/// <reference types="knex" />
 import { UnitOfWork } from './UnitOfWork';
 import { EntityManager } from './EntityManager';
-import { EntityInterface } from './EntityInterface';
+import { EntityInterface, ProxyInterface, EntityCtor } from './EntityInterface';
 import { EntityRepository } from './EntityRepository';
-import { Query } from './Query';
 import { Store } from './Store';
 import { Wetland } from './Wetland';
-import * as knex from 'knex';
+import { Homefront } from 'homefront';
 export declare class Scope {
     /**
      * @type {UnitOfWork}
@@ -31,11 +29,36 @@ export declare class Scope {
     /**
      * Proxy method the entityManager getRepository method.
      *
-     * @param {string|Function|Object} entity
+     * @param {Entity} entity
      *
      * @returns {EntityRepository}
      */
-    getRepository(entity: string | Function | Object): EntityRepository;
+    getRepository<T>(entity: EntityCtor<T>): EntityRepository<T>;
+    /**
+     * Get the wetland config.
+     *
+     * @returns {Homefront}
+     */
+    getConfig(): Homefront;
+    /**
+     * Get a reference to a persisted row without actually loading it.
+     *
+     * @param {Entity} entity
+     * @param {*}      primaryKeyValue
+     *
+     * @returns {EntityInterface}
+     */
+    getReference(entity: Entity, primaryKeyValue: any): EntityInterface;
+    /**
+     * Resolve provided value to an entity reference.
+     *
+     * @param {EntityInterface|string|{}} hint
+     *
+     * @returns {EntityInterface|null}
+     */
+    resolveEntityReference(hint: Entity): {
+        new ();
+    };
     /**
      * Refresh provided entities (sync back from DB).
      *
@@ -53,17 +76,6 @@ export declare class Scope {
      */
     getEntity(name: string): Function;
     /**
-     * Create a new Query.
-     *
-     * @param {{}}                entity
-     * @param {string}            alias
-     * @param {knex.QueryBuilder} statement
-     * @param {string}            [role]
-     *
-     * @returns {Query}
-     */
-    createQuery(entity: Object, alias: string, statement: knex.QueryBuilder, role?: string): Query;
-    /**
      * Get store for provided entity.
      *
      * @param {EntityInterface} entity
@@ -77,6 +89,22 @@ export declare class Scope {
      * @returns {UnitOfWork}
      */
     getUnitOfWork(): UnitOfWork;
+    /**
+     * Attach an entity (proxy it).
+     *
+     * @param {EntityInterface} entity
+     *
+     * @returns {EntityInterface&ProxyInterface}
+     */
+    attach(entity: EntityInterface): ProxyInterface;
+    /**
+     * Detach an entity (remove proxy, and clear from unit of work).
+     *
+     * @param {ProxyInterface} entity
+     *
+     * @returns {EntityInterface}
+     */
+    detach(entity: ProxyInterface): EntityInterface;
     /**
      * Mark provided entity as new.
      *
@@ -100,7 +128,7 @@ export declare class Scope {
      *
      * @return {Promise}
      */
-    flush(): Promise<any>;
+    flush(skipClean?: boolean): Promise<any>;
     /**
      * Clear the unit of work.
      *
@@ -108,3 +136,6 @@ export declare class Scope {
      */
     clear(): Scope;
 }
+export declare type Entity = string | {
+    new ();
+} | EntityInterface;

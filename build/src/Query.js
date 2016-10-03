@@ -1,45 +1,28 @@
 "use strict";
-const EntityProxy_1 = require('./EntityProxy');
-const EntityHydrator_1 = require('./EntityHydrator');
 class Query {
     /**
      * Construct a new Query.
      *
      * @param {knex.QueryBuilder} statement
-     * @param {Scope}             entityManager
+     * @param {Hydrator}          hydrator
      */
-    constructor(statement, entityManager) {
+    constructor(statement, hydrator) {
+        /**
+         * Log all queries when true.
+         *
+         * @type {boolean}
+         */
+        this.debug = false;
         this.statement = statement;
-        this.entityManager = entityManager;
+        this.hydrator = hydrator;
     }
     /**
-     * Get the statement (knex instance).
-     *
-     * @returns {knex.QueryBuilder}
-     */
-    getStatement() {
-        return this.statement;
-    }
-    /**
-     * Set mappings.
-     *
-     * @param {{}} mappings
-     *
-     * @returns {Query} Fluent interface
-     */
-    setMappings(mappings) {
-        this.mappings = mappings;
-        return this;
-    }
-    /**
-     * Set the alias for the host.
-     *
-     * @param {string} alias
+     * Enable debugging for this query.
      *
      * @returns {Query}
      */
-    setAlias(alias) {
-        this.alias = alias;
+    enableDebugging() {
+        this.debug = true;
         return this;
     }
     /**
@@ -48,6 +31,10 @@ class Query {
      * @returns {Promise<[]>}
      */
     execute() {
+        // @todo Change this to a module-wide debug mode that sets up listeners. https://github.com/SpoonX/wetland/issues/35
+        if (this.debug) {
+            console.log(this.getSQL());
+        }
         return this.statement.then();
     }
     /**
@@ -69,30 +56,7 @@ class Query {
      * @returns {Promise<{}[]>}
      */
     getResult() {
-        return this.execute().then(result => this.hydrateEntities(result, this.alias));
-    }
-    /**
-     * Hydrate provided rows to entities.
-     *
-     * @param {{}[]}   rows
-     * @param {string} alias
-     *
-     * @returns {{}[]}
-     */
-    hydrateEntities(rows, alias) {
-        return rows.map(row => this.hydrateEntity(row, alias));
-    }
-    /**
-     * Hydrate an entity.
-     *
-     * @param {{}}     row
-     * @param {string} alias
-     *
-     * @returns {{}}
-     */
-    hydrateEntity(row, alias) {
-        let EntityClass = this.entityManager.getEntity(this.mappings[alias].getEntityName());
-        return EntityProxy_1.EntityProxy.patch(EntityHydrator_1.EntityHydrator.fromSchema(row, EntityClass), this.entityManager.getUnitOfWork());
+        return this.execute().then(result => this.hydrator.hydrateAll(result));
     }
     /**
      * Get the SQL query for current query.
@@ -101,6 +65,14 @@ class Query {
      */
     getSQL() {
         return this.statement.toString();
+    }
+    /**
+     * Get the statement for this query.
+     *
+     * @returns {knex.QueryBuilder}
+     */
+    getStatement() {
+        return this.statement;
     }
 }
 exports.Query = Query;
