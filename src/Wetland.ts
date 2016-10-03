@@ -14,7 +14,7 @@ export class Wetland {
    * @type {Homefront}
    */
   private config: Homefront = new Homefront({
-    debug        : false, // @todo use.
+    debug        : false,
     defaultStore : 'default',
     entityManager: {
       refreshCreated: true,
