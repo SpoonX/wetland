@@ -7,23 +7,8 @@ class Query {
      * @param {Hydrator}          hydrator
      */
     constructor(statement, hydrator) {
-        /**
-         * Log all queries when true.
-         *
-         * @type {boolean}
-         */
-        this.debug = false;
         this.statement = statement;
         this.hydrator = hydrator;
-    }
-    /**
-     * Enable debugging for this query.
-     *
-     * @returns {Query}
-     */
-    enableDebugging() {
-        this.debug = true;
-        return this;
     }
     /**
      * Execute the query.
@@ -31,10 +16,6 @@ class Query {
      * @returns {Promise<[]>}
      */
     execute() {
-        // @todo Change this to a module-wide debug mode that sets up listeners. https://github.com/SpoonX/wetland/issues/35
-        if (this.debug) {
-            console.log(this.getSQL());
-        }
         return this.statement.then();
     }
     /**
