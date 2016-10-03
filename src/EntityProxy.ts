@@ -106,7 +106,6 @@ export class EntityProxy {
 
         deleteProperty: (collection: Collection<Object>, key: string) => {
           if (isProxyActive()) {
-            console.log(key, collection[key]);
             unitOfWork.registerCollectionChange(UnitOfWork.RELATIONSHIP_REMOVED, entityProxy, property, collection[key]);
           }
 
