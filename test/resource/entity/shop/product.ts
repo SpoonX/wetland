@@ -13,7 +13,7 @@ export class Product {
   public author: User;
 
   static setMapping(mapping) {
-    mapping.field('id', {type: 'integer'}).id('id').generatedValue('id', 'autoIncrement');
+    mapping.field('id', {type: 'integer'}).primary('id').generatedValue('id', 'autoIncrement');
     mapping.field('name', {type: 'string', size: 24});
 
     mapping

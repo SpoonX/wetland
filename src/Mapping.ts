@@ -270,7 +270,7 @@ export class Mapping<T> {
       return null;
     }
 
-    return this.getFieldName(primaryKey);
+    return this.getFieldName(primaryKey, primaryKey);
   }
 
   /**

@@ -135,5 +135,14 @@ describe('EntityProxy', () => {
       assert.isTrue(UnitOfWork.isClean(patched));
       assert.strictEqual(UnitOfWork.getObjectState(patched), UnitOfWork.STATE_CLEAN);
     });
+
+    it('should disallow deleting toMany values from entity', () => {
+      let unitOfWork = getUnitOfWork();
+      let patched    = unitOfWork.getEntityManager().attach(new Parent);
+
+      assert.throws(() => {
+        delete patched.simples;
+      }, `It is not allowed to delete a collection. Trying to delete 'Parent.simples'.`);
+    });
   });
 });
