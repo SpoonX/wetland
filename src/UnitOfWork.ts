@@ -868,7 +868,7 @@ export class UnitOfWork {
             });
 
             if (action === UnitOfWork.RELATIONSHIP_ADDED) {
-              return queryBuilder.insert(values).transxacting(transaction.transaction).then();
+              return queryBuilder.insert(values).transacting(transaction.transaction).then();
             }
 
             return queryBuilder.where(values).del().transacting(transaction.transaction).then();
