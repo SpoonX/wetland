@@ -109,7 +109,7 @@ class EntityProxy {
                     return true;
                 }
                 // To many? Only allowed if collection is empty. Also, ensure this new collection is proxied.
-                if (entity[property] instanceof ArrayCollection_1.ArrayCollection) {
+                if (entity[property] instanceof Array) {
                     if (entity[property].length > 0) {
                         throw new Error(`Can't assign to '${target.constructor.name}.${property}'. Collection is not empty.`);
                     }
@@ -155,7 +155,8 @@ class EntityProxy {
                 return target[property];
             },
             deleteProperty: (target, property) => {
-                if (target[property] instanceof ArrayCollection_1.ArrayCollection) {
+                let relation = relations[property];
+                if (relation && (relation.type === Mapping_1.Mapping.RELATION_MANY_TO_MANY || relation.type === Mapping_1.Mapping.RELATION_ONE_TO_MANY)) {
                     throw new Error(`It is not allowed to delete a collection. Trying to delete '${target.constructor.name}.${property}'.`);
                 }
                 unitOfWork.registerRelationChange(UnitOfWork_1.UnitOfWork.RELATIONSHIP_REMOVED, entityProxy, property, target[property]);

@@ -68,9 +68,17 @@ class SchemaBuilder {
      * @returns {Promise<any[]>}
      */
     apply() {
-        return Promise
-            .all(this.creates.map(create => create.then()))
-            .then(() => Promise.all(this.alters.map(alter => alter.then())));
+        let createQueries = [];
+        this.creates.forEach(create => {
+            createQueries.push(create.then());
+        });
+        return Promise.all(createQueries).then(() => {
+            let alterQueries = [];
+            this.alters.forEach(alter => {
+                alterQueries.push(alter.then());
+            });
+            return Promise.all(alterQueries);
+        });
     }
     /**
      * Create the schema.
@@ -143,6 +151,7 @@ class SchemaBuilder {
     processRelations(mapping) {
         let entity = mapping.getTarget();
         let relations = mapping.getRelations();
+        let foreignKeys = [];
         let joinColumns = [];
         if (!relations) {
             return;
@@ -155,17 +164,26 @@ class SchemaBuilder {
                 joinColumns.push({
                     name: column.name,
                     type: 'integer',
-                    unsigned: true
+                    unsigned: true,
+                    nullable: true
                 });
-                return;
+                return foreignKeys.push({
+                    owning: property,
+                    foreign: column.name,
+                    references: column.referencedColumnName,
+                    inTable: targetMapping.getTableName()
+                });
             }
             // Nothing to do for other side.
             if (relation.type === Mapping_1.Mapping.RELATION_ONE_TO_MANY || !relation.inversedBy) {
                 return;
             }
             // This is many to many.
+            let foreignColumns = [];
             let referenceColumns = [];
+            let foreignColumnsInverse = [];
             let referenceColumnsInverse = [];
+            let joinTableIndexes = [];
             let joinTableFields = {
                 id: {
                     name: 'id',
@@ -186,8 +204,11 @@ class SchemaBuilder {
                     name: joinColumn.name,
                     type: joinColumn.type || 'integer',
                     size: joinColumn.size,
-                    unsigned: true
+                    unsigned: true,
+                    nullable: true
                 };
+                joinTableIndexes.push({ columns: joinColumn.name, name: joinColumn.indexName || `idx_${joinColumn.name}` });
+                foreignColumns.push(joinColumn.referencedColumnName);
                 referenceColumns.push(joinColumn.name);
             });
             joinTable.inverseJoinColumns.forEach(inverse => {
@@ -195,20 +216,60 @@ class SchemaBuilder {
                     name: inverse.name,
                     type: inverse.type || 'integer',
                     size: inverse.size,
-                    unsigned: true
+                    unsigned: true,
+                    nullable: true
                 };
+                joinTableIndexes.push({ columns: inverse.name, name: inverse.indexName || `idx_${inverse.name}` });
+                foreignColumnsInverse.push(inverse.name);
                 referenceColumnsInverse.push(inverse.referencedColumnName);
             });
             this.addBuilder(entity, joinTable.name, table => {
                 this.composeFields(table, joinTableFields);
             });
+            this.addBuilder(entity, joinTable.name, table => {
+                joinTableIndexes.forEach(index => {
+                    table.index(index.columns, index.name);
+                });
+            }, true);
+            this.addBuilder(entity, joinTable.name, table => {
+                let foreignInverse = table.foreign(foreignColumnsInverse).references(referenceColumnsInverse).inTable(targetMapping.getTableName());
+                let foreign = table.foreign(referenceColumns).references(foreignColumns).inTable(mapping.getTableName());
+                this.applyCascades(mapping.getField(property).cascades, foreignInverse);
+                this.applyCascades(mapping.getField(property).cascades, foreign);
+            }, true);
         });
         this.addBuilder(entity, mapping.getTableName(), table => {
             joinColumns.forEach(joinColumn => {
                 this.composeField(table, joinColumn);
             });
+            foreignKeys.forEach(foreignKey => {
+                let foreign = table.foreign(foreignKey.foreign).references(foreignKey.references).inTable(foreignKey.inTable);
+                this.applyCascades(mapping.getField(foreignKey.owning).cascades, foreign);
+            });
         }, true);
         return this;
+    }
+    /**
+     * Apply cascades to provided table builder.
+     *
+     * @param {string[]}           cascades
+     * @param {Knex.ColumnBuilder} foreign
+     */
+    applyCascades(cascades, foreign) {
+        if (!cascades) {
+            return;
+        }
+        cascades.forEach(cascade => {
+            if (cascade === Mapping_1.Mapping.CASCADE_PERSIST) {
+                return;
+            }
+            if (cascade === Mapping_1.Mapping.CASCADE_UPDATE) {
+                foreign.onUpdate('cascade');
+            }
+            else if (cascade === Mapping_1.Mapping.CASCADE_DELETE) {
+                foreign.onDelete('cascade');
+            }
+        });
     }
     /**
      * Compose the indexes for mapping.

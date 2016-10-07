@@ -193,7 +193,7 @@ class Mapping {
         if (!primaryKey) {
             return null;
         }
-        return this.getFieldName(primaryKey);
+        return this.getFieldName(primaryKey, primaryKey);
     }
     /**
      * Get the property that has been assigned as the primary key.
