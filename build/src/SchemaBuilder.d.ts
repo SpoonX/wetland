@@ -38,7 +38,7 @@ export declare class SchemaBuilder {
      *
      * @returns {Promise<any[]>}
      */
-    apply(): Promise<any>;
+    apply(): Promise<any[]>;
     /**
      * Create the schema.
      *
@@ -77,6 +77,13 @@ export declare class SchemaBuilder {
      * @returns {SchemaBuilder}
      */
     private processRelations(mapping);
+    /**
+     * Apply cascades to provided table builder.
+     *
+     * @param {string[]}           cascades
+     * @param {Knex.ColumnBuilder} foreign
+     */
+    private applyCascades(cascades, foreign);
     /**
      * Compose the indexes for mapping.
      *

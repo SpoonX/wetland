@@ -104,7 +104,7 @@ export declare class Scope {
      *
      * @returns {EntityInterface&ProxyInterface}
      */
-    attach(entity: EntityInterface): ProxyInterface;
+    attach<T>(entity: T): T;
     /**
      * Detach an entity (remove proxy, and clear from unit of work).
      *

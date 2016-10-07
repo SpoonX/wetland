@@ -283,34 +283,13 @@ export class SchemaBuilder {
         });
       }, true);
 
-      // @todo both foreign keys go on the join table. You moron.
       this.addBuilder(entity, joinTable.name, table => {
-        let foreign  = table.foreign(foreignColumnsInverse).references(referenceColumnsInverse).inTable(targetMapping.getTableName());
-        let cascades = mapping.getField(property).cascades;
+        let foreignInverse = table.foreign(foreignColumnsInverse).references(referenceColumnsInverse).inTable(targetMapping.getTableName());
+        let foreign        = table.foreign(referenceColumns).references(foreignColumns).inTable(mapping.getTableName());
 
-        if (!cascades) {
-          return;
-        }
-
-        cascades.forEach(cascade => {
-          if (cascade === Mapping.CASCADE_PERSIST) {
-            return;
-          }
-
-          if (cascade === Mapping.CASCADE_UPDATE) {
-            foreign.onUpdate('cascade');
-          } else if (cascade === Mapping.CASCADE_DELETE) {
-            foreign.onDelete('cascade');
-          }
-        });
+        this.applyCascades(mapping.getField(property).cascades, foreignInverse);
+        this.applyCascades(mapping.getField(property).cascades, foreign);
       }, true);
-
-      foreignKeys.push({
-        foreign   : foreignColumns,
-        references: referenceColumns,
-        inTable   : joinTable.name,
-        owning    : property
-      });
     });
 
     this.addBuilder(entity, mapping.getTableName(), table => {
@@ -319,33 +298,22 @@ export class SchemaBuilder {
       });
 
       foreignKeys.forEach(foreignKey => {
-        let foreign  = table.foreign(foreignKey.foreign).references(foreignKey.references).inTable(foreignKey.inTable);
-        let cascades = mapping.getField(foreignKey.owning).cascades;
+        let foreign = table.foreign(foreignKey.foreign).references(foreignKey.references).inTable(foreignKey.inTable);
 
-        if (!cascades) {
-          return;
-        }
-
-        cascades.forEach(cascade => {
-          if (cascade === Mapping.CASCADE_PERSIST) {
-            return;
-          }
-
-          if (cascade === Mapping.CASCADE_UPDATE) {
-            foreign.onUpdate('cascade');
-          } else if (cascade === Mapping.CASCADE_DELETE) {
-            foreign.onDelete('cascade');
-          }
-        });
+        this.applyCascades(mapping.getField(foreignKey.owning).cascades, foreign);
       });
     }, true);
 
     return this;
   }
 
-  private applyCascades() {
-    let cascades = mapping.getField(foreignKey.owning).cascades;
-
+  /**
+   * Apply cascades to provided table builder.
+   *
+   * @param {string[]}           cascades
+   * @param {Knex.ColumnBuilder} foreign
+   */
+  private applyCascades(cascades: Array<string>, foreign: Knex.ColumnBuilder) {
     if (!cascades) {
       return;
     }
