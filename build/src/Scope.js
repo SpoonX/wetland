@@ -115,6 +115,14 @@ class Scope {
         return this.unitOfWork;
     }
     /**
+     * Get all registered entities.
+     *
+     * @returns {{}}
+     */
+    getEntities() {
+        return this.manager.getEntities();
+    }
+    /**
      * Attach an entity (proxy it).
      *
      * @param {EntityInterface} entity

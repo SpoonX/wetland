@@ -2,6 +2,7 @@
 const EntityManager_1 = require('./EntityManager');
 const Store_1 = require('./Store');
 const homefront_1 = require('homefront');
+const Migrator_1 = require('./Migrator');
 class Wetland {
     /**
      * Construct a new wetland instance.
@@ -130,6 +131,17 @@ class Wetland {
      */
     getManager() {
         return this.manager.createScope();
+    }
+    /**
+     * Get the migrator.
+     *
+     * @returns {Migrator}
+     */
+    getMigrator() {
+        if (!this.migrator) {
+            this.migrator = new Migrator_1.Migrator(this);
+        }
+        return this.migrator;
     }
     /**
      * Destroy all active connections.

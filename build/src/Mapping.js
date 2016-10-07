@@ -157,9 +157,17 @@ class Mapping {
             indexName = 'idx_' + fields.join('_').toLowerCase();
         }
         fields = Array.isArray(fields) ? fields : [fields];
-        let indexes = this.mapping.fetchOrPut(`indexes`, []);
+        let indexes = this.mapping.fetchOrPut('indexes', []);
         indexes.push({ name: indexName, fields });
         return this;
+    }
+    /**
+     * Get the indexes.
+     *
+     * @returns {{}[]}
+     */
+    getIndexes() {
+        return this.mapping.fetch('indexes', []);
     }
     /**
      * Map a property to be the primary key. Example:
@@ -170,7 +178,7 @@ class Mapping {
      *
      * @return {Mapping}
      */
-    id(property) {
+    primary(property) {
         this.mapping.put('primary', property);
         this.extendField(property, { primary: true });
         return this;
@@ -250,8 +258,18 @@ class Mapping {
      * @return {Mapping}
      */
     generatedValue(property, type) {
-        homefront_1.Homefront.merge(this.mapping.fetchOrPut(`fields.${property}`, {}), { generatedValue: type });
+        this.extendField(property, { generatedValue: type });
         return this;
+    }
+    /**
+     * Convenience method to set auto increment.
+     *
+     * @param {string} property
+     *
+     * @returns {Mapping}
+     */
+    increments(property) {
+        return this.generatedValue(property, 'autoIncrement');
     }
     /**
      * Map a unique constraint.
@@ -281,6 +299,14 @@ class Mapping {
         let indexes = this.mapping.fetchOrPut(`uniqueConstraints`, []);
         indexes.push({ name: constraintName, fields });
         return this;
+    }
+    /**
+     * Get the unique constraints.
+     *
+     * @returns {{}[]}
+     */
+    getUniqueConstraints() {
+        return this.mapping.fetch('uniqueConstraints', []);
     }
     /**
      * Set cascade values.
@@ -396,7 +422,16 @@ class Mapping {
      */
     joinTable(property, options) {
         this.extendField(property, { joinTable: options });
+        this.mapping.fetchOrPut('joinTables', []).push(options);
         return this;
+    }
+    /**
+     * Get all join tables.
+     *
+     * @returns {JoinTable[]}
+     */
+    getJoinTables() {
+        return this.mapping.fetch('joinTables', []);
     }
     /**
      * Register a join column.
@@ -450,8 +485,18 @@ class Mapping {
             let withPrimary = relationMapping.getPrimaryKeyField();
             field.joinTable = {
                 name: `${ownTableName}_${withTableName}`,
-                joinColumns: [{ referencedColumnName: ownPrimary, name: `${ownTableName}_id` }],
-                inverseJoinColumns: [{ referencedColumnName: withPrimary, name: `${withTableName}_id` }]
+                joinColumns: [{
+                        referencedColumnName: ownPrimary,
+                        name: `${ownTableName}_id`,
+                        indexName: `idx_${ownTableName}_id`,
+                        type: 'integer'
+                    }],
+                inverseJoinColumns: [{
+                        referencedColumnName: withPrimary,
+                        name: `${withTableName}_id`,
+                        indexName: `idx_${withTableName}_id`,
+                        type: 'integer'
+                    }]
             };
         }
         return field.joinTable;
@@ -467,6 +512,9 @@ class Mapping {
     extendField(property, additional) {
         homefront_1.Homefront.merge(this.mapping.fetchOrPut(`fields.${property}`, {}), additional);
         return this;
+    }
+    forProperty(property) {
+        return new Field(property, this);
     }
 }
 /**
@@ -489,4 +537,151 @@ Mapping.RELATION_ONE_TO_ONE = 'oneToOne';
  * @type {string}
  */
 Mapping.CASCADE_PERSIST = 'persist';
+/**
+ * @type {string}
+ */
+Mapping.CASCADE_UPDATE = 'update';
+/**
+ * @type {string}
+ */
+Mapping.CASCADE_DELETE = 'delete';
 exports.Mapping = Mapping;
+/**
+ * Convenience class for chaining field definitions.
+ */
+class Field {
+    /**
+     * Construct convenience class to map property.
+     *
+     * @param {string}  property
+     * @param {Mapping} mapping
+     */
+    constructor(property, mapping) {
+        this.property = property;
+        this.mapping = mapping;
+    }
+    /**
+     * Map a field to this property. Examples:
+     *
+     *  mapping.field({type: 'string', length: 255});
+     *  mapping.field({type: 'string', name: 'passwd'});
+     *
+     * @param {FieldOptions} options
+     *
+     * @return {Field}
+     */
+    field(options) {
+        this.mapping.field(this.property, options);
+        return this;
+    }
+    /**
+     * Map to be the primary key.
+     *
+     * @return {Field}
+     */
+    primary() {
+        this.mapping.primary(this.property);
+        return this;
+    }
+    /**
+     * Map generatedValues. Examples:
+     *
+     *  // Auto increment
+     *  mapping.generatedValue('autoIncrement');
+     *
+     * @param {string} type
+     *
+     * @return {Field}
+     */
+    generatedValue(type) {
+        this.mapping.generatedValue(this.property, type);
+        return this;
+    }
+    /**
+     * Set cascade values.
+     *
+     * @param {string[]}  cascades
+     *
+     * @returns {Field}
+     */
+    cascade(cascades) {
+        this.mapping.cascade(this.property, cascades);
+        return this;
+    }
+    /**
+     * Convenience method for auto incrementing values.
+     *
+     * @returns {Field}
+     */
+    increments() {
+        this.mapping.increments(this.property);
+        return this;
+    }
+    /**
+     * Map a relationship.
+     *
+     * @param {Relationship} options
+     *
+     * @returns {Field}
+     */
+    oneToOne(options) {
+        this.mapping.oneToOne(this.property, options);
+        return this;
+    }
+    /**
+     * Map a relationship.
+     *
+     * @param {Relationship} options
+     *
+     * @returns {Field}
+     */
+    oneToMany(options) {
+        this.mapping.oneToMany(this.property, options);
+        return this;
+    }
+    /**
+     * Map a relationship.
+     *
+     * @param {Relationship} options
+     *
+     * @returns {Field}
+     */
+    manyToOne(options) {
+        this.mapping.manyToOne(this.property, options);
+        return this;
+    }
+    /**
+     * Map a relationship.
+     *
+     * @param {Relationship} options
+     *
+     * @returns {Field}
+     */
+    manyToMany(options) {
+        this.mapping.manyToMany(this.property, options);
+        return this;
+    }
+    /**
+     * Register a join table.
+     *
+     * @param {JoinTable} options
+     *
+     * @returns {Field}
+     */
+    joinTable(options) {
+        this.mapping.joinTable(this.property, options);
+        return this;
+    }
+    /**
+     * Register a join column.
+     *
+     * @param {JoinTable} options
+     *
+     * @returns {Field}
+     */
+    joinColumn(options) {
+        this.mapping.joinColumn(this.property, options);
+        return this;
+    }
+}
+exports.Field = Field;

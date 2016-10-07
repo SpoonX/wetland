@@ -3,7 +3,7 @@ import { Homefront } from 'homefront';
 import { EntityRepository } from './EntityRepository';
 import { EntityManager } from './EntityManager';
 import { Scope } from './Scope';
-import { EntityCtor } from './EntityInterface';
+import { EntityCtor, EntityInterface } from './EntityInterface';
 export declare class Mapping<T> {
     /**
      * @type {string}
@@ -25,6 +25,14 @@ export declare class Mapping<T> {
      * @type {string}
      */
     static CASCADE_PERSIST: string;
+    /**
+     * @type {string}
+     */
+    static CASCADE_UPDATE: string;
+    /**
+     * @type {string}
+     */
+    static CASCADE_DELETE: string;
     /**
      * The mapping data.
      *
@@ -140,6 +148,15 @@ export declare class Mapping<T> {
      */
     index(indexName: string | Array<string>, fields?: string | Array<string>): this;
     /**
+     * Get the indexes.
+     *
+     * @returns {{}[]}
+     */
+    getIndexes(): Array<{
+        name: string;
+        fields: Array<string>;
+    }>;
+    /**
      * Map a property to be the primary key. Example:
      *
      *  mapping.id('id');
@@ -148,7 +165,7 @@ export declare class Mapping<T> {
      *
      * @return {Mapping}
      */
-    id(property: string): this;
+    primary(property: string): this;
     /**
      * Get the column name for the primary key.
      *
@@ -175,7 +192,9 @@ export declare class Mapping<T> {
      *
      * @returns {FieldOptions[]}
      */
-    getFields(): Array<FieldOptions>;
+    getFields(): {
+        [key: string]: FieldOptions;
+    };
     /**
      * Get the name of the entity.
      *
@@ -207,6 +226,14 @@ export declare class Mapping<T> {
      */
     generatedValue(property: string, type: string): this;
     /**
+     * Convenience method to set auto increment.
+     *
+     * @param {string} property
+     *
+     * @returns {Mapping}
+     */
+    increments(property: string): this;
+    /**
      * Map a unique constraint.
      *
      *  - Compound:
@@ -226,6 +253,15 @@ export declare class Mapping<T> {
      * @return {Mapping}
      */
     uniqueConstraint(constraintName: string | Array<string>, fields?: string | Array<string>): this;
+    /**
+     * Get the unique constraints.
+     *
+     * @returns {{}[]}
+     */
+    getUniqueConstraints(): Array<{
+        name: string;
+        fields: Array<string>;
+    }>;
     /**
      * Set cascade values.
      *
@@ -306,6 +342,12 @@ export declare class Mapping<T> {
      */
     joinTable(property: string, options: JoinTable): this;
     /**
+     * Get all join tables.
+     *
+     * @returns {JoinTable[]}
+     */
+    getJoinTables(): Array<JoinTable>;
+    /**
      * Register a join column.
      *
      * @param {string}    property
@@ -340,9 +382,130 @@ export declare class Mapping<T> {
      * @returns {Mapping}
      */
     extendField(property: string, additional: Object): this;
+    forProperty(property: string): Field;
+}
+/**
+ * Convenience class for chaining field definitions.
+ */
+export declare class Field {
+    /**
+     * @type {string}
+     */
+    private property;
+    /**
+     * @type {Mapping}
+     */
+    private mapping;
+    /**
+     * Construct convenience class to map property.
+     *
+     * @param {string}  property
+     * @param {Mapping} mapping
+     */
+    constructor(property: string, mapping: Mapping<EntityInterface>);
+    /**
+     * Map a field to this property. Examples:
+     *
+     *  mapping.field({type: 'string', length: 255});
+     *  mapping.field({type: 'string', name: 'passwd'});
+     *
+     * @param {FieldOptions} options
+     *
+     * @return {Field}
+     */
+    field(options: FieldOptions): this;
+    /**
+     * Map to be the primary key.
+     *
+     * @return {Field}
+     */
+    primary(): this;
+    /**
+     * Map generatedValues. Examples:
+     *
+     *  // Auto increment
+     *  mapping.generatedValue('autoIncrement');
+     *
+     * @param {string} type
+     *
+     * @return {Field}
+     */
+    generatedValue(type: string): this;
+    /**
+     * Set cascade values.
+     *
+     * @param {string[]}  cascades
+     *
+     * @returns {Field}
+     */
+    cascade(cascades: Array<string>): this;
+    /**
+     * Convenience method for auto incrementing values.
+     *
+     * @returns {Field}
+     */
+    increments(): this;
+    /**
+     * Map a relationship.
+     *
+     * @param {Relationship} options
+     *
+     * @returns {Field}
+     */
+    oneToOne(options: Relationship): this;
+    /**
+     * Map a relationship.
+     *
+     * @param {Relationship} options
+     *
+     * @returns {Field}
+     */
+    oneToMany(options: Relationship): this;
+    /**
+     * Map a relationship.
+     *
+     * @param {Relationship} options
+     *
+     * @returns {Field}
+     */
+    manyToOne(options: Relationship): this;
+    /**
+     * Map a relationship.
+     *
+     * @param {Relationship} options
+     *
+     * @returns {Field}
+     */
+    manyToMany(options: Relationship): this;
+    /**
+     * Register a join table.
+     *
+     * @param {JoinTable} options
+     *
+     * @returns {Field}
+     */
+    joinTable(options: JoinTable): this;
+    /**
+     * Register a join column.
+     *
+     * @param {JoinTable} options
+     *
+     * @returns {Field}
+     */
+    joinColumn(options: JoinColumn): this;
 }
 export interface FieldOptions {
     type: string;
+    primary?: boolean;
+    textType?: string;
+    precision?: number;
+    enumeration?: Array<any>;
+    generatedValue?: string;
+    scale?: number;
+    nullable?: boolean;
+    defaultsTo?: any;
+    unsigned?: boolean;
+    comment?: string;
     size?: number;
     name?: string;
     cascades?: Array<string>;
@@ -359,6 +522,9 @@ export interface JoinTable {
 export interface JoinColumn {
     referencedColumnName: string;
     name: string;
+    type?: string;
+    size?: number;
+    indexName?: string;
     unique?: boolean;
     nullable?: boolean;
 }

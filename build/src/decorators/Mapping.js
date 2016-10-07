@@ -70,17 +70,17 @@ exports.index = index;
 /**
  * Decorate a property to be the primary key. Example:
  *
- *  @id('id')
+ *  @primary('id')
  *  public id: number;
  *
  * @return {Mapping}
  */
-function id() {
+function primary() {
     return (target, property) => {
-        Mapping_1.Mapping.forEntity(target).id(property);
+        Mapping_1.Mapping.forEntity(target).primary(property);
     };
 }
-exports.id = id;
+exports.primary = primary;
 /**
  * Decorate your property with generatedValues. Example:
  *

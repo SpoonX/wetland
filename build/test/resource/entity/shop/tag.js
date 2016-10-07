@@ -1,7 +1,7 @@
 "use strict";
 class Tag {
     static setMapping(mapping) {
-        mapping.field('id', { type: 'integer' }).id('id').generatedValue('id', 'autoIncrement');
+        mapping.field('id', { type: 'integer' }).primary('id').generatedValue('id', 'autoIncrement');
         mapping.field('name', { type: 'string', size: 24 });
         mapping.manyToMany('images', { targetEntity: 'Image', mappedBy: 'tags' });
         mapping.manyToMany('categories', { targetEntity: 'Category', mappedBy: 'tags' });
