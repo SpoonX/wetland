@@ -218,13 +218,14 @@ class UnitOfWork {
     /**
      * set the state of an entity.
      *
-     * @param {EntityInterface} entity
+     * @param {ProxyInterface} entity
      * @param {string}          state
      *
      * @returns {UnitOfWork}
      */
     setEntityState(entity, state) {
         let metaData = MetaData_1.MetaData.forInstance(entity);
+        let target = entity.isEntityProxy ? entity.getTarget : entity;
         let previousState = metaData.fetch('entityState.state', UnitOfWork.STATE_UNKNOWN);
         if (previousState === state) {
             return this;
@@ -234,9 +235,9 @@ class UnitOfWork {
             return this;
         }
         if (previousState !== UnitOfWork.STATE_UNKNOWN) {
-            this[`${previousState}Objects`].remove(entity);
+            this[`${previousState}Objects`].remove(target);
         }
-        this[`${state}Objects`].add(entity);
+        this[`${state}Objects`].add(target);
         metaData.put('entityState.state', state);
         return this;
     }

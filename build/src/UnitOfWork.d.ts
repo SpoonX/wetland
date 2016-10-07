@@ -176,12 +176,12 @@ export declare class UnitOfWork {
     /**
      * set the state of an entity.
      *
-     * @param {EntityInterface} entity
+     * @param {ProxyInterface} entity
      * @param {string}          state
      *
      * @returns {UnitOfWork}
      */
-    setEntityState(entity: EntityInterface, state: string): UnitOfWork;
+    setEntityState(entity: ProxyInterface, state: string): UnitOfWork;
     /**
      * Register an object as "new".
      *
