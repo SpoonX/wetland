@@ -1,5 +1,5 @@
 import {Homefront} from 'homefront';
-import {ProxyInterface} from './EntityInterface';
+import {ProxyInterface, EntityInterface, EntityCtor} from './EntityInterface';
 
 export class MetaData {
   /**
@@ -57,7 +57,7 @@ export class MetaData {
    *
    * @returns {Function}
    */
-  public static getConstructor(target: Function | Object): Function {
+  public static getConstructor(target: ProxyInterface): Function {
     return (typeof target === 'function' ? target : target.constructor) as Function;
   }
 }
