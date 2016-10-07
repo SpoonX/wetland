@@ -152,6 +152,15 @@ export class Scope {
   }
 
   /**
+   * Get all registered entities.
+   *
+   * @returns {{}}
+   */
+  public getEntities(): {[key: string]: EntityCtor<EntityInterface>} {
+    return this.manager.getEntities();
+  }
+
+  /**
    * Attach an entity (proxy it).
    *
    * @param {EntityInterface} entity
