@@ -13,11 +13,15 @@ For more detailed information, you can look at the tests until the documentation
 * Unit of work
 * Transactions
 * Entity manager
+* Manager scopes
+* Cascade persist
+* Deep joins
 * Repositories
 * QueryBuilder
 * Mapping
 * MetaData
 * Entity proxy
+* Collection proxy
 * Criteria parser
 * More...
 
@@ -32,7 +36,6 @@ If you're using typescript, the typings are supplied by default. No additional t
 
 Usage will be documented soon. To give you an idea, here's an implementation example:
 
-### Vanilla
 ```js
 const Wetland = require('wetland').Wetland;
 const Foo     = require('./entity/foo').Foo;
@@ -50,35 +53,10 @@ const wetland = new Wetland({
   entities: [Foo, Bar]
 });
 
-// Get a manager scope. Call this method for every context (e.g. requests).
-let manager = wetland.getManager();
-
-// Get the repository for Foo
-let repository = manager.getRepository(Foo);
-
-repository.find({name: 'cake'}).then(results => {
-  // ...
-});
-```
-
-### Babel / Typescript
-```ts
-import {Wetland} from 'wetland';
-import {Foo} from './entity/Foo';
-import {Bar} from './entity/Bar';
-
-const wetland = new Wetland({
-  stores: {
-    simple: {
-      client    : 'mysql',
-      connection: {
-        user    : 'root',
-        database: 'testdatabase'
-      }
-    }
-  },
-  entities: [Foo, Bar]
-});
+// Create the tables. Async process, only here as example.
+// use .getSQL() (not async) in stead of apply (async) to get the queries.
+let migrator = wetland.getMigrator().create();
+migrator.apply().then(() => {});
 
 // Get a manager scope. Call this method for every context (e.g. requests).
 let manager = wetland.getManager();
@@ -86,7 +64,9 @@ let manager = wetland.getManager();
 // Get the repository for Foo
 let repository = manager.getRepository(Foo);
 
-repository.find({name: 'cake'}).then(results => {
-  // ...
-});
+// Get some results, and join.
+repository.find({name: 'cake'}, {joins: ['candles', 'baker', 'baker.address']})
+  .then(results => {
+    // ...
+  });
 ```

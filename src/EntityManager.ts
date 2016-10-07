@@ -1,7 +1,7 @@
 import {Mapping} from './Mapping';
 import {Wetland} from './Wetland';
 import {Scope, Entity} from './Scope';
-import {EntityInterface} from './EntityInterface';
+import {EntityInterface, EntityCtor} from './EntityInterface';
 import {Homefront} from 'homefront';
 
 /**
@@ -22,7 +22,7 @@ export class EntityManager {
    *
    * @type {{}}
    */
-  private entities: Object = {};
+  private entities: {[key: string]: EntityCtor<EntityInterface>} = {};
 
   /**
    * Construct a new core entity manager.
@@ -70,13 +70,22 @@ export class EntityManager {
   }
 
   /**
+   * Get all registered entities.
+   *
+   * @returns {{}}
+   */
+  public getEntities(): {[key: string]: EntityCtor<EntityInterface>} {
+    return this.entities;
+  }
+
+  /**
    * Register an entity with the entity manager.
    *
    * @param {EntityInterface} entity
    *
    * @returns {EntityManager}
    */
-  public registerEntity(entity: EntityInterface): EntityManager {
+  public registerEntity<T>(entity: EntityCtor<T> & EntityInterface): EntityManager {
     this.entities[this.getMapping(entity).getEntityName()] = entity;
 
     if (typeof entity.setMapping === 'function') {
@@ -104,7 +113,7 @@ export class EntityManager {
    *
    * @returns {EntityManager}
    */
-  public registerEntities(entities: Array<Function>): EntityManager {
+  public registerEntities(entities: Array<EntityCtor<EntityInterface>>): EntityManager {
     entities.forEach(entity => {
       this.registerEntity(entity);
     });

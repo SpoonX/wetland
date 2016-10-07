@@ -3,7 +3,7 @@ import {EntityRepository} from './EntityRepository';
 import {MetaData} from './MetaData';
 import {EntityManager} from './EntityManager';
 import {Scope} from './Scope';
-import {EntityCtor} from './EntityInterface';
+import {EntityCtor, EntityInterface} from './EntityInterface';
 
 export class Mapping<T> {
 
@@ -31,6 +31,16 @@ export class Mapping<T> {
    * @type {string}
    */
   public static CASCADE_PERSIST = 'persist';
+
+  /**
+   * @type {string}
+   */
+  public static CASCADE_UPDATE = 'update';
+
+  /**
+   * @type {string}
+   */
+  public static CASCADE_DELETE = 'delete';
 
   /**
    * The mapping data.
@@ -215,11 +225,20 @@ export class Mapping<T> {
     }
 
     fields      = Array.isArray(fields) ? fields : ([fields] as Array<string>);
-    let indexes = this.mapping.fetchOrPut(`indexes`, []);
+    let indexes = this.mapping.fetchOrPut('indexes', []);
 
     indexes.push({name: indexName, fields});
 
     return this;
+  }
+
+  /**
+   * Get the indexes.
+   *
+   * @returns {{}[]}
+   */
+  public getIndexes(): Array<{name: string, fields: Array<string>}> {
+    return this.mapping.fetch('indexes', []);
   }
 
   /**
@@ -231,7 +250,7 @@ export class Mapping<T> {
    *
    * @return {Mapping}
    */
-  public id(property: string): this {
+  public primary(property: string): this {
     this.mapping.put('primary', property);
 
     this.extendField(property, {primary: true});
@@ -280,7 +299,7 @@ export class Mapping<T> {
    *
    * @returns {FieldOptions[]}
    */
-  public getFields(): Array<FieldOptions> {
+  public getFields(): {[key: string]: FieldOptions} {
     return this.mapping.fetch('fields', null);
   }
 
@@ -323,9 +342,20 @@ export class Mapping<T> {
    * @return {Mapping}
    */
   public generatedValue(property: string, type: string): this {
-    Homefront.merge(this.mapping.fetchOrPut(`fields.${property}`, {}), {generatedValue: type});
+    this.extendField(property, {generatedValue: type});
 
     return this;
+  }
+
+  /**
+   * Convenience method to set auto increment.
+   *
+   * @param {string} property
+   *
+   * @returns {Mapping}
+   */
+  public increments(property: string): this {
+    return this.generatedValue(property, 'autoIncrement');
   }
 
   /**
@@ -359,6 +389,15 @@ export class Mapping<T> {
     indexes.push({name: constraintName, fields});
 
     return this;
+  }
+
+  /**
+   * Get the unique constraints.
+   *
+   * @returns {{}[]}
+   */
+  public getUniqueConstraints(): Array<{name: string, fields: Array<string>}> {
+    return this.mapping.fetch('uniqueConstraints', []);
   }
 
   /**
@@ -484,8 +523,18 @@ export class Mapping<T> {
    */
   public joinTable(property: string, options: JoinTable): this {
     this.extendField(property, {joinTable: options});
+    this.mapping.fetchOrPut('joinTables', []).push(options);
 
     return this;
+  }
+
+  /**
+   * Get all join tables.
+   *
+   * @returns {JoinTable[]}
+   */
+  public getJoinTables(): Array<JoinTable> {
+    return this.mapping.fetch('joinTables', []);
   }
 
   /**
@@ -548,8 +597,18 @@ export class Mapping<T> {
 
       field.joinTable = {
         name              : `${ownTableName}_${withTableName}`,
-        joinColumns       : [{referencedColumnName: ownPrimary, name: `${ownTableName}_id`}],
-        inverseJoinColumns: [{referencedColumnName: withPrimary, name: `${withTableName}_id`}]
+        joinColumns       : [{
+          referencedColumnName: ownPrimary,
+          name                : `${ownTableName}_id`,
+          indexName           : `idx_${ownTableName}_id`,
+          type                : 'integer'
+        }],
+        inverseJoinColumns: [{
+          referencedColumnName: withPrimary,
+          name                : `${withTableName}_id`,
+          indexName           : `idx_${withTableName}_id`,
+          type                : 'integer'
+        }]
       };
     }
 
@@ -569,10 +628,195 @@ export class Mapping<T> {
 
     return this;
   }
+
+  public forProperty(property: string) {
+    return new Field(property, this);
+  }
+}
+
+/**
+ * Convenience class for chaining field definitions.
+ */
+export class Field {
+  /**
+   * @type {string}
+   */
+  private property: string;
+
+  /**
+   * @type {Mapping}
+   */
+  private mapping: Mapping<EntityInterface>;
+
+  /**
+   * Construct convenience class to map property.
+   *
+   * @param {string}  property
+   * @param {Mapping} mapping
+   */
+  constructor(property: string, mapping: Mapping<EntityInterface>) {
+    this.property = property;
+    this.mapping  = mapping;
+  }
+
+  /**
+   * Map a field to this property. Examples:
+   *
+   *  mapping.field({type: 'string', length: 255});
+   *  mapping.field({type: 'string', name: 'passwd'});
+   *
+   * @param {FieldOptions} options
+   *
+   * @return {Field}
+   */
+  public field(options: FieldOptions): this {
+    this.mapping.field(this.property, options);
+
+    return this;
+  }
+
+  /**
+   * Map to be the primary key.
+   *
+   * @return {Field}
+   */
+  public primary() {
+    this.mapping.primary(this.property);
+
+    return this;
+  }
+
+  /**
+   * Map generatedValues. Examples:
+   *
+   *  // Auto increment
+   *  mapping.generatedValue('autoIncrement');
+   *
+   * @param {string} type
+   *
+   * @return {Field}
+   */
+  public generatedValue(type: string): this {
+    this.mapping.generatedValue(this.property, type);
+
+    return this;
+  }
+
+  /**
+   * Set cascade values.
+   *
+   * @param {string[]}  cascades
+   *
+   * @returns {Field}
+   */
+  public cascade(cascades: Array<string>): this {
+    this.mapping.cascade(this.property, cascades);
+
+    return this;
+  }
+
+  /**
+   * Convenience method for auto incrementing values.
+   *
+   * @returns {Field}
+   */
+  public increments(): this {
+    this.mapping.increments(this.property);
+
+    return this;
+  }
+
+  /**
+   * Map a relationship.
+   *
+   * @param {Relationship} options
+   *
+   * @returns {Field}
+   */
+  public oneToOne(options: Relationship): this {
+    this.mapping.oneToOne(this.property, options);
+
+    return this;
+  }
+
+  /**
+   * Map a relationship.
+   *
+   * @param {Relationship} options
+   *
+   * @returns {Field}
+   */
+  public oneToMany(options: Relationship): this {
+    this.mapping.oneToMany(this.property, options);
+
+    return this;
+  }
+
+  /**
+   * Map a relationship.
+   *
+   * @param {Relationship} options
+   *
+   * @returns {Field}
+   */
+  public manyToOne(options: Relationship): this {
+    this.mapping.manyToOne(this.property, options);
+
+    return this;
+  }
+
+  /**
+   * Map a relationship.
+   *
+   * @param {Relationship} options
+   *
+   * @returns {Field}
+   */
+  public manyToMany(options: Relationship): this {
+    this.mapping.manyToMany(this.property, options);
+
+    return this;
+  }
+
+  /**
+   * Register a join table.
+   *
+   * @param {JoinTable} options
+   *
+   * @returns {Field}
+   */
+  public joinTable(options: JoinTable): this {
+    this.mapping.joinTable(this.property, options);
+
+    return this;
+  }
+
+  /**
+   * Register a join column.
+   *
+   * @param {JoinTable} options
+   *
+   * @returns {Field}
+   */
+  public joinColumn(options: JoinColumn): this {
+    this.mapping.joinColumn(this.property, options);
+
+    return this;
+  }
 }
 
 export interface FieldOptions {
   type: string,
+  primary?: boolean,
+  textType?: string,
+  precision?: number,
+  enumeration?: Array<any>,
+  generatedValue?: string,
+  scale?: number,
+  nullable?: boolean,
+  defaultsTo?: any,
+  unsigned?: boolean,
+  comment?: string,
   size?: number,
   name?: string,
   cascades?: Array<string>,
@@ -591,6 +835,8 @@ export interface JoinTable {
 export interface JoinColumn {
   referencedColumnName: string,
   name: string,
+  type?: string,
+  size?: number,
   unique?: boolean,
   nullable?: boolean
 }

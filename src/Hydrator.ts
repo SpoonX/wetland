@@ -193,8 +193,6 @@ export class Hydrator {
       this.hydrateJoins(recipe, row, entity);
     }
 
-    this.unitOfWork.registerClean(entity);
-
     entity.activateProxying();
 
     return entity;
