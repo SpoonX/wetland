@@ -71,14 +71,14 @@ export function index(indexName: string | Array<string>, fields?: string | Array
 /**
  * Decorate a property to be the primary key. Example:
  *
- *  @id('id')
+ *  @primary('id')
  *  public id: number;
  *
  * @return {Mapping}
  */
-export function id() {
+export function primary() {
   return (target: Object, property: string) => {
-    Mapping.forEntity(target).id(property);
+    Mapping.forEntity(target).primary(property);
   };
 }
 
