@@ -1,4 +1,4 @@
-# Wetland
+# ![Wetland](https://cloud.githubusercontent.com/assets/67802/19189074/3c112d48-8c96-11e6-82e0-c64caca59e77.png)
 
 Wetland is an enterprise grade object-relational mapper (ORM) for node.js.  
 
