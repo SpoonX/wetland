@@ -87,10 +87,22 @@ export class SchemaBuilder {
    *
    * @returns {Promise<any[]>}
    */
-  public apply(): Promise<any> {
-    return Promise
-      .all(this.creates.map(create => create.then()))
-      .then(() => Promise.all(this.alters.map(alter => alter.then())));
+  public apply() {
+    let createQueries = [];
+
+    this.creates.forEach(create => {
+      createQueries.push(create.then());
+    });
+
+    return Promise.all(createQueries).then(() => {
+      let alterQueries = [];
+
+      this.alters.forEach(alter => {
+        alterQueries.push(alter.then());
+      });
+
+      return Promise.all(alterQueries);
+    });
   }
 
   /**
@@ -176,6 +188,7 @@ export class SchemaBuilder {
   private processRelations(mapping: Mapping<EntityInterface>): this {
     let entity      = mapping.getTarget();
     let relations   = mapping.getRelations();
+    let foreignKeys = [];
     let joinColumns = [];
 
     if (!relations) {
@@ -192,10 +205,16 @@ export class SchemaBuilder {
         joinColumns.push({
           name    : column.name,
           type    : 'integer',
-          unsigned: true
+          unsigned: true,
+          nullable: true
         });
 
-        return;
+        return foreignKeys.push({
+          owning    : property,
+          foreign   : column.name,
+          references: column.referencedColumnName,
+          inTable   : targetMapping.getTableName()
+        });
       }
 
       // Nothing to do for other side.
@@ -204,8 +223,11 @@ export class SchemaBuilder {
       }
 
       // This is many to many.
+      let foreignColumns          = [];
       let referenceColumns        = [];
+      let foreignColumnsInverse   = [];
       let referenceColumnsInverse = [];
+      let joinTableIndexes        = [];
       let joinTableFields         = {
         id: {
           name          : 'id',
@@ -228,9 +250,12 @@ export class SchemaBuilder {
           name    : joinColumn.name,
           type    : joinColumn.type || 'integer',
           size    : joinColumn.size,
-          unsigned: true
+          unsigned: true,
+          nullable: true
         };
 
+        joinTableIndexes.push({columns: joinColumn.name, name: joinColumn.indexName || `idx_${joinColumn.name}`});
+        foreignColumns.push(joinColumn.referencedColumnName);
         referenceColumns.push(joinColumn.name);
       });
 
@@ -239,14 +264,52 @@ export class SchemaBuilder {
           name    : inverse.name,
           type    : inverse.type || 'integer',
           size    : inverse.size,
-          unsigned: true
+          unsigned: true,
+          nullable: true
         };
 
+        joinTableIndexes.push({columns: inverse.name, name: inverse.indexName || `idx_${inverse.name}`});
+        foreignColumnsInverse.push(inverse.name);
         referenceColumnsInverse.push(inverse.referencedColumnName);
       });
 
       this.addBuilder(entity, joinTable.name, table => {
         this.composeFields(table, joinTableFields);
+      });
+
+      this.addBuilder(entity, joinTable.name, table => {
+        joinTableIndexes.forEach(index => {
+          table.index(index.columns, index.name);
+        });
+      }, true);
+
+      // @todo both foreign keys go on the join table. You moron.
+      this.addBuilder(entity, joinTable.name, table => {
+        let foreign  = table.foreign(foreignColumnsInverse).references(referenceColumnsInverse).inTable(targetMapping.getTableName());
+        let cascades = mapping.getField(property).cascades;
+
+        if (!cascades) {
+          return;
+        }
+
+        cascades.forEach(cascade => {
+          if (cascade === Mapping.CASCADE_PERSIST) {
+            return;
+          }
+
+          if (cascade === Mapping.CASCADE_UPDATE) {
+            foreign.onUpdate('cascade');
+          } else if (cascade === Mapping.CASCADE_DELETE) {
+            foreign.onDelete('cascade');
+          }
+        });
+      }, true);
+
+      foreignKeys.push({
+        foreign   : foreignColumns,
+        references: referenceColumns,
+        inTable   : joinTable.name,
+        owning    : property
       });
     });
 
@@ -254,9 +317,50 @@ export class SchemaBuilder {
       joinColumns.forEach(joinColumn => {
         this.composeField(table, joinColumn);
       });
+
+      foreignKeys.forEach(foreignKey => {
+        let foreign  = table.foreign(foreignKey.foreign).references(foreignKey.references).inTable(foreignKey.inTable);
+        let cascades = mapping.getField(foreignKey.owning).cascades;
+
+        if (!cascades) {
+          return;
+        }
+
+        cascades.forEach(cascade => {
+          if (cascade === Mapping.CASCADE_PERSIST) {
+            return;
+          }
+
+          if (cascade === Mapping.CASCADE_UPDATE) {
+            foreign.onUpdate('cascade');
+          } else if (cascade === Mapping.CASCADE_DELETE) {
+            foreign.onDelete('cascade');
+          }
+        });
+      });
     }, true);
 
     return this;
+  }
+
+  private applyCascades() {
+    let cascades = mapping.getField(foreignKey.owning).cascades;
+
+    if (!cascades) {
+      return;
+    }
+
+    cascades.forEach(cascade => {
+      if (cascade === Mapping.CASCADE_PERSIST) {
+        return;
+      }
+
+      if (cascade === Mapping.CASCADE_UPDATE) {
+        foreign.onUpdate('cascade');
+      } else if (cascade === Mapping.CASCADE_DELETE) {
+        foreign.onDelete('cascade');
+      }
+    });
   }
 
   /**

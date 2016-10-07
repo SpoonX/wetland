@@ -136,7 +136,7 @@ export class EntityProxy {
         }
 
         // To many? Only allowed if collection is empty. Also, ensure this new collection is proxied.
-        if (entity[property] instanceof Collection) {
+        if (entity[property] instanceof Array) {
           if (entity[property].length > 0) {
             throw new Error(
               `Can't assign to '${target.constructor.name}.${property}'. Collection is not empty.`
@@ -200,7 +200,9 @@ export class EntityProxy {
       },
 
       deleteProperty: (target: Object, property: string) => {
-        if (target[property] instanceof Collection) {
+        let relation = relations[property];
+
+        if (relation && (relation.type === Mapping.RELATION_MANY_TO_MANY || relation.type === Mapping.RELATION_ONE_TO_MANY)) {
           throw new Error(
             `It is not allowed to delete a collection. Trying to delete '${target.constructor.name}.${property}'.`
           );

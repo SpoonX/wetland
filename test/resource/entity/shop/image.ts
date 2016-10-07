@@ -7,10 +7,10 @@ export class Image {
   public tags: ArrayCollection<Tag>;
 
   static setMapping(mapping) {
-    mapping.field('id', {type: 'integer'}).id('id').generatedValue('id', 'autoIncrement');
+    mapping.field('id', {type: 'integer'}).primary('id').generatedValue('id', 'autoIncrement');
     mapping.field('name', {type: 'string', size: 24});
-    mapping.field('type', {type: 'string', size: 24});
-    mapping.field('location', {type: 'string', size: 24});
+    mapping.field('type', {type: 'string', size: 24, nullable: true});
+    mapping.field('location', {type: 'string', size: 24, nullable: true});
 
     mapping
       .manyToOne('author', {targetEntity: 'User', inversedBy: 'products'})

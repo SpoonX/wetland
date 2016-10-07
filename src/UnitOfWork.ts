@@ -432,7 +432,7 @@ export class UnitOfWork {
       }
 
       // Is this relation a *ToMany?
-      if (!(entity[property] instanceof ArrayCollection)) {
+      if (!(entity[property] instanceof Array)) {
         this.cascadeSingle(entity, property, entity[property], mapping);
 
         this.registerRelationChange(UnitOfWork.RELATIONSHIP_ADDED, entity, property, entity[property]);
@@ -512,7 +512,7 @@ export class UnitOfWork {
         Object.getOwnPropertyNames(relationChanges[changedType]).forEach(property => {
           let changes = relationChanges[changedType];
 
-          if (!(changes[property] instanceof ArrayCollection)) {
+          if (!(changes[property] instanceof Array)) {
             this.cascadeSingle(changed, property, changes[property], mapping);
 
             return;

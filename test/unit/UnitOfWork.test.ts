@@ -12,6 +12,9 @@ import {Image} from '../resource/entity/shop/image';
 import {Tag} from '../resource/entity/shop/tag';
 import {User} from '../resource/entity/shop/user';
 import {Profile} from '../resource/entity/shop/Profile';
+import * as path from 'path';
+
+let tmpTestDir = path.join(__dirname, '../.tmp');
 
 function getUnitOfWork(entities?): UnitOfWork {
   let wetland = new Wetland({});
@@ -524,86 +527,90 @@ describe('UnitOfWork', () => {
       let wetland = new Wetland({
         stores  : {
           'default': {
-            client    : 'mysql',
-            connection: {
-              user    : 'root',
-              database: 'wetland'
+            client          : 'sqlite3',
+            useNullAsDefault: true,
+            connection      : {
+              filename: `${tmpTestDir}/shitshow-persist.sqlite`
             }
           }
         },
         entities: [Product, Category, Image, Tag, User, Profile]
       });
 
-      let entityManager  = wetland.getManager();
-      let unitOfWork     = entityManager.getUnitOfWork();
-      let product        = new Product;
-      let profile        = new Profile;
-      let categoryOne    = new Category;
-      let categoryTwo    = new Category;
-      let categoryThree  = new Category;
-      let image          = new Image;
-      let tagOne         = new Tag;
-      let tagTwo         = new Tag;
-      let tagThree       = new Tag;
-      let tagFour        = new Tag;
-      let creatorOne     = new User;
-      let creatorTwo     = new User;
-      let creatorThree   = new User;
-      let creatorFour    = new User;
-      profile.slogan     = 'No harm, try harder.';
-      creatorOne.name    = 'test tag one creator';
-      creatorTwo.name    = 'test tag two creator';
-      creatorThree.name  = 'test tag three creator';
-      creatorFour.name   = 'test tag four creator';
-      creatorOne.profile = profile;
-      image.name         = 'test image';
-      tagOne.name        = 'test tag one';
-      tagOne.creator     = creatorOne;
-      tagTwo.name        = 'test tag two';
-      tagTwo.creator     = creatorTwo;
-      tagThree.id        = 3;
-      tagThree.name      = 'test tag three';
-      tagThree.creator   = creatorThree;
-      tagFour.name       = 'test tag four';
-      tagFour.creator    = creatorFour;
-      product.name       = 'test product';
-      categoryOne.name   = 'test category one';
-      categoryTwo.name   = 'test category two';
-      categoryThree.name = 'test category three';
-      product.categories = new ArrayCollection;
-      product.image      = image;
-      image.tags         = new ArrayCollection;
-      categoryThree.tags = new ArrayCollection;
-      categoryThree.id   = 6;
+      console.log(wetland.getMigrator().create().getSQL());
 
-      categoryThree.tags.push(tagThree, tagFour);
+      wetland.getMigrator().create().apply().then(() => {
+        let entityManager  = wetland.getManager();
+        let unitOfWork     = entityManager.getUnitOfWork();
+        let product        = new Product;
+        let profile        = new Profile;
+        let categoryOne    = new Category;
+        let categoryTwo    = new Category;
+        let categoryThree  = new Category;
+        let image          = new Image;
+        let tagOne         = new Tag;
+        let tagTwo         = new Tag;
+        let tagThree       = new Tag;
+        let tagFour        = new Tag;
+        let creatorOne     = new User;
+        let creatorTwo     = new User;
+        let creatorThree   = new User;
+        let creatorFour    = new User;
+        profile.slogan     = 'No harm, try harder.';
+        creatorOne.name    = 'test tag one creator';
+        creatorTwo.name    = 'test tag two creator';
+        creatorThree.name  = 'test tag three creator';
+        creatorFour.name   = 'test tag four creator';
+        creatorOne.profile = profile;
+        image.name         = 'test image';
+        tagOne.name        = 'test tag one';
+        tagOne.creator     = creatorOne;
+        tagTwo.name        = 'test tag two';
+        tagTwo.creator     = creatorTwo;
+        tagThree.id        = 3;
+        tagThree.name      = 'test tag three';
+        tagThree.creator   = creatorThree;
+        tagFour.name       = 'test tag four';
+        tagFour.creator    = creatorFour;
+        product.name       = 'test product';
+        categoryOne.name   = 'test category one';
+        categoryTwo.name   = 'test category two';
+        categoryThree.name = 'test category three';
+        product.categories = new ArrayCollection;
+        product.image      = image;
+        image.tags         = new ArrayCollection;
+        categoryThree.tags = new ArrayCollection;
+        categoryThree.id   = 6;
 
-      unitOfWork.registerClean(categoryThree, true);
-      unitOfWork.registerClean(creatorThree, true);
-      unitOfWork.registerClean(tagThree, true);
+        categoryThree.tags.push(tagThree, tagFour);
 
-      unitOfWork.registerCollectionChange(UnitOfWork.RELATIONSHIP_REMOVED, categoryThree, 'tags', tagThree);
-      unitOfWork.registerCollectionChange(UnitOfWork.RELATIONSHIP_ADDED, categoryThree, 'tags', tagFour);
-      unitOfWork.registerDirty(tagThree, 'name');
+        unitOfWork.registerClean(categoryThree, true);
+        unitOfWork.registerClean(creatorThree, true);
+        unitOfWork.registerClean(tagThree, true);
 
-      product.categories.push(categoryOne, categoryTwo, categoryThree);
-      image.tags.push(tagOne, tagTwo);
+        unitOfWork.registerCollectionChange(UnitOfWork.RELATIONSHIP_REMOVED, categoryThree, 'tags', tagThree);
+        unitOfWork.registerCollectionChange(UnitOfWork.RELATIONSHIP_ADDED, categoryThree, 'tags', tagFour);
+        unitOfWork.registerDirty(tagThree, 'name');
 
-      entityManager.persist(product);
+        product.categories.push(categoryOne, categoryTwo, categoryThree);
+        image.tags.push(tagOne, tagTwo);
 
-      assert.strictEqual(unitOfWork.getNewObjects().length, 1);
-      assert.strictEqual(unitOfWork.getRelationshipsChangedObjects().length, 1);
+        entityManager.persist(product);
 
-      entityManager.flush().then(() => {
-        entityManager.getRepository(User).findOne({name: 'test tag one creator'}, {join: {'profile': 'p'}})
-          .then(user => {
-            assert.strictEqual(user.profile.slogan, 'No harm, try harder.');
+        assert.strictEqual(unitOfWork.getNewObjects().length, 1);
+        assert.strictEqual(unitOfWork.getRelationshipsChangedObjects().length, 1);
 
-            wetland.destroyConnections().then(() => {
-              done();
+        entityManager.flush().then(() => {
+          entityManager.getRepository(User).findOne({name: 'test tag one creator'}, {join: {'profile': 'p'}})
+            .then(user => {
+              assert.strictEqual(user.profile.slogan, 'No harm, try harder.');
+
+              wetland.destroyConnections().then(() => {
+                done();
+              });
             });
-          });
-      }).catch(done);
+        }).catch(done);
+      });
     });
   });
 });

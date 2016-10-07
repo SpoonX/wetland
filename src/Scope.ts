@@ -167,7 +167,7 @@ export class Scope {
    *
    * @returns {EntityInterface&ProxyInterface}
    */
-  public attach(entity: EntityInterface): ProxyInterface {
+  public attach<T>(entity: T): T {
     return EntityProxy.patchEntity(entity, this);
   }
 
