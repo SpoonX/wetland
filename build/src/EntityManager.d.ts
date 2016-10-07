@@ -1,7 +1,7 @@
 import { Mapping } from './Mapping';
 import { Wetland } from './Wetland';
 import { Scope, Entity } from './Scope';
-import { EntityInterface } from './EntityInterface';
+import { EntityInterface, EntityCtor } from './EntityInterface';
 import { Homefront } from 'homefront';
 /**
  * The main entity manager for wetland.
@@ -50,13 +50,21 @@ export declare class EntityManager {
         new ();
     };
     /**
+     * Get all registered entities.
+     *
+     * @returns {{}}
+     */
+    getEntities(): {
+        [key: string]: EntityCtor<EntityInterface>;
+    };
+    /**
      * Register an entity with the entity manager.
      *
      * @param {EntityInterface} entity
      *
      * @returns {EntityManager}
      */
-    registerEntity(entity: EntityInterface): EntityManager;
+    registerEntity<T>(entity: EntityCtor<T> & EntityInterface): EntityManager;
     /**
      * Get the mapping for provided entity. Can be an instance, constructor or the name of the entity.
      *
@@ -72,7 +80,7 @@ export declare class EntityManager {
      *
      * @returns {EntityManager}
      */
-    registerEntities(entities: Array<Function>): EntityManager;
+    registerEntities(entities: Array<EntityCtor<EntityInterface>>): EntityManager;
     /**
      * Resolve provided value to an entity reference.
      *

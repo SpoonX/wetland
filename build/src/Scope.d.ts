@@ -90,6 +90,14 @@ export declare class Scope {
      */
     getUnitOfWork(): UnitOfWork;
     /**
+     * Get all registered entities.
+     *
+     * @returns {{}}
+     */
+    getEntities(): {
+        [key: string]: EntityCtor<EntityInterface>;
+    };
+    /**
      * Attach an entity (proxy it).
      *
      * @param {EntityInterface} entity

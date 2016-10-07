@@ -1,4 +1,8 @@
 "use strict";
+var SchemaBuilder_1 = require('./SchemaBuilder');
+exports.SchemaBuilder = SchemaBuilder_1.SchemaBuilder;
+var Migrator_1 = require('./Migrator');
+exports.Migrator = Migrator_1.Migrator;
 var Hydrator_1 = require('./Hydrator');
 exports.Hydrator = Hydrator_1.Hydrator;
 var IdentityMap_1 = require('./IdentityMap');
@@ -21,6 +25,7 @@ var Wetland_1 = require('./Wetland');
 exports.Wetland = Wetland_1.Wetland;
 var Mapping_1 = require('./Mapping');
 exports.Mapping = Mapping_1.Mapping;
+exports.Field = Mapping_1.Field;
 var QueryBuilder_1 = require('./QueryBuilder');
 exports.QueryBuilder = QueryBuilder_1.QueryBuilder;
 var EntityManager_1 = require('./EntityManager');

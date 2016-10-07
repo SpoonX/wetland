@@ -2,12 +2,17 @@
 import { Store, PoolConfig, ReplicationConfig, SingleConfig } from './Store';
 import { Homefront } from 'homefront';
 import { Scope } from './Scope';
-import { EntityInterface } from './EntityInterface';
+import { EntityInterface, EntityCtor } from './EntityInterface';
+import { Migrator } from './Migrator';
 export declare class Wetland {
     /**
      * @type {EntityManager}
      */
     private manager;
+    /**
+     * @type {Migrator}
+     */
+    private migrator;
     /**
      * @type {Homefront}
      */
@@ -35,7 +40,7 @@ export declare class Wetland {
      *
      * @returns {Wetland}
      */
-    registerEntity(entity: EntityInterface): Wetland;
+    registerEntity(entity: EntityCtor<EntityInterface>): Wetland;
     /**
      * Register multiple entities with the entity manager.
      *
@@ -43,7 +48,7 @@ export declare class Wetland {
      *
      * @returns {Wetland}
      */
-    registerEntities(entities: Array<Function>): Wetland;
+    registerEntities(entities: Array<EntityCtor<EntityInterface>>): Wetland;
     /**
      * Register stores with wetland.
      *
@@ -78,6 +83,12 @@ export declare class Wetland {
      * @returns {Scope}
      */
     getManager(): Scope;
+    /**
+     * Get the migrator.
+     *
+     * @returns {Migrator}
+     */
+    getMigrator(): Migrator;
     /**
      * Destroy all active connections.
      *

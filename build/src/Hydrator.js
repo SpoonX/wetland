@@ -145,7 +145,6 @@ class Hydrator {
         if (recipe.joins) {
             this.hydrateJoins(recipe, row, entity);
         }
-        this.unitOfWork.registerClean(entity);
         entity.activateProxying();
         return entity;
     }

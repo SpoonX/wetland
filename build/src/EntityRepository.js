@@ -44,9 +44,6 @@ class EntityRepository {
         if (criteria) {
             queryBuilder.where(criteria);
         }
-        if (options.debug) {
-            queryBuilder.debug();
-        }
         if (options.orderBy) {
             queryBuilder.orderBy(options.orderBy);
         }

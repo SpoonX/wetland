@@ -63,12 +63,12 @@ export declare function index(indexName: string | Array<string>, fields?: string
 /**
  * Decorate a property to be the primary key. Example:
  *
- *  @id('id')
+ *  @primary('id')
  *  public id: number;
  *
  * @return {Mapping}
  */
-export declare function id(): (target: Object, property: string) => void;
+export declare function primary(): (target: Object, property: string) => void;
 /**
  * Decorate your property with generatedValues. Example:
  *

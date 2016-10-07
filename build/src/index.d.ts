@@ -1,3 +1,5 @@
+export { SchemaBuilder } from './SchemaBuilder';
+export { Migrator } from './Migrator';
 export { Hydrator } from './Hydrator';
 export { IdentityMap } from './IdentityMap';
 export { EntityInterface, ProxyInterface, EntityCtor } from './EntityInterface';
@@ -9,7 +11,7 @@ export { UnitOfWork } from './UnitOfWork';
 export { ArrayCollection } from './ArrayCollection';
 export { EntityRepository } from './EntityRepository';
 export { Wetland } from './Wetland';
-export { Mapping, FieldOptions, JoinColumn, JoinTable, Relationship } from './Mapping';
+export { Mapping, Field, FieldOptions, JoinColumn, JoinTable, Relationship } from './Mapping';
 export { QueryBuilder } from './QueryBuilder';
 export { EntityManager } from './EntityManager';
 export { Scope } from './Scope';

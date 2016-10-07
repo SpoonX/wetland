@@ -58,6 +58,14 @@ class EntityManager {
         return entity;
     }
     /**
+     * Get all registered entities.
+     *
+     * @returns {{}}
+     */
+    getEntities() {
+        return this.entities;
+    }
+    /**
      * Register an entity with the entity manager.
      *
      * @param {EntityInterface} entity
