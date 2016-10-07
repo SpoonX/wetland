@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 process.setMaxListeners(0);
+console.log(__dirname);
 let tmpTestDir = path.join(__dirname, '.tmp');
 let clearTmpDir = () => {
     try {

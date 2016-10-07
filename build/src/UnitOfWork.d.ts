@@ -122,11 +122,11 @@ export declare class UnitOfWork {
     /**
      * Get the state for provided entity.
      *
-     * @param {EntityInterface} entity
+     * @param {ProxyInterface} entity
      *
      * @returns {string}
      */
-    static getObjectState(entity: EntityInterface): string;
+    static getObjectState(entity: ProxyInterface): string;
     /**
      * Returns if provided entity has relationship changes.
      *
