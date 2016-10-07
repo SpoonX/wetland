@@ -39,5 +39,5 @@ export declare class MetaData {
      *
      * @returns {Function}
      */
-    static getConstructor(target: Function | Object): Function;
+    static getConstructor(target: ProxyInterface): Function;
 }
