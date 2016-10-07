@@ -162,11 +162,11 @@ export class UnitOfWork {
   /**
    * Get the state for provided entity.
    *
-   * @param {EntityInterface} entity
+   * @param {ProxyInterface} entity
    *
    * @returns {string}
    */
-  public static getObjectState(entity: EntityInterface): string {
+  public static getObjectState(entity: ProxyInterface): string {
     return MetaData.forInstance(entity).fetch('entityState.state', UnitOfWork.STATE_UNKNOWN);
   }
 
@@ -308,8 +308,8 @@ export class UnitOfWork {
    * @returns {UnitOfWork}
    */
   public setEntityState(entity: ProxyInterface, state: string): UnitOfWork {
-    let metaData      = MetaData.forInstance(entity);
     let target        = entity.isEntityProxy ? entity.getTarget() : entity;
+    let metaData      = MetaData.forInstance(target);
     let previousState = metaData.fetch('entityState.state', UnitOfWork.STATE_UNKNOWN);
 
     if (previousState === state) {
@@ -826,11 +826,11 @@ export class UnitOfWork {
         let relation = relations[property];
 
         if (relation.type !== Mapping.RELATION_MANY_TO_MANY) {
-          let owningMapping = relation.mappedBy ? Mapping.forEntity(other) : changedMapping;
-          let owningSide    = relation.mappedBy ? other : changed;
-          let otherSide     = relation.mappedBy ? changed : other;
-          let joinColumn    = owningMapping.getJoinColumn(property);
-          let primaryKey    = owningMapping.getPrimaryKey();
+          let mapping    = relation.mappedBy ? Mapping.forEntity(other) : changedMapping;
+          let owningSide = relation.mappedBy ? other : changed;
+          let otherSide  = relation.mappedBy ? changed : other;
+          let joinColumn = mapping.getJoinColumn(relation.mappedBy ? relation.mappedBy : property);
+          let primaryKey = mapping.getPrimaryKey();
 
           // Update id of property on own side, based on joinColumn.
           return this.persistTarget(owningSide, <T>(queryBuilder: QueryBuilder<T>, target: T) => {

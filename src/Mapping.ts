@@ -559,7 +559,7 @@ export class Mapping<T> {
    * @returns {JoinColumn}
    */
   public getJoinColumn(property: string): JoinColumn {
-    let field = this.getField(property);
+    let field = this.mapping.fetchOrPut(`fields.${property}`, {});
 
     if (!field.joinColumn) {
       field.joinColumn = {
@@ -582,7 +582,7 @@ export class Mapping<T> {
    * @returns {JoinTable}
    */
   public getJoinTable(property: string, entityManager?: EntityManager| Scope): JoinTable {
-    let field = this.getField(property);
+    let field = this.mapping.fetchOrPut(`fields.${property}`, {});
 
     if (!field.joinTable) {
       if (!entityManager) {
