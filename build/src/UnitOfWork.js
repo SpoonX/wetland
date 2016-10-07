@@ -225,7 +225,7 @@ class UnitOfWork {
      */
     setEntityState(entity, state) {
         let metaData = MetaData_1.MetaData.forInstance(entity);
-        let target = entity.isEntityProxy ? entity.getTarget : entity;
+        let target = entity.isEntityProxy ? entity.getTarget() : entity;
         let previousState = metaData.fetch('entityState.state', UnitOfWork.STATE_UNKNOWN);
         if (previousState === state) {
             return this;
@@ -323,7 +323,7 @@ class UnitOfWork {
                 return;
             }
             // Is this relation a *ToMany?
-            if (!(entity[property] instanceof ArrayCollection_1.ArrayCollection)) {
+            if (!(entity[property] instanceof Array)) {
                 this.cascadeSingle(entity, property, entity[property], mapping);
                 this.registerRelationChange(UnitOfWork.RELATIONSHIP_ADDED, entity, property, entity[property]);
                 return;
@@ -385,7 +385,7 @@ class UnitOfWork {
             let processChanged = changedType => {
                 Object.getOwnPropertyNames(relationChanges[changedType]).forEach(property => {
                     let changes = relationChanges[changedType];
-                    if (!(changes[property] instanceof ArrayCollection_1.ArrayCollection)) {
+                    if (!(changes[property] instanceof Array)) {
                         this.cascadeSingle(changed, property, changes[property], mapping);
                         return;
                     }
