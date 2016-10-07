@@ -453,7 +453,7 @@ class Mapping {
      * @returns {JoinColumn}
      */
     getJoinColumn(property) {
-        let field = this.getField(property);
+        let field = this.mapping.fetchOrPut(`fields.${property}`, {});
         if (!field.joinColumn) {
             field.joinColumn = {
                 name: `${property}_id`,
@@ -473,7 +473,7 @@ class Mapping {
      * @returns {JoinTable}
      */
     getJoinTable(property, entityManager) {
-        let field = this.getField(property);
+        let field = this.mapping.fetchOrPut(`fields.${property}`, {});
         if (!field.joinTable) {
             if (!entityManager) {
                 return null;

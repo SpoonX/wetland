@@ -1,5 +1,6 @@
 /// <reference types="chai" />
 import { Homefront } from 'homefront';
+import { ProxyInterface } from './EntityInterface';
 export declare class MetaData {
     /**
      * Static weakmap of objects their metadata.
@@ -26,11 +27,11 @@ export declare class MetaData {
     /**
      * Get metadata for provided target (accepts instance).
      *
-     * @param {{}} instance
+     * @param {ProxyInterface} instance
      *
      * @returns {Homefront}
      */
-    static forInstance(instance: Object): Homefront;
+    static forInstance(instance: ProxyInterface): Homefront;
     /**
      * Get the constructor for provided target.
      *

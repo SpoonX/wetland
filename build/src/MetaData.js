@@ -27,7 +27,7 @@ class MetaData {
     /**
      * Get metadata for provided target (accepts instance).
      *
-     * @param {{}} instance
+     * @param {ProxyInterface} instance
      *
      * @returns {Homefront}
      */
@@ -35,7 +35,7 @@ class MetaData {
         if (typeof instance !== 'object') {
             throw new Error("Can't get metadata, provided instance isn't of type Object.");
         }
-        return MetaData.ensure(instance);
+        return MetaData.ensure(instance.isEntityProxy ? instance.getTarget() : instance);
     }
     /**
      * Get the constructor for provided target.

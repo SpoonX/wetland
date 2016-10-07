@@ -104,7 +104,7 @@ class UnitOfWork {
     /**
      * Get the state for provided entity.
      *
-     * @param {EntityInterface} entity
+     * @param {ProxyInterface} entity
      *
      * @returns {string}
      */
@@ -224,8 +224,8 @@ class UnitOfWork {
      * @returns {UnitOfWork}
      */
     setEntityState(entity, state) {
-        let metaData = MetaData_1.MetaData.forInstance(entity);
         let target = entity.isEntityProxy ? entity.getTarget() : entity;
+        let metaData = MetaData_1.MetaData.forInstance(target);
         let previousState = metaData.fetch('entityState.state', UnitOfWork.STATE_UNKNOWN);
         if (previousState === state) {
             return this;
@@ -654,11 +654,11 @@ class UnitOfWork {
             let persistRelationChange = (action, owning, property, other) => {
                 let relation = relations[property];
                 if (relation.type !== Mapping_1.Mapping.RELATION_MANY_TO_MANY) {
-                    let owningMapping = relation.mappedBy ? Mapping_1.Mapping.forEntity(other) : changedMapping;
+                    let mapping = relation.mappedBy ? Mapping_1.Mapping.forEntity(other) : changedMapping;
                     let owningSide = relation.mappedBy ? other : changed;
                     let otherSide = relation.mappedBy ? changed : other;
-                    let joinColumn = owningMapping.getJoinColumn(property);
-                    let primaryKey = owningMapping.getPrimaryKey();
+                    let joinColumn = mapping.getJoinColumn(relation.mappedBy ? relation.mappedBy : property);
+                    let primaryKey = mapping.getPrimaryKey();
                     // Update id of property on own side, based on joinColumn.
                     return this.persistTarget(owningSide, (queryBuilder, target) => {
                         let query = queryBuilder.where({ [primaryKey]: target[primaryKey] });
