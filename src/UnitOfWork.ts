@@ -309,7 +309,7 @@ export class UnitOfWork {
    */
   public setEntityState(entity: ProxyInterface, state: string): UnitOfWork {
     let metaData      = MetaData.forInstance(entity);
-    let target        = entity.isEntityProxy ? entity.getTarget : entity;
+    let target        = entity.isEntityProxy ? entity.getTarget() : entity;
     let previousState = metaData.fetch('entityState.state', UnitOfWork.STATE_UNKNOWN);
 
     if (previousState === state) {
