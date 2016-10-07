@@ -837,6 +837,7 @@ export interface JoinColumn {
   name: string,
   type?: string,
   size?: number,
+  indexName?: string,
   unique?: boolean,
   nullable?: boolean
 }
