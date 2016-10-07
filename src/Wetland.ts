@@ -2,13 +2,19 @@ import {EntityManager} from './EntityManager';
 import {Store, PoolConfig, ReplicationConfig, SingleConfig} from './Store';
 import {Homefront} from 'homefront';
 import {Scope} from './Scope';
-import {EntityInterface} from './EntityInterface';
+import {EntityInterface, EntityCtor} from './EntityInterface';
+import {Migrator} from './Migrator';
 
 export class Wetland {
   /**
    * @type {EntityManager}
    */
   private manager: EntityManager = new EntityManager(this);
+
+  /**
+   * @type {Migrator}
+   */
+  private migrator: Migrator;
 
   /**
    * @type {Homefront}
@@ -69,7 +75,7 @@ export class Wetland {
    *
    * @returns {Wetland}
    */
-  public registerEntity(entity: EntityInterface): Wetland {
+  public registerEntity(entity: EntityCtor<EntityInterface>): Wetland {
     this.manager.registerEntity(entity);
 
     return this;
@@ -82,7 +88,7 @@ export class Wetland {
    *
    * @returns {Wetland}
    */
-  public registerEntities(entities: Array<Function>): Wetland {
+  public registerEntities(entities: Array<EntityCtor<EntityInterface>>): Wetland {
     this.manager.registerEntities(entities);
 
     return this;
@@ -157,6 +163,19 @@ export class Wetland {
    */
   public getManager(): Scope {
     return this.manager.createScope();
+  }
+
+  /**
+   * Get the migrator.
+   *
+   * @returns {Migrator}
+   */
+  public getMigrator(): Migrator {
+    if (!this.migrator) {
+      this.migrator = new Migrator(this);
+    }
+
+    return this.migrator;
   }
 
   /**
