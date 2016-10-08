@@ -6,7 +6,7 @@ export class Delivery {
   public static setMapping(mapping: Mapping<Delivery>) {
     mapping.forProperty('id').primary().increments();
 
-    mapping.forProperty('created').field({type: 'datetime', defaultTo: mapping.now()});
+    mapping.forProperty('created').field({type: 'timestamp', defaultTo: mapping.now()});
 
     mapping.manyToOne('address', {targetEntity: Address, inversedBy: 'deliveries'});
 

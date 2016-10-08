@@ -336,10 +336,10 @@ export let schemas = {
         column_default: 'CURRENT_TIMESTAMP',
         table_name    : 'delivery',
         column_name   : 'created',
-        data_type     : 'datetime',
+        data_type     : 'timestamp',
         extra         : '',
         column_key    : '',
-        column_type   : 'datetime',
+        column_type   : 'timestamp',
         is_nullable   : 'NO'
       },
       {
