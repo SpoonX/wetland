@@ -11,7 +11,7 @@ export class Schema {
       'column_key',
       'column_type',
       'is_nullable'
-    ], 'columns', table);
+    ], 'columns', null, table);
   }
 
   static getAllInfo(connection, table?) {
@@ -56,7 +56,7 @@ export class Schema {
       'delete_rule',
       'table_name',
       'referenced_table_name',
-    ], 'referential_constraints', table);
+    ], 'referential_constraints', null, table);
   }
 
   static getConstraints(connection, table?) {
@@ -66,15 +66,19 @@ export class Schema {
       'constraint_name',
       'referenced_table_name',
       'referenced_column_name'
-    ], 'key_column_usage', table);
+    ], 'key_column_usage', 'column_name', table);
   }
 
-  static getData(connection, constraint, select, from, table?) {
+  static getData(connection, constraint, select, from, orderBy, table?) {
     let query = connection
       .select(select)
       .from('information_schema.' + from)
       .where({[constraint ? 'constraint_schema' : 'table_schema']: 'wetland_test'})
       .orderBy('table_name', 'asc');
+
+    if (orderBy) {
+      query.orderBy(orderBy);
+    }
 
     if (table) {
       query.andWhere({referenced_table_name: table});

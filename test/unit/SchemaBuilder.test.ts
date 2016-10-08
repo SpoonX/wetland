@@ -4,6 +4,7 @@ import {SchemaBuilder} from '../../src/SchemaBuilder';
 import {Store} from '../../src/Store';
 import {Schema} from '../resource/Schema';
 import {schemas} from '../resource/schemas';
+import * as util from 'util';
 
 describe('SchemaBuilder', () => {
   beforeEach(done => {
@@ -52,6 +53,9 @@ describe('SchemaBuilder', () => {
 
       new SchemaBuilder(wetland.getManager()).create().apply().then(() => {
         Schema.getAllInfo(wetland.getStore().getConnection(Store.ROLE_MASTER)).then(schemaInfo => {
+          console.log('MINE', util.inspect(schemas.postal, { depth: 8 }));
+          console.log('ACTUAL', util.inspect(schemaInfo, { depth: 8 }));
+
           assert.deepEqual(schemaInfo, schemas.postal);
 
           done();
