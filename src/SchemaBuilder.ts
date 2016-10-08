@@ -396,7 +396,7 @@ export class SchemaBuilder {
 
     if (field.defaultTo) {
       if (field.defaultTo instanceof Raw) {
-        column.defaultTo(this.client.raw(field.defaultTo.getQuery()));
+        column.defaultTo(<any>this.client.raw(field.defaultTo.getQuery()));
       } else {
         column.defaultTo(field.defaultTo);
       }

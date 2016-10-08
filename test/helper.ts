@@ -3,7 +3,6 @@ import * as path from 'path';
 
 process.setMaxListeners(0);
 
-console.log(__dirname);
 let tmpTestDir  = path.join(__dirname, '.tmp');
 let clearTmpDir = () => {
   try {
@@ -16,7 +15,7 @@ let clearTmpDir = () => {
   }
 };
 
-before((done) => {
+before(done => {
   clearTmpDir();
   fs.mkdir(tmpTestDir, done);
 });
