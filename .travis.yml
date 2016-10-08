@@ -1,0 +1,5 @@
+services:
+  - mysql
+
+before_script:
+  - npm run build
