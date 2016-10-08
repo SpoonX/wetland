@@ -1,4 +1,4 @@
-import {Mapping, FieldOptions} from './Mapping';
+import {Mapping, FieldOptions, Raw} from './Mapping';
 import {EntityInterface, EntityCtor} from './EntityInterface';
 import * as Knex from 'knex';
 import {Scope} from './Scope';
@@ -27,6 +27,11 @@ export class SchemaBuilder {
   private built: boolean = false;
 
   /**
+   * @type {Knex}
+   */
+  private client: Knex;
+
+  /**
    * @type {string[]}
    */
   private types = [
@@ -53,6 +58,7 @@ export class SchemaBuilder {
    */
   public constructor(entityManager: Scope) {
     this.entityManager = entityManager;
+    this.client        = entityManager.getStore().getConnection(Store.ROLE_MASTER);
   }
 
   /**
@@ -396,6 +402,14 @@ export class SchemaBuilder {
 
     if (field.primary) {
       column.primary();
+    }
+
+    if (field.defaultTo) {
+      if (field.defaultTo instanceof Raw) {
+        column.defaultTo(this.client.raw(field.defaultTo.getQuery()));
+      } else {
+        column.defaultTo(field.defaultTo);
+      }
     }
   }
 
