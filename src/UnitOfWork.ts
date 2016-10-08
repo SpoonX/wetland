@@ -340,6 +340,16 @@ export class UnitOfWork {
    * @returns {UnitOfWork} Fluent interface
    */
   public registerNew(newObject: Object): UnitOfWork {
+    let objectState = UnitOfWork.getObjectState(newObject);
+
+    if (objectState === UnitOfWork.STATE_NEW) {
+      return this;
+    }
+
+    if (objectState !== UnitOfWork.STATE_UNKNOWN) {
+      throw new Error(`Only unregistered entities can be marked as new. Entity '${newObject.constructor.name}' has state '${objectState}'.`);
+    }
+
     this.setEntityState(newObject, UnitOfWork.STATE_NEW);
 
     return this;
