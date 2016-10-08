@@ -425,15 +425,6 @@ export let schemas = {
         referenced_table_name   : 'order'
       },
       {
-        constraint_name         : 'tracker_user_user_id_foreign',
-        unique_constraint_schema: 'wetland_test',
-        unique_constraint_name  : 'PRIMARY',
-        update_rule             : 'RESTRICT',
-        delete_rule             : 'RESTRICT',
-        table_name              : 'tracker_user',
-        referenced_table_name   : 'user'
-      },
-      {
         constraint_name         : 'tracker_user_tracker_id_foreign',
         unique_constraint_schema: 'wetland_test',
         unique_constraint_name  : 'PRIMARY',
@@ -441,6 +432,15 @@ export let schemas = {
         delete_rule             : 'RESTRICT',
         table_name              : 'tracker_user',
         referenced_table_name   : 'tracker'
+      },
+      {
+        constraint_name         : 'tracker_user_user_id_foreign',
+        unique_constraint_schema: 'wetland_test',
+        unique_constraint_name  : 'PRIMARY',
+        update_rule             : 'RESTRICT',
+        delete_rule             : 'RESTRICT',
+        table_name              : 'tracker_user',
+        referenced_table_name   : 'user'
       }
     ]
   }
