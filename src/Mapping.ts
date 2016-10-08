@@ -96,6 +96,15 @@ export class Mapping<T> {
   }
 
   /**
+   * Raw command for current timestamp.
+   *
+   * @returns {Raw}
+   */
+  public now(): Raw {
+    return new Raw('CURRENT_TIMESTAMP');
+  }
+
+  /**
    * Map a field to this property. Examples:
    *
    *  mapping.field('username', {type: 'string', length: 255});
@@ -805,6 +814,37 @@ export class Field {
   }
 }
 
+/**
+ * A raw query
+ */
+export class Raw {
+  /**
+   * @type {string}
+   */
+  private query: string;
+
+  /**
+   * @param {string} query
+   */
+  public constructor(query) {
+    this.setQuery(query);
+  }
+
+  /**
+   * @returns {string}
+   */
+  getQuery(): string {
+    return this.query;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setQuery(value: string) {
+    this.query = value;
+  }
+}
+
 export interface FieldOptions {
   type: string,
   primary?: boolean,
@@ -814,7 +854,7 @@ export interface FieldOptions {
   generatedValue?: string,
   scale?: number,
   nullable?: boolean,
-  defaultsTo?: any,
+  defaultTo?: any | Raw,
   unsigned?: boolean,
   comment?: string,
   size?: number,
