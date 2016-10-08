@@ -4,6 +4,7 @@ import {MetaData} from './MetaData';
 import {EntityManager} from './EntityManager';
 import {Scope} from './Scope';
 import {EntityCtor, EntityInterface} from './EntityInterface';
+import {ArrayCollection} from './ArrayCollection';
 
 export class Mapping<T> {
 
@@ -230,13 +231,12 @@ export class Mapping<T> {
   public index(indexName: string | Array<string>, fields?: string | Array<string>): this {
     if (!fields) {
       fields    = (Array.isArray(indexName) ? indexName : [indexName]) as Array<string>;
-      indexName = 'idx_' + (fields as Array<string>).join('_').toLowerCase();
+      indexName = `idx_${(fields as Array<string>).join('_').toLowerCase()}}`;
     }
 
-    fields      = Array.isArray(fields) ? fields : ([fields] as Array<string>);
-    let indexes = this.mapping.fetchOrPut('indexes', []);
+    let indexes  = this.mapping.fetchOrPut(`indexes.${indexName}`, new ArrayCollection);
 
-    indexes.push({name: indexName, fields});
+    indexes.add(...(Array.isArray(fields) ? fields : [fields]) as Array<string>);
 
     return this;
   }
@@ -244,10 +244,10 @@ export class Mapping<T> {
   /**
    * Get the indexes.
    *
-   * @returns {{}[]}
+   * @returns {{}}
    */
-  public getIndexes(): Array<{name: string, fields: Array<string>}> {
-    return this.mapping.fetch('indexes', []);
+  public getIndexes(): {[key: string]: Array<string>} {
+    return this.mapping.fetch('indexes', {});
   }
 
   /**
@@ -392,10 +392,9 @@ export class Mapping<T> {
       constraintName = (fields as Array<string>).join('_').toLowerCase() + '_unique';
     }
 
-    fields      = (Array.isArray(fields) ? fields : [fields]) as Array<string>;
-    let indexes = this.mapping.fetchOrPut(`uniqueConstraints`, []);
+    let constraints = this.mapping.fetchOrPut(`uniqueConstraints.${constraintName}`, new ArrayCollection);
 
-    indexes.push({name: constraintName, fields});
+    constraints.add(...(Array.isArray(fields) ? fields : [fields]) as Array<string>);
 
     return this;
   }
@@ -403,10 +402,10 @@ export class Mapping<T> {
   /**
    * Get the unique constraints.
    *
-   * @returns {{}[]}
+   * @returns {{}}
    */
-  public getUniqueConstraints(): Array<{name: string, fields: Array<string>}> {
-    return this.mapping.fetch('uniqueConstraints', []);
+  public getUniqueConstraints(): {[key: string]: Array<string>} {
+    return this.mapping.fetch('uniqueConstraints', {});
   }
 
   /**
@@ -532,7 +531,7 @@ export class Mapping<T> {
    */
   public joinTable(property: string, options: JoinTable): this {
     this.extendField(property, {joinTable: options});
-    this.mapping.fetchOrPut('joinTables', []).push(options);
+    this.mapping.fetchOrPut('joinTables', new ArrayCollection).add(options);
 
     return this;
   }
@@ -609,13 +608,11 @@ export class Mapping<T> {
         joinColumns       : [{
           referencedColumnName: ownPrimary,
           name                : `${ownTableName}_id`,
-          indexName           : `idx_${ownTableName}_id`,
           type                : 'integer'
         }],
         inverseJoinColumns: [{
           referencedColumnName: withPrimary,
           name                : `${withTableName}_id`,
-          indexName           : `idx_${withTableName}_id`,
           type                : 'integer'
         }]
       };
