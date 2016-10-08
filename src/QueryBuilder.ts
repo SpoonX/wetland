@@ -407,12 +407,21 @@ export class QueryBuilder<T> {
 
       selectAliases.push(`${column} as ${column}`);
     } else {
-      let fields = this.mappings[propertyAlias].getFields();
-      alias      = propertyAlias;
+      let mapping = this.mappings[propertyAlias];
+      let fields  = mapping.getFields();
+      alias       = propertyAlias;
 
       Object.getOwnPropertyNames(fields).forEach(field => {
         if (!fields[field].relationship) {
-          let fieldAlias             = (propertyAlias ? propertyAlias + '.' : '') + fields[field].name;
+          let fieldName = fields[field].name || (fields[field].primary ? 'id' : null);
+
+          if (!fieldName) {
+            throw new Error(
+              `Trying to query for field without a name for '${mapping.getEntityName()}.${field}'.`
+            );
+          }
+
+          let fieldAlias             = (propertyAlias ? propertyAlias + '.' : '') + fieldName;
           hydrateColumns[fieldAlias] = field;
 
           selectAliases.push(`${fieldAlias} as ${fieldAlias}`);

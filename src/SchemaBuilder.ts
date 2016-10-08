@@ -3,6 +3,7 @@ import {EntityInterface, EntityCtor} from './EntityInterface';
 import * as Knex from 'knex';
 import {Scope} from './Scope';
 import {Store} from './Store';
+import {index} from './decorators/Mapping';
 
 export class SchemaBuilder {
 
@@ -138,16 +139,27 @@ export class SchemaBuilder {
   private processEntity(entity: EntityCtor<EntityInterface>) {
     let mapping   = Mapping.forEntity(entity);
     let tableName = mapping.getTableName();
+    let relations = this.processRelations(mapping);
 
     this.addBuilder(entity, tableName, table => {
       this.composeFields(table, mapping.getFields());
+      if (!relations) {
+        return;
+      }
+
+      this.composeFields(table, relations.joinColumns);
+
+      relations.foreignKeys.forEach(foreignKey => {
+        let foreign = table.foreign(foreignKey.foreign).references(foreignKey.references).inTable(foreignKey.inTable);
+
+        this.applyCascades(mapping.getField(foreignKey.owning).cascades, foreign);
+      });
     });
 
     this.addBuilder(entity, tableName, table => {
       this.composeIndexes(table, mapping);
     }, true);
 
-    this.processRelations(mapping);
   }
 
   /**
@@ -191,11 +203,11 @@ export class SchemaBuilder {
    *
    * @returns {SchemaBuilder}
    */
-  private processRelations(mapping: Mapping<EntityInterface>): this {
+  private processRelations(mapping: Mapping<EntityInterface>): ProcessedRelations {
     let entity      = mapping.getTarget();
     let relations   = mapping.getRelations();
     let foreignKeys = [];
-    let joinColumns = [];
+    let joinColumns = {};
 
     if (!relations) {
       return;
@@ -208,12 +220,12 @@ export class SchemaBuilder {
       if ((relation.type === Mapping.RELATION_MANY_TO_ONE) || (relation.type === Mapping.RELATION_ONE_TO_ONE && !relation.mappedBy)) {
         let column = mapping.getJoinColumn(property);
 
-        joinColumns.push({
+        joinColumns[column.name] = {
           name    : column.name,
           type    : 'integer',
           unsigned: true,
           nullable: true
-        });
+        };
 
         return foreignKeys.push({
           owning    : property,
@@ -251,66 +263,40 @@ export class SchemaBuilder {
         joinTable = targetMapping.getJoinTable(relation.mappedBy, this.entityManager);
       }
 
-      joinTable.joinColumns.forEach(joinColumn => {
-        joinTableFields[joinColumn.name] = {
-          name    : joinColumn.name,
-          type    : joinColumn.type || 'integer',
-          size    : joinColumn.size,
+      let processTableColumns = (side, foreign, reference)=> {
+        joinTableFields[side.name] = {
+          name    : side.name,
+          type    : side.type || 'integer',
+          size    : side.size,
           unsigned: true,
           nullable: true
         };
 
-        joinTableIndexes.push({columns: joinColumn.name, name: joinColumn.indexName || `idx_${joinColumn.name}`});
-        foreignColumns.push(joinColumn.referencedColumnName);
-        referenceColumns.push(joinColumn.name);
-      });
+        joinTableIndexes.push({columns: side.name, name: side.indexName});
+        foreign.push(side.referencedColumnName);
+        reference.push(side.name);
+      };
 
-      joinTable.inverseJoinColumns.forEach(inverse => {
-        joinTableFields[inverse.name] = {
-          name    : inverse.name,
-          type    : inverse.type || 'integer',
-          size    : inverse.size,
-          unsigned: true,
-          nullable: true
-        };
-
-        joinTableIndexes.push({columns: inverse.name, name: inverse.indexName || `idx_${inverse.name}`});
-        foreignColumnsInverse.push(inverse.name);
-        referenceColumnsInverse.push(inverse.referencedColumnName);
-      });
+      joinTable.joinColumns.forEach(column => processTableColumns(column, foreignColumns, referenceColumns));
+      joinTable.inverseJoinColumns.forEach(column => processTableColumns(column, referenceColumnsInverse, foreignColumnsInverse));
 
       this.addBuilder(entity, joinTable.name, table => {
         this.composeFields(table, joinTableFields);
-      });
 
-      this.addBuilder(entity, joinTable.name, table => {
         joinTableIndexes.forEach(index => {
-          table.index(index.columns, index.name);
+          table.index(index.columns);
         });
-      }, true);
 
-      this.addBuilder(entity, joinTable.name, table => {
+
         let foreignInverse = table.foreign(foreignColumnsInverse).references(referenceColumnsInverse).inTable(targetMapping.getTableName());
         let foreign        = table.foreign(referenceColumns).references(foreignColumns).inTable(mapping.getTableName());
 
         this.applyCascades(mapping.getField(property).cascades, foreignInverse);
         this.applyCascades(mapping.getField(property).cascades, foreign);
-      }, true);
+      });
     });
 
-    this.addBuilder(entity, mapping.getTableName(), table => {
-      joinColumns.forEach(joinColumn => {
-        this.composeField(table, joinColumn);
-      });
-
-      foreignKeys.forEach(foreignKey => {
-        let foreign = table.foreign(foreignKey.foreign).references(foreignKey.references).inTable(foreignKey.inTable);
-
-        this.applyCascades(mapping.getField(foreignKey.owning).cascades, foreign);
-      });
-    }, true);
-
-    return this;
+    return {joinColumns, foreignKeys};
   }
 
   /**
@@ -346,12 +332,16 @@ export class SchemaBuilder {
    * @returns {SchemaBuilder}
    */
   private composeIndexes(indexBuilder: Knex.TableBuilder, mapping: Mapping<EntityInterface>): this {
-    mapping.getIndexes().forEach(index => {
-      indexBuilder.index(index.fields.map(field => mapping.getColumnName(field)), index.name);
+    let indexes           = mapping.getIndexes();
+    let uniqueConstraints = mapping.getUniqueConstraints();
+
+    Object.getOwnPropertyNames(indexes).forEach(indexName => {
+      console.log(indexes);
+      indexBuilder.index(indexes[indexName].map(field => mapping.getColumnName(field)), indexName);
     });
 
-    mapping.getUniqueConstraints().forEach(constraint => {
-      indexBuilder.unique(constraint.fields.map(field => mapping.getColumnName(field)), constraint.name);
+    Object.getOwnPropertyNames(uniqueConstraints).forEach(constraintName => {
+      indexBuilder.unique(uniqueConstraints[constraintName].map(field => mapping.getColumnName(field)), constraintName);
     });
 
     return this;
@@ -616,4 +606,9 @@ export class SchemaBuilder {
   public enumeration(table: Knex.TableBuilder, field: FieldOptions): Knex.ColumnBuilder {
     return table.enu(field.name, field.enumeration);
   }
+}
+
+export interface ProcessedRelations {
+  joinColumns: {[key: string]: FieldOptions},
+  foreignKeys: Array<{owning: string, foreign: string, references: string, inTable: string}>
 }
