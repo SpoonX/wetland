@@ -4,6 +4,8 @@ import {Homefront} from 'homefront';
 import {Scope} from './Scope';
 import {EntityInterface, EntityCtor} from './EntityInterface';
 import {Migrator} from './Migrator';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export class Wetland {
   /**
@@ -47,8 +49,10 @@ export class Wetland {
 
     this.config.merge(config);
 
-    let stores   = this.config.fetch('stores');
-    let entities = this.config.fetch('entities');
+    let stores      = this.config.fetch('stores');
+    let entities    = this.config.fetch('entities');
+    let entityPaths = this.config.fetch('entityPaths', []);
+    let entityPath  = this.config.fetch('entityPath');
 
     if (stores) {
       this.registerStores(stores);
@@ -56,6 +60,32 @@ export class Wetland {
 
     if (entities) {
       this.registerEntities(entities);
+    }
+
+    if (entityPath) {
+      entityPaths.push(entityPath);
+    }
+
+    if (entityPaths.length) {
+      entityPaths.forEach(entityPath => {
+        fs.readdirSync(entityPath)
+          .filter(match => match.search(/\.js$/) > -1)
+          .map(entity => entity.replace(/\.js$/, ''))
+          .forEach(entity => {
+            let filePath   = path.join(entityPath, entity);
+            let ToRegister = require(filePath);
+
+            if (typeof ToRegister !== 'function') {
+              ToRegister = ToRegister[entity];
+            }
+
+            if (typeof ToRegister !== 'function') {
+              throw new Error(`Error loading entity '${entity}'. No constructor exported.`);
+            }
+
+            this.registerEntity(ToRegister);
+          });
+      });
     }
   }
 
