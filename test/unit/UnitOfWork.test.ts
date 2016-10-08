@@ -207,6 +207,16 @@ describe('UnitOfWork', () => {
   });
 
   describe('.registerNew()', () => {
+    it('should throw an error when entity not unpersisted', () => {
+      let unitOfWork = getUnitOfWork();
+      let simple     = new Simple;
+
+      unitOfWork.registerClean(simple);
+
+      assert.throws(() => {
+        unitOfWork.registerNew(simple);
+      }, "Only unregistered entities can be marked as new. Entity 'Simple' has state 'clean'.");
+    });
     it('should register the entity as new', () => {
       let unitOfWork = getUnitOfWork();
       let simple     = new Simple;
@@ -392,7 +402,6 @@ describe('UnitOfWork', () => {
       product.categories.push(category);
 
       unitOfWork.registerDeleted(category);
-      unitOfWork.registerClean(product);
       unitOfWork.registerCollectionChange(UnitOfWork.RELATIONSHIP_ADDED, product, 'categories', category);
       entityManager.persist(product);
 
@@ -403,7 +412,6 @@ describe('UnitOfWork', () => {
 
     it('should prepare cascades for persist when new collection', () => {
       let unitOfWork     = getUnitOfWork([Product, User]);
-      let entityManager  = unitOfWork.getEntityManager();
       let product        = new Product;
       let category       = new Category;
       let category2      = new Category;
@@ -414,7 +422,7 @@ describe('UnitOfWork', () => {
       unitOfWork.registerClean(product);
       unitOfWork.registerCollectionChange(UnitOfWork.RELATIONSHIP_ADDED, product, 'categories', category);
       unitOfWork.registerCollectionChange(UnitOfWork.RELATIONSHIP_ADDED, product, 'categories', category2);
-      entityManager.persist(product);
+
       unitOfWork.prepareCascades();
 
       assert.strictEqual(unitOfWork.getNewObjects().length, 2);
@@ -526,7 +534,7 @@ describe('UnitOfWork', () => {
     it('should persist all the changes properly (aka the shit-show-but-with-persist-as-well test)', done => {
       let wetland = new Wetland({
         stores  : {
-          'default': {
+          defaultStore: {
             client          : 'sqlite3',
             useNullAsDefault: true,
             connection      : {
@@ -536,8 +544,6 @@ describe('UnitOfWork', () => {
         },
         entities: [Product, Category, Image, Tag, User, Profile]
       });
-
-      console.log(wetland.getMigrator().create().getSQL());
 
       wetland.getMigrator().create().apply().then(() => {
         let entityManager  = wetland.getManager();
@@ -609,7 +615,7 @@ describe('UnitOfWork', () => {
                 done();
               });
             });
-        }).catch(done);
+        });
       });
     });
   });
