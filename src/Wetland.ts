@@ -23,7 +23,7 @@ export class Wetland {
    */
   private config: Homefront = new Homefront({
     debug        : false,
-    defaultStore : 'default',
+    defaultStore : 'defaultStore',
     entityManager: {
       refreshCreated: true,
       refreshUpdated: true
