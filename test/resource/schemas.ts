@@ -1,62 +1,5 @@
 export let schemas = {
   todo  : {
-    constraints           : [
-      {
-        table_name            : 'list',
-        column_name           : 'id',
-        constraint_name       : 'PRIMARY',
-        referenced_table_name : null,
-        referenced_column_name: null
-      },
-      {
-        table_name            : 'todo',
-        column_name           : 'list_id',
-        constraint_name       : 'todo_list_id_foreign',
-        referenced_table_name : 'list',
-        referenced_column_name: 'id'
-      },
-      {
-        table_name            : 'todo',
-        column_name           : 'id',
-        constraint_name       : 'PRIMARY',
-        referenced_table_name : null,
-        referenced_column_name: null
-      },
-      {
-        table_name            : 'todo',
-        column_name           : 'creator_id',
-        constraint_name       : 'todo_creator_id_foreign',
-        referenced_table_name : 'user',
-        referenced_column_name: 'id'
-      },
-      {
-        table_name            : 'user',
-        column_name           : 'id',
-        constraint_name       : 'PRIMARY',
-        referenced_table_name : null,
-        referenced_column_name: null
-      }
-    ],
-    referentialConstraints: [
-      {
-        constraint_name         : 'todo_creator_id_foreign',
-        unique_constraint_schema: 'wetland_test',
-        unique_constraint_name  : 'PRIMARY',
-        update_rule             : 'RESTRICT',
-        delete_rule             : 'RESTRICT',
-        table_name              : 'todo',
-        referenced_table_name   : 'user'
-      },
-      {
-        constraint_name         : 'todo_list_id_foreign',
-        unique_constraint_schema: 'wetland_test',
-        unique_constraint_name  : 'PRIMARY',
-        update_rule             : 'RESTRICT',
-        delete_rule             : 'RESTRICT',
-        table_name              : 'todo',
-        referenced_table_name   : 'list'
-      }
-    ],
     columns               : [
       {
         column_default: null,
@@ -158,71 +101,34 @@ export let schemas = {
         column_type   : 'varchar(24)',
         is_nullable   : 'NO'
       }
-    ]
-  },
-  postal: {
+    ],
     constraints           : [
       {
-        table_name            : 'address',
+        table_name            : 'list',
         column_name           : 'id',
         constraint_name       : 'PRIMARY',
         referenced_table_name : null,
         referenced_column_name: null
       },
       {
-        table_name            : 'delivery',
-        column_name           : 'order_id',
-        constraint_name       : 'delivery_order_id_foreign',
-        referenced_table_name : 'order',
-        referenced_column_name: 'id'
-      },
-      {
-        table_name            : 'delivery',
-        column_name           : 'id',
-        constraint_name       : 'PRIMARY',
-        referenced_table_name : null,
-        referenced_column_name: null
-      },
-      {
-        table_name            : 'delivery',
-        column_name           : 'address_id',
-        constraint_name       : 'delivery_address_id_foreign',
-        referenced_table_name : 'address',
-        referenced_column_name: 'id'
-      },
-      {
-        table_name            : 'order',
-        column_name           : 'id',
-        constraint_name       : 'PRIMARY',
-        referenced_table_name : null,
-        referenced_column_name: null
-      },
-      {
-        table_name            : 'tracker',
-        column_name           : 'id',
-        constraint_name       : 'PRIMARY',
-        referenced_table_name : null,
-        referenced_column_name: null
-      },
-      {
-        table_name            : 'tracker_user',
-        column_name           : 'id',
-        constraint_name       : 'PRIMARY',
-        referenced_table_name : null,
-        referenced_column_name: null
-      },
-      {
-        table_name            : 'tracker_user',
-        column_name           : 'tracker_id',
-        constraint_name       : 'tracker_user_tracker_id_foreign',
-        referenced_table_name : 'tracker',
-        referenced_column_name: 'id'
-      },
-      {
-        table_name            : 'tracker_user',
-        column_name           : 'user_id',
-        constraint_name       : 'tracker_user_user_id_foreign',
+        table_name            : 'todo',
+        column_name           : 'creator_id',
+        constraint_name       : 'todo_creator_id_foreign',
         referenced_table_name : 'user',
+        referenced_column_name: 'id'
+      },
+      {
+        table_name            : 'todo',
+        column_name           : 'id',
+        constraint_name       : 'PRIMARY',
+        referenced_table_name : null,
+        referenced_column_name: null
+      },
+      {
+        table_name            : 'todo',
+        column_name           : 'list_id',
+        constraint_name       : 'todo_list_id_foreign',
+        referenced_table_name : 'list',
         referenced_column_name: 'id'
       },
       {
@@ -235,42 +141,26 @@ export let schemas = {
     ],
     referentialConstraints: [
       {
-        constraint_name         : 'delivery_address_id_foreign',
+        constraint_name         : 'todo_creator_id_foreign',
         unique_constraint_schema: 'wetland_test',
         unique_constraint_name  : 'PRIMARY',
         update_rule             : 'RESTRICT',
         delete_rule             : 'RESTRICT',
-        table_name              : 'delivery',
-        referenced_table_name   : 'address'
-      },
-      {
-        constraint_name         : 'delivery_order_id_foreign',
-        unique_constraint_schema: 'wetland_test',
-        unique_constraint_name  : 'PRIMARY',
-        update_rule             : 'RESTRICT',
-        delete_rule             : 'CASCADE',
-        table_name              : 'delivery',
-        referenced_table_name   : 'order'
-      },
-      {
-        constraint_name         : 'tracker_user_user_id_foreign',
-        unique_constraint_schema: 'wetland_test',
-        unique_constraint_name  : 'PRIMARY',
-        update_rule             : 'RESTRICT',
-        delete_rule             : 'RESTRICT',
-        table_name              : 'tracker_user',
+        table_name              : 'todo',
         referenced_table_name   : 'user'
       },
       {
-        constraint_name         : 'tracker_user_tracker_id_foreign',
+        constraint_name         : 'todo_list_id_foreign',
         unique_constraint_schema: 'wetland_test',
         unique_constraint_name  : 'PRIMARY',
         update_rule             : 'RESTRICT',
         delete_rule             : 'RESTRICT',
-        table_name              : 'tracker_user',
-        referenced_table_name   : 'tracker'
+        table_name              : 'todo',
+        referenced_table_name   : 'list'
       }
-    ],
+    ]
+  },
+  postal: {
     columns               : [
       {
         column_default: null,
@@ -441,6 +331,116 @@ export let schemas = {
         column_key    : 'PRI',
         column_type   : 'int(10) unsigned',
         is_nullable   : 'NO'
+      }
+    ],
+    constraints           : [
+      {
+        table_name            : 'address',
+        column_name           : 'id',
+        constraint_name       : 'PRIMARY',
+        referenced_table_name : null,
+        referenced_column_name: null
+      },
+      {
+        table_name            : 'delivery',
+        column_name           : 'address_id',
+        constraint_name       : 'delivery_address_id_foreign',
+        referenced_table_name : 'address',
+        referenced_column_name: 'id'
+      },
+      {
+        table_name            : 'delivery',
+        column_name           : 'id',
+        constraint_name       : 'PRIMARY',
+        referenced_table_name : null,
+        referenced_column_name: null
+      },
+      {
+        table_name            : 'delivery',
+        column_name           : 'order_id',
+        constraint_name       : 'delivery_order_id_foreign',
+        referenced_table_name : 'order',
+        referenced_column_name: 'id'
+      },
+      {
+        table_name            : 'order',
+        column_name           : 'id',
+        constraint_name       : 'PRIMARY',
+        referenced_table_name : null,
+        referenced_column_name: null
+      },
+      {
+        table_name            : 'tracker',
+        column_name           : 'id',
+        constraint_name       : 'PRIMARY',
+        referenced_table_name : null,
+        referenced_column_name: null
+      },
+      {
+        table_name            : 'tracker_user',
+        column_name           : 'id',
+        constraint_name       : 'PRIMARY',
+        referenced_table_name : null,
+        referenced_column_name: null
+      },
+      {
+        table_name            : 'tracker_user',
+        column_name           : 'tracker_id',
+        constraint_name       : 'tracker_user_tracker_id_foreign',
+        referenced_table_name : 'tracker',
+        referenced_column_name: 'id'
+      },
+      {
+        table_name            : 'tracker_user',
+        column_name           : 'user_id',
+        constraint_name       : 'tracker_user_user_id_foreign',
+        referenced_table_name : 'user',
+        referenced_column_name: 'id'
+      },
+      {
+        table_name            : 'user',
+        column_name           : 'id',
+        constraint_name       : 'PRIMARY',
+        referenced_table_name : null,
+        referenced_column_name: null
+      }
+    ],
+    referentialConstraints: [
+      {
+        constraint_name         : 'delivery_address_id_foreign',
+        unique_constraint_schema: 'wetland_test',
+        unique_constraint_name  : 'PRIMARY',
+        update_rule             : 'RESTRICT',
+        delete_rule             : 'RESTRICT',
+        table_name              : 'delivery',
+        referenced_table_name   : 'address'
+      },
+      {
+        constraint_name         : 'delivery_order_id_foreign',
+        unique_constraint_schema: 'wetland_test',
+        unique_constraint_name  : 'PRIMARY',
+        update_rule             : 'RESTRICT',
+        delete_rule             : 'CASCADE',
+        table_name              : 'delivery',
+        referenced_table_name   : 'order'
+      },
+      {
+        constraint_name         : 'tracker_user_user_id_foreign',
+        unique_constraint_schema: 'wetland_test',
+        unique_constraint_name  : 'PRIMARY',
+        update_rule             : 'RESTRICT',
+        delete_rule             : 'RESTRICT',
+        table_name              : 'tracker_user',
+        referenced_table_name   : 'user'
+      },
+      {
+        constraint_name         : 'tracker_user_tracker_id_foreign',
+        unique_constraint_schema: 'wetland_test',
+        unique_constraint_name  : 'PRIMARY',
+        update_rule             : 'RESTRICT',
+        delete_rule             : 'RESTRICT',
+        table_name              : 'tracker_user',
+        referenced_table_name   : 'tracker'
       }
     ]
   }
