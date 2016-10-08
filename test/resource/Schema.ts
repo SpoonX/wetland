@@ -11,7 +11,7 @@ export class Schema {
       'column_key',
       'column_type',
       'is_nullable'
-    ], 'columns', null, table);
+    ], 'columns', 'column_name', table);
   }
 
   static getReferentialConstraints(connection, table?) {
