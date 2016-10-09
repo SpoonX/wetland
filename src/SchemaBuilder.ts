@@ -1,4 +1,4 @@
-import {Mapping, FieldOptions, Raw} from './Mapping';
+import {Mapping, FieldOptions, Raw, JoinColumn} from './Mapping';
 import {EntityInterface, EntityCtor} from './EntityInterface';
 import * as Knex from 'knex';
 import {Scope} from './Scope';
@@ -149,16 +149,22 @@ export class SchemaBuilder {
       this.composeFields(table, relations.joinColumns);
 
       relations.foreignKeys.forEach(foreignKey => {
-        let foreign = table.foreign(foreignKey.foreign).references(foreignKey.references).inTable(foreignKey.inTable);
+        let column = foreignKey.joinColumn;
+        let foreign = table.foreign(column.name).references(column.referencedColumnName).inTable(foreignKey.inTable);
 
-        this.applyCascades(mapping.getField(foreignKey.owning).cascades, foreign);
+        if (column.onDelete) {
+          foreign.onDelete(column.onDelete);
+        }
+
+        if (column.onUpdate) {
+          foreign.onDelete(column.onUpdate);
+        }
       });
     });
 
     this.addBuilder(entity, tableName, table => {
       this.composeIndexes(table, mapping);
     }, true);
-
   }
 
   /**
@@ -226,12 +232,7 @@ export class SchemaBuilder {
           nullable: true
         };
 
-        return foreignKeys.push({
-          owning    : property,
-          foreign   : column.name,
-          references: column.referencedColumnName,
-          inTable   : targetMapping.getTableName()
-        });
+        return foreignKeys.push({joinColumn: column, owning: property, inTable: targetMapping.getTableName()});
       }
 
       // Nothing to do for other side.
@@ -299,30 +300,6 @@ export class SchemaBuilder {
     });
 
     return {joinColumns, foreignKeys};
-  }
-
-  /**
-   * Apply cascades to provided table builder.
-   *
-   * @param {string[]}           cascades
-   * @param {Knex.ColumnBuilder} foreign
-   */
-  private applyCascades(cascades: Array<string>, foreign: Knex.ColumnBuilder) {
-    if (!cascades) {
-      return;
-    }
-
-    cascades.forEach(cascade => {
-      if (cascade === Mapping.CASCADE_PERSIST) {
-        return;
-      }
-
-      if (cascade === Mapping.CASCADE_UPDATE) {
-        foreign.onUpdate('cascade');
-      } else if (cascade === Mapping.CASCADE_DELETE) {
-        foreign.onDelete('cascade');
-      }
-    });
   }
 
   /**
@@ -396,7 +373,7 @@ export class SchemaBuilder {
       column.primary();
     }
 
-    if (field.defaultTo) {
+    if (typeof field.defaultTo !== 'undefined') {
       if (field.defaultTo instanceof Raw) {
         column.defaultTo(<any>this.client.raw(field.defaultTo.getQuery()));
       } else {
@@ -612,5 +589,5 @@ export class SchemaBuilder {
 
 export interface ProcessedRelations {
   joinColumns: {[key: string]: FieldOptions},
-  foreignKeys: Array<{owning: string, foreign: string, references: string, inTable: string}>
+  foreignKeys: Array<{joinColumn: JoinColumn, owning: string, inTable: string}>
 }
