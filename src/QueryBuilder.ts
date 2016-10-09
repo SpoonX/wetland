@@ -459,6 +459,7 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public update(values, returning?: any): this {
+    this.statement.from(this.mappings[this.alias].getTableName());
     this.statement.update(this.mapToColumns(values), returning);
 
     return this;
@@ -550,6 +551,7 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public remove(): this {
+    this.statement.from(this.mappings[this.alias].getTableName());
     this.statement.del();
 
     return this;
