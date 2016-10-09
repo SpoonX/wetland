@@ -48,7 +48,7 @@ export class EntityRepository<T> {
     if (!statement) {
       let connection = this.entityManager.getStore(this.entity).getConnection(Store.ROLE_SLAVE);
 
-      statement = connection(`${Mapping.forEntity(this.entity).getTableName()} as ${alias}`);
+      statement = connection(`${this.mapping.getTableName()} as ${alias}`);
     }
 
     return new QueryBuilder(this.entityManager, statement, this.mapping, alias);
