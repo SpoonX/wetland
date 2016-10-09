@@ -3,7 +3,6 @@ import {EntityInterface, EntityCtor} from './EntityInterface';
 import * as Knex from 'knex';
 import {Scope} from './Scope';
 import {Store} from './Store';
-import {index} from './decorators/Mapping';
 
 export class SchemaBuilder {
 
@@ -287,12 +286,15 @@ export class SchemaBuilder {
           table.index(index.columns);
         });
 
+        table.foreign(foreignColumnsInverse)
+          .references(referenceColumnsInverse)
+          .inTable(targetMapping.getTableName())
+          .onDelete('cascade');
 
-        let foreignInverse = table.foreign(foreignColumnsInverse).references(referenceColumnsInverse).inTable(targetMapping.getTableName());
-        let foreign        = table.foreign(referenceColumns).references(foreignColumns).inTable(mapping.getTableName());
-
-        this.applyCascades(mapping.getField(property).cascades, foreignInverse);
-        this.applyCascades(mapping.getField(property).cascades, foreign);
+        table.foreign(referenceColumns)
+          .references(foreignColumns)
+          .inTable(mapping.getTableName())
+          .onDelete('cascade');
       });
     });
 
