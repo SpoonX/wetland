@@ -10,6 +10,8 @@ export class Delivery {
 
     mapping.manyToOne('address', {targetEntity: Address, inversedBy: 'deliveries'});
 
-    mapping.forProperty('order').oneToOne({targetEntity: Order}).cascade(['delete']);
+    mapping.forProperty('order')
+      .joinColumn({onDelete: 'cascade'})
+      .oneToOne({targetEntity: Order});
   }
 }
