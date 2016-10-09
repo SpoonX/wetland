@@ -34,16 +34,6 @@ export class Mapping<T> {
   public static CASCADE_PERSIST = 'persist';
 
   /**
-   * @type {string}
-   */
-  public static CASCADE_UPDATE = 'update';
-
-  /**
-   * @type {string}
-   */
-  public static CASCADE_DELETE = 'delete';
-
-  /**
    * The mapping data.
    *
    * @type {Homefront}
@@ -234,7 +224,7 @@ export class Mapping<T> {
       indexName = `idx_${(fields as Array<string>).join('_').toLowerCase()}}`;
     }
 
-    let indexes  = this.mapping.fetchOrPut(`indexes.${indexName}`, new ArrayCollection);
+    let indexes = this.mapping.fetchOrPut(`indexes.${indexName}`, new ArrayCollection);
 
     indexes.add(...(Array.isArray(fields) ? fields : [fields]) as Array<string>);
 
@@ -554,7 +544,14 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public joinColumn(property: string, options: JoinColumn): this {
-    this.extendField(property, {joinColumn: options});
+    this.extendField(property, {
+      joinColumn: Homefront.merge({
+        name                : `${property}_id`,
+        referencedColumnName: 'id',
+        unique              : false,
+        nullable            : true
+      }, options)
+    });
 
     return this;
   }
@@ -589,36 +586,33 @@ export class Mapping<T> {
    *
    * @returns {JoinTable}
    */
-  public getJoinTable(property: string, entityManager?: EntityManager| Scope): JoinTable {
-    let field = this.mapping.fetchOrPut(`fields.${property}`, {});
+  public getJoinTable(property: string, entityManager: EntityManager| Scope): JoinTable {
+    let field       = this.mapping.fetchOrPut(`fields.${property}`, {});
+    field.joinTable = field.joinTable || {};
 
-    if (!field.joinTable) {
-      if (!entityManager) {
-        return null;
-      }
-
-      let relationMapping = Mapping.forEntity(entityManager.resolveEntityReference(field.relationship.targetEntity));
-      let ownTableName    = this.getTableName();
-      let withTableName   = relationMapping.getTableName();
-      let ownPrimary      = this.getPrimaryKeyField();
-      let withPrimary     = relationMapping.getPrimaryKeyField();
-
-      field.joinTable = {
-        name              : `${ownTableName}_${withTableName}`,
-        joinColumns       : [{
-          referencedColumnName: ownPrimary,
-          name                : `${ownTableName}_id`,
-          type                : 'integer'
-        }],
-        inverseJoinColumns: [{
-          referencedColumnName: withPrimary,
-          name                : `${withTableName}_id`,
-          type                : 'integer'
-        }]
-      };
+    if (!entityManager) {
+      throw new Error('EntityManager is required as a second argument for getJoinTable.');
     }
 
-    return field.joinTable;
+    let relationMapping = Mapping.forEntity(entityManager.resolveEntityReference(field.relationship.targetEntity));
+    let ownTableName    = this.getTableName();
+    let withTableName   = relationMapping.getTableName();
+    let ownPrimary      = this.getPrimaryKeyField();
+    let withPrimary     = relationMapping.getPrimaryKeyField();
+
+    return Homefront.merge({
+      name              : `${ownTableName}_${withTableName}`,
+      joinColumns       : [{
+        referencedColumnName: ownPrimary,
+        name                : `${ownTableName}_id`,
+        type                : 'integer'
+      }],
+      inverseJoinColumns: [{
+        referencedColumnName: withPrimary,
+        name                : `${withTableName}_id`,
+        type                : 'integer'
+      }]
+    }, field.joinTable) as JoinTable;
   }
 
   /**
@@ -870,11 +864,13 @@ export interface JoinTable {
 }
 
 export interface JoinColumn {
-  referencedColumnName: string,
-  name: string,
+  referencedColumnName?: string,
+  name?: string,
   type?: string,
   size?: number,
   indexName?: string,
+  onDelete?: string,
+  onUpdate?: string,
   unique?: boolean,
   nullable?: boolean
 }
