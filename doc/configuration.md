@@ -1,10 +1,15 @@
 # Configuration
-  To get your application up and running, you need to set some things up first. In this section we are going to give you an example of how to create a simple todo application using wetland.
+
+To get your application up and running, you need to set some things up first. In this section we are going to give you an example of how to create a simple todo application using wetland.
 
 ## Creating a schema
+
 The schema will define the fields, properties and relationships of the entity. Here are the two entities we are going to use in this todo application. You can find all mapping options described on the Mapping chapter.
 
-*./entities/list.js*
+{% ./entities/list.js -%}
+
+{% sample lang='js' -%}
+
 ```js
 let Todo = require('./todo');
 
@@ -21,7 +26,8 @@ class List {
 module.exports = List;
 ```
 
-*./entities/todo.js*
+_.\/entities\/todo.js_
+
 ```js
 let List = require('./list');
 
@@ -41,6 +47,9 @@ module.exports = Todo;
 
 ## Implementing wetland
 
-###Database configuration
+A wetland's instance can be created by simply requiring wetland and
 
-###Registering entities
+### Database configuration
+
+### Registering entities
+
