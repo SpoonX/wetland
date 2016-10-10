@@ -8,12 +8,11 @@
 Wetland is an enterprise grade object-relational mapper (ORM) for node.js.
 
 _**Note:** This module is under active development.
-While it's usable and well tested, it's not done yet.
-Some key features are still missing._
+While it's usable and well tested, key features are still in progress.
 
 ## Features
-The following is a list of the biggest features this ORM provides.
-For more detailed information, you can look at the tests until the documentation has been written.
+Below is a list of wetland ORM's main features.
+More detailed information can be found in the tests, pending full documentation.
 
 * Unit of work
 * Transactions
@@ -31,15 +30,15 @@ For more detailed information, you can look at the tests until the documentation
 * More...
 
 ## Installation
-To install wetland simply run the following command:
+To install wetland, run the following command:
 
 `npm i --save wetland`
 
-If you're using typescript, the typings are supplied by default. No additional typings have to be installed.
+If you're using TypeScript the typings are supplied by default. No additional typings need installing.
 
 ## Usage
 
-Usage will be documented soon. To give you an idea, here's an implementation example:
+Usage documention pending. Below is a basic implementation example:
 
 ```js
 const Wetland = require('wetland').Wetland;
