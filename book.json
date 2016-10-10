@@ -16,12 +16,12 @@
             "languages": [
                 {
                     "lang"   : "js",
-                    "name"   : "JavaScript"
+                    "name"   : "JavaScript",
+                    "default": true
                 },
                 {
                      "lang": "ts",
-                     "name": "TypeScript",
-                     "default": true
+                     "name": "TypeScript"
                 }
             ],
             "split": true,
