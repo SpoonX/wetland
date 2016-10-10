@@ -21,7 +21,7 @@
                 },
                 {
                      "lang": "ts",
-                     "name": "TypeScript",
+                     "name": "TypeScript"
                 }
             ],
             "split": true,
