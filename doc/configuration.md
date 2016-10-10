@@ -44,5 +44,3 @@ module.exports = Todo;
 ###Database configuration
 
 ###Registering entities
-
-

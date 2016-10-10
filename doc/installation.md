@@ -35,9 +35,3 @@ If you are new to Node.js, you can download its latest version [here](https://no
  
  #####MsSQL
  `$ npm install --save mssql`
-
-
-
-
-
-
