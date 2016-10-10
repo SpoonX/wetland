@@ -6,10 +6,15 @@ To get your application up and running, you need to set some things up first. In
 
 The schema will define the fields, properties and relationships of the entity. Here are the two entities we are going to use in this todo application. You can find all mapping options described on the Mapping chapter.
 
-{% ./entities/list.js -%}
+###### List schema
+{% method %}
 
-{% sample lang='js' -%}
+{% common %}
+```
+// ./entities/list
+```
 
+{% sample lang="js" %}
 ```js
 let Todo = require('./todo');
 
@@ -25,9 +30,32 @@ class List {
 
 module.exports = List;
 ```
+{% sample lang='ts' %}
 
-_.\/entities\/todo.js_
+```js
+import {Todo} from './todo';
 
+export class List {
+  static setMapping(mapping) {
+    mapping.forProperty('id').primary().increments();
+    mapping.field('name', {type: 'string'});
+    mapping.forProperty('todos')
+      .oneToMany({targetEntity: Todo, mappedBy: 'list')
+      .cascade(['persist', 'remove']);
+  }
+}
+```
+{% endmethod %}
+
+###### Todo schema
+{% method %}
+
+{% common %}
+```
+// ./entities/todo
+```
+
+{% sample lang="js" %}
 ```js
 let List = require('./list');
 
@@ -37,13 +65,30 @@ class Todo {
     mapping.field('task', {type: 'string'});
     mapping.field('done', {type: 'boolean', defaultTo: false});
     mapping.forProperty('list')
-      .manyToOne({targetEntity: 'List', inversedBy: 'todos'})
+      .manyToOne({targetEntity: List, inversedBy: 'todos'})
       .joinColumn({onDelete: 'cascade'});
   }
 }
 
 module.exports = Todo;
 ```
+
+{% sample lang="ts" %}
+```js
+import {List} from './list';
+
+export class Todo {
+  static setMapping(mapping) {
+    mapping.forProperty('id').primary().increments();
+    mapping.field('task', {type: 'string'});
+    mapping.field('done', {type: 'boolean', defaultTo: false});
+    mapping.forProperty('list')
+      .manyToOne({targetEntity: Todo, inversedBy: 'todos'})
+      .joinColumn({onDelete: 'cascade'});
+  }
+}
+```
+{% endmethod %}
 
 ## Implementing wetland
 
