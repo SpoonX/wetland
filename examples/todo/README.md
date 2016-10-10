@@ -13,7 +13,7 @@ Create a project directory, and navigate to it.
 
 The project is all set up now.
 
-##Mappings
+## Mappings
 
 *The mappings for List*
 ```js
