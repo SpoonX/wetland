@@ -10,10 +10,10 @@
 
 `$ nvm install node`
 
-If you are new to Node.js, you can download its latest version [here](https://nodejs.org/en/download/current/). Only after that you will be able to install and use wetland.
+If you are new to Node.js, you can download the latest version [here](https://nodejs.org/en/download/current/). You will need to install node if you wish to use wetland.
 
 ###Your database
- Wetland offers support to all of the following:
+ Wetland offers support for all of the following:
  
  #####PostgresSQL
  `$ npm install --save pg`
