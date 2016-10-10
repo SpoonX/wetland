@@ -3,7 +3,7 @@ import {EntityRepository} from './EntityRepository';
 import {MetaData} from './MetaData';
 import {EntityManager} from './EntityManager';
 import {Scope} from './Scope';
-import {EntityCtor, EntityInterface} from './EntityInterface';
+import {EntityCtor, EntityInterface, ProxyInterface} from './EntityInterface';
 import {ArrayCollection} from './ArrayCollection';
 
 export class Mapping<T> {
@@ -54,7 +54,8 @@ export class Mapping<T> {
    *
    * @return {Mapping}
    */
-  public static forEntity<T>(target: EntityCtor<T> | T): Mapping<T> {
+  public static forEntity<T>(target: EntityCtor<T> | T | ProxyInterface): Mapping<T> {
+    target       = target['isEntityProxy'] ? (target as ProxyInterface).getTarget() : target;
     let entity   = MetaData.getConstructor(target) as EntityCtor<T>;
     let metadata = MetaData.forTarget(entity);
 

@@ -315,7 +315,6 @@ export class SchemaBuilder {
     let uniqueConstraints = mapping.getUniqueConstraints();
 
     Object.getOwnPropertyNames(indexes).forEach(indexName => {
-      console.log(indexes);
       indexBuilder.index(indexes[indexName].map(field => mapping.getColumnName(field)), indexName);
     });
 
