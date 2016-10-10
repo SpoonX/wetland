@@ -54,9 +54,8 @@ function todo(parameters) {
   }
 
   if (action === 'show-all') {
-    return manager.getRepository(List).find(null, {join: ['todos']}).then(all => {
-      console.log(util.inspect(all, { depth: 8 }));
-    });
+    return manager.getRepository(List).find(null, {join: ['todos']})
+      .then(all => console.log(util.inspect(all, { depth: 8 })));
   }
 
   if (action === 'add-todo') {
