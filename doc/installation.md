@@ -1,19 +1,19 @@
 # Installation
- Run the following command from your project root to install wetland:
+ To install wetland run the following command from project root:
 
 `$ npm install --save wetland`
 
 ##Prerequisites
 ###Node.js (v6.0.0+)
- Wetland was built on ES6, so your node.js version must be v6.0.0 or higher to support all of its features. 
+ Wetland was built on ES6, so your Node.js version must be v6.0.0 or higher to support all of its features. 
  You can update your current node version by running:
 
 `$ nvm install node`
 
-If you are new to Node.js, you can download its latest version [here](https://nodejs.org/en/download/current/). Only after that you will be able to install and use wetland.
+If you are new to Node.js, you can download its latest version [here](https://nodejs.org/en/download/current/). You will need to complete this installation to run wetland.
 
 ###Your database
- Wetland offers support to all of the following:
+ Wetland offers support for all of the following:
  
  #####PostgresSQL
  `$ npm install --save pg`
