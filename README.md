@@ -1,5 +1,10 @@
 # ![Wetland](https://cloud.githubusercontent.com/assets/67802/19230467/ed74d496-8ed4-11e6-84bf-4bcc7c5c2fef.png)
 
+[![Build Status](https://travis-ci.org/SpoonX/wetland.svg?branch=master)](https://travis-ci.org/SpoonX/wetland)
+[![npm version](https://badge.fury.io/js/wetland.svg)](https://badge.fury.io/js/wetland)
+[![Dependency Status](https://gemnasium.com/badges/github.com/SpoonX/wetland.svg)](https://gemnasium.com/github.com/SpoonX/wetland)
+[![Gitter chat](https://badges.gitter.im/SpoonX/Dev.svg)](https://gitter.im/SpoonX/Dev)
+
 Wetland is an enterprise grade object-relational mapper (ORM) for node.js.
 
 _**Note:** This module is under active development.
