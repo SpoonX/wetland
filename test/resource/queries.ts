@@ -1,3 +1,20 @@
 export let queries = {
-  veryDeepJoins: "select `p`.`id` as `p.id`, `p`.`name` as `p.name`, `categories`.`id` as `categories.id`, `categories`.`name` as `categories.name`, `author`.`id` as `author.id`, `author`.`name` as `author.name`, `image`.`id` as `image.id`, `image`.`name` as `image.name`, `image`.`type` as `image.type`, `image`.`location` as `image.location`, `tags`.`id` as `tags.id`, `tags`.`name` as `tags.name`, `creator`.`id` as `creator.id`, `creator`.`name` as `creator.name`, `products`.`id` as `products.id`, `products`.`name` as `products.name`, `cc`.`id` as `cc.id`, `cc`.`name` as `cc.name` from `product` as `p` left join `product_custom_join_category` as `product_custom_join_category0` on `p`.`id` = `product_custom_join_category0`.`product_id` left join `category` as `categories` on `product_custom_join_category0`.`category_id` = `categories`.`id` left join `user` as `author` on `p`.`author_id` = `author`.`id` left join `image` as `image` on `p`.`image_id` = `image`.`id` left join `image_tag` as `image_tag0` on `image`.`id` = `image_tag0`.`image_id` left join `tag` as `tags` on `image_tag0`.`tag_id` = `tags`.`id` left join `user` as `creator` on `tags`.`creator_id` = `creator`.`id` left join `product` as `products` on `products`.`author_id` = `creator`.`id` left join `product_custom_join_category` as `product_custom_join_category1` on `products`.`id` = `product_custom_join_category1`.`product_id` left join `category` as `cc` on `product_custom_join_category1`.`category_id` = `cc`.`id` where `creator`.`name` = 'Wesley'",
+  selectAll     : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t`",
+  selectOne     : "select `t`.`id` as `t.id`, `t`.`task` as `t.task` from `todo` as `t`",
+  selectArray   : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t",
+  selectSum     : "select sum(`id`) from `todo` as `t`",
+  insert        : "insert into `todo` as `t` (`task`, `done`) values ('Bake cake', true)",
+  update        : "update `todo` set `done` = true where `id` = 1",
+  limit         : "select `t`.`id` as `t.id`, `t`.`task` as `t.task` from `todo` as `t` limit 69",
+  offset        : "select `t`.`id` as `t.id`, `t`.`done` as `t.done` from `todo` as `t` limit 5 offset 15",
+  orderByAsc    : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` order by `task` asc",
+  orderByDesc   : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` order by `done` desc",
+  orderByDescObj: "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` order by `task` desc",
+  orderByDescArr: "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` order by `done` desc",
+  deleteById    : "delete from `todo` where `id` = 1",
+  where         : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` where `done` = true",
+  whereIn       : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` where `task` in ('Pet cat', 'Pet cat again')",
+  whereAnd      : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` where `task` = 'Rob bank' and `done` = false",
+  whereLTE      : "select `t`.`id` as `t.id`, `t`.`task` as `t.task` from `todo` as `t` where `id` <= 13",
+
 };
