@@ -37,6 +37,11 @@ export class QueryBuilder<T> {
   private selects: Array<any> = [];
 
   /**
+   * @type {{}]
+   */
+  private appliedPrimaryKeys: {[key: string]: string};
+
+  /**
    * @type {Array}
    */
   private orderBys: Array<{orderBy: string | Array<string> | Object, direction: string | null}> = [];
@@ -388,7 +393,7 @@ export class QueryBuilder<T> {
       propertyAlias = `${alias}.${propertyAlias}`;
     }
 
-    let aliasRecipe    = this.hydrator.getRecipe(alias);
+    let aliasRecipe;
     let selectAliases  = [];
     let hydrateColumns = {};
 
@@ -398,11 +403,12 @@ export class QueryBuilder<T> {
       let column             = this.criteria.mapToColumn(propertyAlias);
       hydrateColumns[column] = property;
       alias                  = parts[0];
+      aliasRecipe            = this.hydrator.getRecipe(alias);
 
-      let primaryKeyAlias = `${aliasRecipe.primaryKey.alias} as ${aliasRecipe.primaryKey.alias}`;
+      if (!this.appliedPrimaryKeys[alias]) {
+        this.appliedPrimaryKeys[alias] = `${aliasRecipe.primaryKey.alias} as ${aliasRecipe.primaryKey.alias}`;
 
-      if (selectAliases.indexOf(primaryKeyAlias) === -1) {
-        selectAliases.push(primaryKeyAlias);
+        selectAliases.push(this.appliedPrimaryKeys[alias]);
       }
 
       selectAliases.push(`${column} as ${column}`);
