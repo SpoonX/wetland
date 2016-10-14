@@ -25,61 +25,62 @@ describe('QueryBuilder', () => {
     it('should create an alias', () => {
       let alias = wetland.getManager().getRepository(Todo).getQueryBuilder().createAlias('t');
 
-      assert.strictEqual(alias, 't0', 'It did not created an alias.');
+      assert.strictEqual(alias, 't0');
     });
   });
 
   describe('join', () => {
     it('should create a select query with a join clause by specifying the type of join manually', () => {
-        let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-        let query = queryBuilder.select('task').join('innerJoin', 'list', 'l').getQuery().getSQL();
+      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
+      let query        = queryBuilder.select('task').join('innerJoin', 'list', 'l').getQuery().getSQL();
 
-        assert.strictEqual(query, queries.join, 'It did not create expected query with a join clause.');
+      assert.strictEqual(query, queries.join);
+
     });
   });
 
   describe('leftJoin', () => {
     it('should create a query with a left join clause', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-      let query = queryBuilder.select('t').leftJoin('list', 'l').getQuery().getSQL();
+      let query        = queryBuilder.select('t').leftJoin('list', 'l').getQuery().getSQL();
 
-      assert.strictEqual(query, queries.leftJoin, 'It did not create expected query with a left join clause.')
+      assert.strictEqual(query, queries.leftJoin);
     });
   });
 
   describe('rightJoin', () => {
     it('should create a query with a right join clause', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-      let query = queryBuilder.select('t').rightJoin('list', 'l').getQuery().getSQL();
+      let query        = queryBuilder.select('t').rightJoin('list', 'l').getQuery().getSQL();
 
-      assert.strictEqual(query, queries.rightJoin, 'It did not create expected query with a right join clause.')
+      assert.strictEqual(query, queries.rightJoin);
     });
   });
 
   describe('innerJoin', () => {
     it('should create a query with a inner join clause', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-      let query = queryBuilder.select('t').innerJoin('list', 'l').getQuery().getSQL();
+      let query        = queryBuilder.select('t').innerJoin('list', 'l').getQuery().getSQL();
 
-      assert.strictEqual(query, queries.innerJoin, 'It did not create expected query with a inner join clause.')
+      assert.strictEqual(query, queries.innerJoin);
     });
   });
 
   describe('leftOuterJoin', () => {
     it('should create a query with a left outer join clause', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-      let query = queryBuilder.select('t').leftOuterJoin('list', 'l').getQuery().getSQL();
+      let query        = queryBuilder.select('t').leftOuterJoin('list', 'l').getQuery().getSQL();
 
-      assert.strictEqual(query, queries.leftOuterJoin, 'It did not create expected query with a left outer join clause.')
+      assert.strictEqual(query, queries.leftOuterJoin);
     });
   });
 
   describe('rightOuterJoin', () => {
     it('should create a query with a right outer join clause', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-      let query = queryBuilder.select('t').rightOuterJoin('list', 'l').getQuery().getSQL();
+      let query        = queryBuilder.select('t').rightOuterJoin('list', 'l').getQuery().getSQL();
 
-      assert.strictEqual(query, queries.rightOuterJoin, 'It did not create expected query with a right outer join clause.')
+      assert.strictEqual(query, queries.rightOuterJoin);
     });
   });
 
@@ -88,7 +89,7 @@ describe('QueryBuilder', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('t').outerJoin('list', 'l').getQuery().getSQL();
 
-      assert.strictEqual(query, queries.outerJoin, 'It did not create expected query with a outer join clause.')
+      assert.strictEqual(query, queries.outerJoin);
     });
   });
 
@@ -97,7 +98,7 @@ describe('QueryBuilder', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('t').fullOuterJoin('list', 'l').getQuery().getSQL();
 
-      assert.strictEqual(query, queries.fullOuterJoin, 'It did not create expected query with a full outer join clause.')
+      assert.strictEqual(query, queries.fullOuterJoin);
     });
   });
 
@@ -106,15 +107,14 @@ describe('QueryBuilder', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('t').crossJoin('list', 'l').getQuery().getSQL();
 
-      assert.strictEqual(query, queries.crossJoin, 'It did not create expected query with a cross join clause.')
+      assert.strictEqual(query, queries.crossJoin);
     });
   });
 
   describe('getQuery', () => {
     it('should return a Query instance', () => {
       let getQuery = wetland.getManager().getRepository(Todo).getQueryBuilder().getQuery();
-
-      assert.instanceOf(getQuery, Query, 'It did not return a Query instance.');
+      assert.instanceOf(getQuery, Query);
     });
   });
 
@@ -123,137 +123,137 @@ describe('QueryBuilder', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('t').getQuery().getSQL();
 
-      assert.strictEqual(query, queries.selectAll, 'It did not create expected select query.');
+      assert.strictEqual(query, queries.selectAll);
     });
 
     it('should create a query by passing one string as argument', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('task').getQuery().getSQL();
 
-      assert.strictEqual(query, queries.selectOne, 'It did not create expected select query.');
+      assert.strictEqual(query, queries.selectOne);
     });
 
-    // @todo: repeating ids
     it('should create a query by passing one array of strings as argument', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select(['t.task', 't.done']).getQuery().getSQL();
 
-      assert.strictEqual(query, queries.selectArray, 'It did not create expected select query.');
+      assert.strictEqual(query, queries.selectArray);
     });
 
     it('should create a `sum()` query', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select({sum: 'id'}).getQuery().getSQL();
 
-      assert.strictEqual(query, queries.selectSum, 'It did not create expected select query.');
+      assert.strictEqual(query, queries.selectSum);
     });
   });
 
   describe('insert', () => {
-    // @todo: wrong order
     it('should create an insert query', () => {
-      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-      let query        = queryBuilder.insert({task: 'Bake cake', done: true}).getQuery().getSQL();
+      let toInsert     = {'task': 'Bake cake', 'done': true};
+      let keys         = ['task', 'done'];
+      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder();
+      let query        = queryBuilder.insert(toInsert).getQuery().getSQL();
 
-      assert.strictEqual(query, queries.insert, 'It did not create expected insert query.')
+      keys.forEach(key => {
+        assert.include(query, key);
+      });
     });
   });
 
   describe('update', () => {
     it('should created an update query', () => {
-      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-      let query        = queryBuilder.update({done: true}).where({id: 1}).getQuery().getSQL();
+      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder();
+      let query        = queryBuilder.update({'done': true}).where({'id': 1}).getQuery().getSQL();
 
-      assert.strictEqual(query, queries.update, 'It did not create expected update query.');
+      assert.strictEqual(query, queries.update);
     });
   });
 
   describe('limit', () => {
     it('should create a query containing a limit clause', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-      let query        = queryBuilder.select('task').limit(69).getQuery().getSQL();
+      let query        = queryBuilder.select('t').limit(69).getQuery().getSQL();
 
-      assert.strictEqual(query, queries.limit, 'It did not create expect query with a limit clause.');
+      assert.strictEqual(query, queries.limit);
     });
   });
 
   describe('offset', () => {
     it('should create a query that contains an offset following the limit clause', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-      let query        = queryBuilder.select('done').limit(5).offset(15).getQuery().getSQL();
+      let query        = queryBuilder.select('t.done').limit(5).offset(15).getQuery().getSQL();
 
-      assert.strictEqual(query, queries.offset, 'It did not create expected query with a limit and an offset clauses.');
+      assert.strictEqual(query, queries.offset);
     });
   });
 
   describe('orderBy', () => {
     it('should create a query that sorts by a property (asc)', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-      let query        = queryBuilder.select('t').orderBy('task').getQuery().getSQL();
+      let query        = queryBuilder.select('t').orderBy('t.task').getQuery().getSQL();
 
-      assert.strictEqual(query, queries.orderByAsc, 'It did not create expected ascending orderBy query.');
+      assert.strictEqual(query, queries.orderByAsc);
     });
 
     it('should create a query that sorts by a property (desc)', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-      let query        = queryBuilder.select('t').orderBy('done', 'desc').getQuery().getSQL();
+      let query        = queryBuilder.select('t').orderBy('t.done', 'desc').getQuery().getSQL();
 
-      assert.strictEqual(query, queries.orderByDesc, 'It did not create expected descending orderBy query.');
+      assert.strictEqual(query, queries.orderByDesc);
     });
 
-    // @todo: not ordering by
     it('should create a query by passing the conditionals as an object', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-      let query        = queryBuilder.select('t').orderBy({task: 'desc'}).getQuery().getSQL();
+      let query        = queryBuilder.select('t').orderBy({'t.task': 'desc'}).getQuery().getSQL();
 
-      assert.strictEqual(query, queries.orderByDescObj, 'It did not create expected query using object as the argument.');
+      assert.strictEqual(query, queries.orderByDescObj);
     });
 
-    // @todo: not ordering by
     it('should create a query by passing the conditionals as an array of objects', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-      let query        = queryBuilder.select('t').orderBy(['task', {done: 'desc'}]).getQuery().getSQL();
+      let query        = queryBuilder.select('t').orderBy(['t.task', {'t.done': 'desc'}]).getQuery().getSQL();
 
-      assert.strictEqual(query, queries.orderByDescArr, 'It did not create expected query using array as the argument.');
+      assert.strictEqual(query, queries.orderByDescArr);
     });
   });
 
   describe('remove', () => {
     it('should create a delete query.', () => {
-      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-      let query        = queryBuilder.remove().where({id: 1}).getQuery().getSQL();
+      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder();
+      let query        = queryBuilder.remove().where({'id': 1}).getQuery().getSQL();
 
-      assert.strictEqual(query, queries.deleteById, 'It did not create expected remove query.');
+      assert.strictEqual(query, queries.deleteById);
     });
   });
 
   describe('where', () => {
     it('should create a select query with a `where` clause.', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-      let query        = queryBuilder.select('t').where({done: true}).getQuery().getSQL();
+      let query        = queryBuilder.select('t').where({'t.done': true}).getQuery().getSQL();
 
-      assert.strictEqual(query, queries.where, 'It did not create expected query with a where clause.');
+      assert.strictEqual(query, queries.where);
     });
 
     it('should create a select query with a `where in` clause.', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-      let query        = queryBuilder.select('t').where({task: ['Pet cat', 'Pet cat again']}).getQuery().getSQL();
+      let query        = queryBuilder.select('t').where({'t.task': ['Pet cat', 'Pet cat again']}).getQuery().getSQL();
 
-      assert.strictEqual(query, queries.whereIn, 'It did not create expected query with a where in clause.');
+      assert.strictEqual(query, queries.whereIn);
     });
 
     it('should create a select query with a `where and` clause.', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-      let query        = queryBuilder.select('t').where({task: 'Rob bank', done: false}).getQuery().getSQL();
+      let query        = queryBuilder.select('t').where({'t.task': 'Rob bank', 't.done': false}).getQuery().getSQL();
 
-      assert.strictEqual(query, queries.whereAnd, 'It did not create expected query with a where clause');
+      assert.strictEqual(query, queries.whereAnd);
     });
 
     it('should create a select query with a `where` clause and an operator.', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
-      let query        = queryBuilder.select('t.task').where({id: {lte: 13}}).getQuery().getSQL();
+      let query        = queryBuilder.select('t.task').where({'t.id': {lte: 13}}).getQuery().getSQL();
 
-      assert.strictEqual(query, queries.whereLTE, 'It did not create expected query with a where <= clause.');
+      assert.strictEqual(query, queries.whereLTE);
     });
   });
 });
