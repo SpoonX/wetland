@@ -30,39 +30,84 @@ describe('QueryBuilder', () => {
   });
 
   describe('join', () => {
+    it('should create a select query with a join clause by specifying the type of join manually', () => {
+        let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
+        let query = queryBuilder.select('task').join('innerJoin', 'list', 'l').getQuery().getSQL();
 
+        assert.strictEqual(query, queries.join, 'It did not create expected query with a join clause.');
+    });
   });
 
   describe('leftJoin', () => {
+    it('should create a query with a left join clause', () => {
+      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
+      let query = queryBuilder.select('t').leftJoin('list', 'l').getQuery().getSQL();
 
+      assert.strictEqual(query, queries.leftJoin, 'It did not create expected query with a left join clause.')
+    });
   });
 
   describe('rightJoin', () => {
+    it('should create a query with a right join clause', () => {
+      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
+      let query = queryBuilder.select('t').rightJoin('list', 'l').getQuery().getSQL();
 
+      assert.strictEqual(query, queries.rightJoin, 'It did not create expected query with a right join clause.')
+    });
   });
 
   describe('innerJoin', () => {
+    it('should create a query with a inner join clause', () => {
+      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
+      let query = queryBuilder.select('t').innerJoin('list', 'l').getQuery().getSQL();
 
+      assert.strictEqual(query, queries.innerJoin, 'It did not create expected query with a inner join clause.')
+    });
   });
 
   describe('leftOuterJoin', () => {
+    it('should create a query with a left outer join clause', () => {
+      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
+      let query = queryBuilder.select('t').leftOuterJoin('list', 'l').getQuery().getSQL();
 
+      assert.strictEqual(query, queries.leftOuterJoin, 'It did not create expected query with a left outer join clause.')
+    });
   });
 
   describe('rightOuterJoin', () => {
+    it('should create a query with a right outer join clause', () => {
+      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
+      let query = queryBuilder.select('t').rightOuterJoin('list', 'l').getQuery().getSQL();
 
+      assert.strictEqual(query, queries.rightOuterJoin, 'It did not create expected query with a right outer join clause.')
+    });
   });
 
   describe('outerJoin', () => {
+    it('should create a query with a outer join clause', () => {
+      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
+      let query        = queryBuilder.select('t').outerJoin('list', 'l').getQuery().getSQL();
 
+      assert.strictEqual(query, queries.outerJoin, 'It did not create expected query with a outer join clause.')
+    });
   });
 
   describe('fullOuterJoin', () => {
+    it('should create a query with a full outer join clause', () => {
+      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
+      let query        = queryBuilder.select('t').fullOuterJoin('list', 'l').getQuery().getSQL();
 
+      assert.strictEqual(query, queries.fullOuterJoin, 'It did not create expected query with a full outer join clause.')
+    });
   });
 
   describe('crossJoin', () => {
+    it('should create a query with a cross join clause', () => {
+      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
+      let query        = queryBuilder.select('t').crossJoin('list', 'l').getQuery().getSQL();
 
+      assert.strictEqual(query, queries.crossJoin, 'It did not create expected query with a cross join clause.')
+    });
   });
 
   describe('getQuery', () => {
