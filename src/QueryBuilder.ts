@@ -39,7 +39,7 @@ export class QueryBuilder<T> {
   /**
    * @type {{}]
    */
-  private appliedPrimaryKeys: {[key: string]: string};
+  private appliedPrimaryKeys: {[key: string]: string} = {};
 
   /**
    * @type {Array}
