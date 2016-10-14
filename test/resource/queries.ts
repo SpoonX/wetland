@@ -15,5 +15,14 @@ export let queries = {
   where         : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` where `done` = true",
   whereIn       : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` where `task` in ('Pet cat', 'Pet cat again')",
   whereAnd      : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` where `task` = 'Rob bank' and `done` = false",
-  whereLTE      : "select `t`.`id` as `t.id`, `t`.`task` as `t.task` from `todo` as `t` where `id` <= 13"
+  whereLTE      : "select `t`.`id` as `t.id`, `t`.`task` as `t.task` from `todo` as `t` where `id` <= 13",
+  join          : "select `t`.`id` as `t.id`, `t`.`task` as `t.task` from `todo` as `t` inner join `list` as `l` on `t`.`list_id` = `l`.`id`",
+  leftJoin      : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` left join `list` as `l` on `t`.`list_id` = `l`.`id`",
+  rightJoin     : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` right join `list` as `l` on `t`.`list_id` = `l`.`id`",
+  innerJoin     : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` inner join `list` as `l` on `t`.`list_id` = `l`.`id`",
+  leftOuterJoin : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` left outer join `list` as `l` on `t`.`list_id` = `l`.`id`",
+  rightOuterJoin: "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` right outer join `list` as `l` on `t`.`list_id` = `l`.`id`",
+  outerJoin     : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` outer join `list` as `l` on `t`.`list_id` = `l`.`id`",
+  fullOuterJoin : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` full outer join `list` as `l` on `t`.`list_id` = `l`.`id`",
+  crossJoin     : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` cross join `list` as `l` on `t`.`list_id` = `l`.`id`"
 };
