@@ -1,16 +1,32 @@
 {
-  "root"         : "./doc",
-  "plugins"      : [
-    "edit-link",
-    "github"
-  ],
-  "pluginsConfig": {
-    "edit-link": {
-      "base" : "https://github.com/SpoonX/wetland/edit/master/doc",
-      "label": "Edit This Page"
+    "plugins": [
+        "edit-link",
+        "github",
+        "theme-api"
+    ],
+    "pluginsConfig": {
+        "edit-link": {
+            "base": "https://github.com/SpoonX/wetland/edit/master/doc",
+            "label": "Edit This Page"
+        },
+        "github": {
+            "url": "https://github.com/spoonx/wetland"
+        },
+        "theme-api": {
+            "languages": [
+                {
+                    "lang"   : "js",
+                    "name"   : "JavaScript",
+                    "default": true
+                },
+                {
+                     "lang": "ts",
+                     "name": "TypeScript"
+                }
+            ],
+            "split": true,
+            "theme": "dark"
+        }
     },
-    "github"   : {
-      "url": "https://github.com/spoonx/wetland"
-    }
-  }
+    "root": "./doc"
 }

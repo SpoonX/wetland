@@ -39,7 +39,7 @@ export class QueryBuilder<T> {
   /**
    * @type {{}]
    */
-  private appliedPrimaryKeys: {[key: string]: string};
+  private appliedPrimaryKeys: {[key: string]: string} = {};
 
   /**
    * @type {Array}
@@ -528,11 +528,11 @@ export class QueryBuilder<T> {
     if (typeof orderBy === 'string') {
       this.statement.orderBy(this.criteria.mapToColumn(orderBy), direction);
     } else if (Array.isArray(orderBy)) {
-      orderBy.forEach(order => this.orderBy(order));
+      orderBy.forEach(order => this.applyOrderBy(order));
     } else if (typeof orderBy === 'object') {
       let property = Object.keys(orderBy)[0];
 
-      this.orderBy(property, orderBy[property]);
+      this.applyOrderBy(property, orderBy[property]);
     }
 
     return this;
