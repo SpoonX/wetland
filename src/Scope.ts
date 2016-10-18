@@ -138,8 +138,14 @@ export class Scope {
    *
    * @returns {Store}
    */
-  public getStore(entity?: EntityInterface): Store {
-    let storeName = entity ? this.manager.getMapping(entity).getStoreName() : null;
+  public getStore(entity?: EntityInterface | string): Store {
+    let storeName = null;
+
+    if (typeof entity === 'string') {
+      storeName = entity;
+    } else if (entity) {
+      storeName = this.manager.getMapping(entity).getStoreName();
+    }
 
     return this.wetland.getStore(storeName);
   }

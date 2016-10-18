@@ -104,6 +104,8 @@ export class EntityRepository<T> {
       });
     }
 
+    let query = queryBuilder.getQuery();
+
     return queryBuilder.getQuery().getResult();
   }
 

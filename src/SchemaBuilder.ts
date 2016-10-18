@@ -1,8 +1,9 @@
-import {Mapping, FieldOptions, Raw, JoinColumn} from './Mapping';
+import {Mapping, FieldOptions, JoinColumn} from './Mapping';
 import {EntityInterface, EntityCtor} from './EntityInterface';
 import * as Knex from 'knex';
 import {Scope} from './Scope';
 import {Store} from './Store';
+import {Raw} from './Raw';
 
 export class SchemaBuilder {
 
