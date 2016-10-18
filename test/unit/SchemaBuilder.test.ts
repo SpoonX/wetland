@@ -1,10 +1,10 @@
 import {assert} from 'chai';
+import * as Promise from 'bluebird';
 import {Wetland} from '../../src/Wetland';
 import {SchemaBuilder} from '../../src/SchemaBuilder';
 import {Store} from '../../src/Store';
 import {Schema} from '../resource/Schema';
 import {schemas} from '../resource/schemas';
-import * as util from 'util';
 
 describe('SchemaBuilder', () => {
   beforeEach(done => {
@@ -12,52 +12,43 @@ describe('SchemaBuilder', () => {
   });
 
   describe('.create()', () => {
-    it('should create my tables (todo)', (done) => {
-      let wetland = new Wetland({
-        entityPath: __dirname + '/../resource/entity/todo',
-        stores    : {
-          defaultStore: {
-            client    : 'mysql',
-            connection: {
-              user    : 'root',
-              host    : '127.0.0.1',
-              database: 'wetland_test'
-            }
-          }
-        }
-      });
-
-      new SchemaBuilder(wetland.getManager()).create().apply().then(() => {
-        Schema.getAllInfo(wetland.getStore().getConnection(Store.ROLE_MASTER)).then(schemaInfo => {
-          assert.deepEqual(schemaInfo, schemas.todo);
-
-          done();
-        }).catch(console.error);
-      }).catch(console.error);
-    });
-
-    it('should create my tables (postal)', (done) => {
-      let wetland = new Wetland({
-        entityPath: __dirname + '/../resource/entity/postal',
-        stores    : {
-          defaultStore: {
-            client    : 'mysql',
-            connection: {
-              user    : 'root',
-              host    : '127.0.0.1',
-              database: 'wetland_test'
-            }
-          }
-        }
-      });
-
-      new SchemaBuilder(wetland.getManager()).create().apply().then(() => {
-        Schema.getAllInfo(wetland.getStore().getConnection(Store.ROLE_MASTER)).then(schemaInfo => {
-          assert.deepEqual(schemaInfo, schemas.postal);
-
-          done();
-        });
-      });
-    });
+    it('should create my tables (todo)', done => testEntities('todo', done));
+    it('should create my tables (postal)', done => testEntities('postal', done));
   });
 });
+
+function testEntities(section, done) {
+  let wetland = new Wetland({
+    entityPath: __dirname + '/../resource/entity/' + section,
+    stores    : {
+      defaultStore: {
+        client    : 'mysql',
+        connection: {
+          user    : 'root',
+          host    : '127.0.0.1',
+          database: 'wetland_test'
+        }
+      }
+    }
+  });
+
+  let connection = wetland.getStore().getConnection(Store.ROLE_MASTER);
+
+  new SchemaBuilder(wetland.getManager()).create().apply().then(() => {
+    return testProperty(connection, section, 'columns', 'columns')
+      .then(() => testProperty(connection, section, 'constraints', 'key_column_usage'))
+      .then(() => testProperty(connection, section, 'referentialConstraints', 'referential_constraints'))
+      .then(() => done())
+      .catch(done);
+  });
+}
+
+function testProperty(connection, section, property, table) {
+  return Promise.all(schemas[section][property].map(target => {
+    return connection
+      .from('information_schema.' + table)
+      .where(target)
+      .where(property === 'columns' ? 'table_schema' : 'constraint_schema', '=', 'wetland_test')
+      .then(result => assert.lengthOf(result, 1, `'${section}' broken with ${JSON.stringify(target)}`));
+  }));
+}

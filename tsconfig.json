@@ -8,7 +8,7 @@
     "module": "commonjs",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "outDir": "build",
+    "outDir": "dist",
     "lib": [
       "es5",
       "es6",

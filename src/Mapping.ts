@@ -5,6 +5,8 @@ import {EntityManager} from './EntityManager';
 import {Scope} from './Scope';
 import {EntityCtor, EntityInterface, ProxyInterface} from './EntityInterface';
 import {ArrayCollection} from './ArrayCollection';
+import {Raw} from './Raw';
+
 
 export class Mapping<T> {
 
@@ -93,6 +95,15 @@ export class Mapping<T> {
    * @returns {Raw}
    */
   public now(): Raw {
+    return Mapping.now();
+  }
+
+  /**
+   * Raw command for current timestamp.
+   *
+   * @returns {Raw}
+   */
+  public static now(): Raw {
     return new Raw('CURRENT_TIMESTAMP');
   }
 
@@ -803,37 +814,6 @@ export class Field {
     this.mapping.joinColumn(this.property, options);
 
     return this;
-  }
-}
-
-/**
- * A raw query
- */
-export class Raw {
-  /**
-   * @type {string}
-   */
-  private query: string;
-
-  /**
-   * @param {string} query
-   */
-  public constructor(query) {
-    this.setQuery(query);
-  }
-
-  /**
-   * @returns {string}
-   */
-  getQuery(): string {
-    return this.query;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setQuery(value: string) {
-    this.query = value;
   }
 }
 
