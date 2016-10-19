@@ -17,3 +17,4 @@ notes.md
 .travis.yml
 .gitignore
 wallaby.js
+yarn.lock

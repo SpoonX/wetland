@@ -1,4 +1,4 @@
-build
+dist
 rlib-cov
 *.seed
 *.log
@@ -17,3 +17,4 @@ node_modules
 .vscode
 notes.md
 _book
+yarn.lock

@@ -3,7 +3,7 @@ import {Store, PoolConfig, ReplicationConfig, SingleConfig} from './Store';
 import {Homefront} from 'homefront';
 import {Scope} from './Scope';
 import {EntityInterface, EntityCtor} from './EntityInterface';
-import {Migrator} from './Migrator';
+import {Migrator} from './Migrator/Migrator';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -11,7 +11,7 @@ export class Wetland {
   /**
    * @type {EntityManager}
    */
-  private manager: EntityManager = new EntityManager(this);
+  private entityManager: EntityManager = new EntityManager(this);
 
   /**
    * @type {Migrator}
@@ -43,11 +43,9 @@ export class Wetland {
   public constructor(config?: Object) {
     this.setupExitListeners();
 
-    if (!config) {
-      return;
+    if (config) {
+      this.config.merge(config);
     }
-
-    this.config.merge(config);
 
     let stores      = this.config.fetch('stores');
     let entities    = this.config.fetch('entities');
@@ -66,27 +64,33 @@ export class Wetland {
       entityPaths.push(entityPath);
     }
 
-    if (entityPaths.length) {
-      entityPaths.forEach(entityPath => {
-        fs.readdirSync(entityPath)
-          .filter(match => match.search(/\.js$/) > -1)
-          .map(entity => entity.replace(/\.js$/, ''))
-          .forEach(entity => {
-            let filePath   = path.join(entityPath, entity);
-            let ToRegister = require(filePath);
-
-            if (typeof ToRegister !== 'function') {
-              ToRegister = ToRegister[entity];
-            }
-
-            if (typeof ToRegister !== 'function') {
-              throw new Error(`Error loading entity '${entity}'. No constructor exported.`);
-            }
-
-            this.registerEntity(ToRegister);
-          });
-      });
+    if (!entityPaths.length) {
+      return;
     }
+
+    entityPaths.forEach(entityPath => {
+      fs.readdirSync(entityPath)
+        .filter(match => match.search(/\.js$/) > -1)
+        .map(entity => entity.replace(/\.js$/, ''))
+        .forEach(entity => {
+          let filePath   = path.join(entityPath, entity);
+          let ToRegister = require(filePath);
+
+          if (typeof ToRegister !== 'function') {
+            ToRegister = ToRegister[entity];
+          }
+
+          if (typeof ToRegister !== 'function') {
+            throw new Error(`Error loading entity '${entity}'. No constructor exported.`);
+          }
+
+          this.registerEntity(ToRegister);
+        });
+    });
+  }
+
+  public registerPlugin(plugin) {
+    plugin.bootstrap(this);
   }
 
   /**
@@ -106,7 +110,7 @@ export class Wetland {
    * @returns {Wetland}
    */
   public registerEntity(entity: EntityCtor<EntityInterface>): Wetland {
-    this.manager.registerEntity(entity);
+    this.entityManager.registerEntity(entity);
 
     return this;
   }
@@ -119,7 +123,7 @@ export class Wetland {
    * @returns {Wetland}
    */
   public registerEntities(entities: Array<EntityCtor<EntityInterface>>): Wetland {
-    this.manager.registerEntities(entities);
+    this.entityManager.registerEntities(entities);
 
     return this;
   }
@@ -192,7 +196,11 @@ export class Wetland {
    * @returns {Scope}
    */
   public getManager(): Scope {
-    return this.manager.createScope();
+    return this.entityManager.createScope();
+  }
+
+  public getEntityManager(): EntityManager {
+    return this.entityManager;
   }
 
   /**

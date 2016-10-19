@@ -1,5 +1,7 @@
 export {SchemaBuilder} from './SchemaBuilder';
-export {Migrator} from './Migrator';
+export {Migrator} from './Migrator/Migrator';
+export {Run} from './Migrator/Run';
+export {Migration} from './Migrator/Migration';
 export {Hydrator} from './Hydrator';
 export {IdentityMap} from './IdentityMap';
 export {EntityInterface, ProxyInterface, EntityCtor} from './EntityInterface';

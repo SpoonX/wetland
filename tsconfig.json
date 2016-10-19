@@ -8,7 +8,11 @@
     "module": "commonjs",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "outDir": "build",
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "wetland": ["src/index"]
+    },
     "lib": [
       "es5",
       "es6",
