@@ -9,6 +9,10 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "wetland": ["src/index"]
+    },
     "lib": [
       "es5",
       "es6",
