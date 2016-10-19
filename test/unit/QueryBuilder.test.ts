@@ -21,7 +21,7 @@ let wetland = new Wetland({
 });
 
 describe('QueryBuilder', () => {
-  describe('createAlias', () => {
+  describe('.createAlias()', () => {
     it('should create an alias', () => {
       let alias = wetland.getManager().getRepository(Todo).getQueryBuilder().createAlias('t');
 
@@ -29,7 +29,7 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('join', () => {
+  describe('.join()', () => {
     it('should create a select query with a join clause by specifying the type of join manually', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('task').join('innerJoin', 'list', 'l').getQuery().getSQL();
@@ -39,7 +39,7 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('leftJoin', () => {
+  describe('.leftJoin()', () => {
     it('should create a query with a left join clause', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('t').leftJoin('list', 'l').getQuery().getSQL();
@@ -48,7 +48,7 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('rightJoin', () => {
+  describe('.rightJoin()', () => {
     it('should create a query with a right join clause', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('t').rightJoin('list', 'l').getQuery().getSQL();
@@ -57,7 +57,7 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('innerJoin', () => {
+  describe('.innerJoin()', () => {
     it('should create a query with a inner join clause', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('t').innerJoin('list', 'l').getQuery().getSQL();
@@ -66,7 +66,7 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('leftOuterJoin', () => {
+  describe('.leftOuterJoin()', () => {
     it('should create a query with a left outer join clause', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('t').leftOuterJoin('list', 'l').getQuery().getSQL();
@@ -75,7 +75,7 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('rightOuterJoin', () => {
+  describe('.rightOuterJoin()', () => {
     it('should create a query with a right outer join clause', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('t').rightOuterJoin('list', 'l').getQuery().getSQL();
@@ -84,7 +84,7 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('outerJoin', () => {
+  describe('.outerJoin()', () => {
     it('should create a query with a outer join clause', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('t').outerJoin('list', 'l').getQuery().getSQL();
@@ -93,7 +93,7 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('fullOuterJoin', () => {
+  describe('.fullOuterJoin()', () => {
     it('should create a query with a full outer join clause', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('t').fullOuterJoin('list', 'l').getQuery().getSQL();
@@ -102,7 +102,7 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('crossJoin', () => {
+  describe('.crossJoin()', () => {
     it('should create a query with a cross join clause', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('t').crossJoin('list', 'l').getQuery().getSQL();
@@ -111,14 +111,14 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('getQuery', () => {
+  describe('.getQuery()', () => {
     it('should return a Query instance', () => {
       let getQuery = wetland.getManager().getRepository(Todo).getQueryBuilder().getQuery();
       assert.instanceOf(getQuery, Query);
     });
   });
 
-  describe('select', () => {
+  describe('.select()', () => {
     it('should create a query without having to specify the columns', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('t').getQuery().getSQL();
@@ -148,7 +148,7 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('insert', () => {
+  describe('.insert()', () => {
     it('should create an insert query', () => {
       let toInsert     = {'task': 'Bake cake', 'done': true};
       let keys         = ['task', 'done'];
@@ -161,7 +161,7 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('update', () => {
+  describe('.update()', () => {
     it('should created an update query', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder();
       let query        = queryBuilder.update({'done': true}).where({'id': 1}).getQuery().getSQL();
@@ -170,7 +170,7 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('limit', () => {
+  describe('.limit()', () => {
     it('should create a query containing a limit clause', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('t').limit(69).getQuery().getSQL();
@@ -179,7 +179,7 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('offset', () => {
+  describe('.offset()', () => {
     it('should create a query that contains an offset following the limit clause', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('t.done').limit(5).offset(15).getQuery().getSQL();
@@ -188,7 +188,7 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('orderBy', () => {
+  describe('.orderBy()', () => {
     it('should create a query that sorts by a property (asc)', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('t').orderBy('t.task').getQuery().getSQL();
@@ -218,7 +218,7 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('remove', () => {
+  describe('.remove()', () => {
     it('should create a delete query.', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder();
       let query        = queryBuilder.remove().where({'id': 1}).getQuery().getSQL();
@@ -227,7 +227,7 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('where', () => {
+  describe('.where()', () => {
     it('should create a select query with a `where` clause.', () => {
       let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
       let query        = queryBuilder.select('t').where({'t.done': true}).getQuery().getSQL();
