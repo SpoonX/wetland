@@ -1,6 +1,6 @@
 {
   "name": "wetland",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "An enterprise grade ORM for Node.js.",
   "main": "./dist/js/src/index.js",
   "typings": "./dist/definitions/index.d.ts",
