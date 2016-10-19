@@ -5,29 +5,24 @@
 [![Dependency Status](https://gemnasium.com/badges/github.com/SpoonX/wetland.svg)](https://gemnasium.com/github.com/SpoonX/wetland)
 [![Gitter chat](https://badges.gitter.im/SpoonX/Dev.svg)](https://gitter.im/SpoonX/Dev)
 
-Wetland is an enterprise grade object-relational mapper (ORM) for node.js.
-
-_**Note:** This module is under active development.
-While it's usable and well tested, some key features are still in progress._
+Wetland is a modern, and enterprise grade object-relational mapper (ORM) for node.js.
+It allows you to get started quickly, without losing flexibility or features.
 
 ## Features
-The major features this ORM provides are listed below.
-Looking at the tests will provide more detailed information, pending full documentation.
+Some of the major features provided include:
 
 * Unit of work
+* Migrations
 * Transactions
 * Entity manager
-* Manager scopes
-* Cascade persist
+* Cascaded persists
 * Deep joins
 * Repositories
 * QueryBuilder
-* Mapping
-* MetaData
-* Entity proxy
-* Collection proxy
-* Criteria parser
-* More...
+* Entity mapping
+* Optimized state manager
+* Recipe based hydration
+* [More...](https://wetland.spoonx.org)
 
 ## Installation
 To install wetland run the following command:
@@ -36,9 +31,15 @@ To install wetland run the following command:
 
 Typings are provided by default for TypeScript users. No additional typings need installing.
 
+## Compatibility
+
+* All operating systems
+* Node.js 6.0+
+
 ## Usage
 
-Simple implementation example:
+The following is a snippet to give you an idea what it's like to work with wetland.
+For a much more detailed explanation, [head to the documention.](https://wetland.spoonx.org).
 
 ```js
 const Wetland = require('wetland').Wetland;
@@ -74,5 +75,3 @@ repository.find({name: 'cake'}, {joins: ['candles', 'baker', 'baker.address']})
     // ...
   });
 ```
-
-Additional documentation is in progress.
