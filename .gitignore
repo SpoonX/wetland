@@ -1,4 +1,4 @@
-build
+dist
 rlib-cov
 *.seed
 *.log
