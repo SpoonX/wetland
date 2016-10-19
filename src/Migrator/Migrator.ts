@@ -129,7 +129,7 @@ export class Migrator {
    */
   public up(action: string): Bluebird<any> {
     return Bluebird.all([this.migrationTable.getLastMigrationName(), this.migrationFile.getMigrations()])
-      .spread((name, migrations: Array<string>) => migrations[migrations.indexOf(name) + 1])
+      .spread((name, migrations: Array<string>) => migrations[migrations.indexOf((name as string)) + 1])
       .then(migrations => this.run(Migrator.DIRECTION_UP, action, migrations));
   }
 
@@ -154,7 +154,7 @@ export class Migrator {
    */
   public latest(action: string = Migrator.ACTION_RUN): Bluebird<any> {
     return Bluebird.all([this.migrationTable.getLastMigrationName(), this.migrationFile.getMigrations()])
-      .spread((name, migrations: Array<string>) => migrations.slice(migrations.indexOf(name) + 1))
+      .spread((name, migrations: Array<string>) => migrations.slice(migrations.indexOf((name as string)) + 1))
       .then(migrations => this.run(Migrator.DIRECTION_UP, action, migrations));
   }
 
