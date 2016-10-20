@@ -27,7 +27,7 @@ describe('MigrationFile', () => {
 
   describe('.getConfig()', () => {
     it('should get the config', () => {
-      let config        = {};
+      let config        = {directory: ''};
       let migrationFile = new MigrationFile(config);
 
       assert.deepEqual(migrationFile.getConfig(), config);
