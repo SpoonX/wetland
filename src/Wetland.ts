@@ -5,6 +5,7 @@ import {Scope} from './Scope';
 import {EntityInterface, EntityCtor} from './EntityInterface';
 import {Migrator} from './Migrator/Migrator';
 import * as fs from 'fs';
+import * as mkdirp from 'mkdirp';
 import * as path from 'path';
 
 export class Wetland {
@@ -23,6 +24,7 @@ export class Wetland {
    */
   private config: Homefront = new Homefront({
     debug        : false,
+    dataDirectory: path.resolve(process.cwd(), '.data'),
     defaultStore : 'defaultStore',
     entityManager: {
       refreshCreated: true,
@@ -41,6 +43,8 @@ export class Wetland {
    * @param {{}} config
    */
   public constructor(config?: Object) {
+    this.ensureDataDirectory(this.config.fetch('dataDirectory'));
+
     this.setupExitListeners();
 
     if (config) {
@@ -54,6 +58,8 @@ export class Wetland {
 
     if (stores) {
       this.registerStores(stores);
+    } else {
+      this.registerDefaultStore();
     }
 
     if (entities) {
@@ -87,10 +93,6 @@ export class Wetland {
           this.registerEntity(ToRegister);
         });
     });
-  }
-
-  public registerPlugin(plugin) {
-    plugin.bootstrap(this);
   }
 
   /**
@@ -244,5 +246,42 @@ export class Wetland {
    */
   private setupExitListeners() {
     process.on('beforeExit', () => this.destroyConnections());
+  }
+
+  /**
+   * Register a default (fallback) store (sqlite3).
+   */
+  private registerDefaultStore() {
+    try {
+      require('sqlite3');
+    } catch (error) {
+      throw new Error(
+        'No stores configured and sqlite3 not found as dependency. ' +
+        'Configure a store, or run `npm i --save sqlite3`.'
+      );
+    }
+
+    this.registerStore(this.config.fetch('defaultStore'), {
+      client          : 'sqlite3',
+      useNullAsDefault: true,
+      connection      : {filename: `${this.config.fetch('dataDirectory')}/wetland.sqlite`}
+    });
+  }
+
+  /**
+   * Ensure that the data directory exists.
+   *
+   * @param {string} dataDirectory
+   */
+  private ensureDataDirectory(dataDirectory: string) {
+    try {
+      fs.statSync(dataDirectory);
+    } catch (error) {
+      try {
+        mkdirp.sync(dataDirectory);
+      } catch (error) {
+        throw new Error(`Unable to create data directory at '${dataDirectory}'`);
+      }
+    }
   }
 }
