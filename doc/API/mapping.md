@@ -1,10 +1,11 @@
 # Mapping
-
-As demonstrated on the previous chapter, an entity is a class that has a static method called `setMapping()`. This method will be used by wetland to create your entity's schema. In this chapter we will describe all the methods you can use to create your schema or to fetch information about your entity.
+The mapping methods are used to create the entity's schema. Usage examples can be found on our [Cookbook.]()
 
 {% method %}
 ## .addRelation()
-This method adds a relation to the mapping. The options available to create your relationship are described [here.](#relationship) Although you can add your relations using this method, we recommend you to use `.oneToOne()`, `.oneToMany()`, `.manyToMany()` or `.manyToOne()` instead, for practical reasons.
+This method adds a relation to the mapping, although we recommend you to use `.oneToOne()`, `.oneToMany()`, 
+`.manyToMany()` or `.manyToOne()` instead, for practical reasons.
+The options available to create your relationship are described [here.](#relationship)
 
 {% common %}
 ```js
@@ -14,7 +15,9 @@ mapping.addRelation('property', {targetedEntity: 'target', type: 'oneToMany', in
 
 {% method %}
 ## .cascade() 
-Sets cascade options to `persist`, `delete` or both. The cascade options must be passed as an array, regardless of how many cascade options the property has. 
+Sets cascade options to `persist`, `delete` or both.
+The cascade options must be passed as an array, regardless of how many cascade options the property has. 
+
 {% common %}
 ```js
 mapping.cascade('property', ['persist']);
@@ -25,7 +28,9 @@ mapping.forProperty('property').cascade(['persist']);
 
 {% method %}
 ## .entity()
-Maps an entity, allowing you to create a custom attributes for your entity. By using this method you can customize the `repository`, `name`, `tableName` and `store` attributes of your entity.
+Maps an entity, allowing you to create a custom attributes for your entity.
+By using this method you can customize the `repository`, `name`, `tableName` and `store` attributes of your entity.
+
 {% common %}
 ```js
 mapping.entity({repository: MyRepository, name: 'custom', store: MyOtherStore});
@@ -34,7 +39,8 @@ mapping.entity({repository: MyRepository, name: 'custom', store: MyOtherStore});
 
 {% method %}
 ## .extendField()
-Extend the field options for a property. This method is used internally by other methods in the Mapping class. The field options can be found [here.](#field)
+Extend the field options for a property. This method is used internally by other methods in the Mapping class.
+The field options can be found [here.](#field)
 
 {% common %}
 ```js
@@ -66,7 +72,9 @@ forEntity('entity');
 
 {% method %}
 ## .forProperty()
-Convenience method to map a property. This method stores the name of the property, erasing the need to specify a target when chaining manipulating  methods to map a property.
+Convenience method to map a property.
+This method stores the name of the property, erasing the need to specify a target when chaining manipulating  
+methods to map a property.
 
 {% common %}
 ```js
@@ -76,7 +84,8 @@ mapping.forProperty('property');
 
 {% method %}
 ## .generatedValue()
-This method maps the generated values of a property. It calls `.extendField()` on the property, adding a type to the `generatedValue` field.
+This method maps the generated values of a property.
+It calls `.extendField()` on the property, adding a type to the `generatedValue` field.
 
 {% common %}
 ```js
@@ -265,7 +274,8 @@ mapping.getUniqueConstraints();
 
 {% method %}
 ## .increments()
-Convenience method to set auto increment. This method calls `.extendField()` on the property, setting the `generatedValue` field option to `autoIncrement`. 
+Convenience method to set auto increment.
+This method calls `.extendField()` on the property, setting the `generatedValue` field option to `autoIncrement`. 
 
 {% common %}
 ```js
@@ -277,7 +287,8 @@ mapping.forProperty('property').increments();
 
 {% method %}
 ## .index()
-Maps an index. If you decide not to choose your index name, wetland will do it for you. The index name will then be `'idx_'` followed by your property names separated by an underscore.
+Maps an index. If you decide not to choose your index name, wetland will do it for you.
+The index name will then be `'idx_'` followed by your property names separated by an underscore.
 
 {% common %}
 ```js
@@ -306,7 +317,9 @@ mapping.isRelation('property');
 
 {% method %}
 ## .joinColumn()
-Register a join column. This method calls `.extendField()` on the property, assigning the options given to the `joinColumn` field. The full list of options can be found [here.](#joinColumn)
+Register a join column.
+This method calls `.extendField()` on the property, assigning the options given to the `joinColumn` field.
+The full list of options can be found [here.](#join-column)
 
 {% common %}
 ```js
@@ -318,7 +331,9 @@ mapping.forProperty('property').joinColumn({});
 
 {% method %}
 ## .joinTable()
-Register a join table. This method also uses `.extendField()` to assign the options given to the `joinTable` field. The full list of options can be found [here.](#joinTable)
+Register a join table.
+This method also uses `.extendField()` to assign the options given to the `joinTable` field.
+The full list of options can be found [here.](#join-table)
 
 {% common %}
 ```js
@@ -330,7 +345,9 @@ mapping.forProperty('property').joinTable({});
 
 {% method %}
 ## .manyToMany()
-Convenience method to add a many-to-many relationship. A property in this kind of relationship can be either `mappedBy` or `inversedBy`, depending on if it is or not on the owning side, respectively. 
+Maps a many-to-many relationship.
+A property in this kind of relationship can be either `mappedBy` or `inversedBy`, 
+depending on if it is or not on the owning side, respectively. 
 
 {% common %}
 ```js
@@ -376,7 +393,8 @@ mapping.forProperty('property').oneToMany({targetEntity: 'target', mappedBy: 'fi
 
 {% method %}
 ## .oneToOne()
-Maps a one to one relationship. A property in this kind of relationship can be either `mappedBy` or `inversedBy`, just like the many-to-many example. 
+Maps a one to one relationship.
+A property in this kind of relationship can be either `mappedBy` or `inversedBy`, just like the many-to-many example. 
 
 {% common %}
 ```js
@@ -400,7 +418,9 @@ mapping.forProperty('property').primary();
 
 {% method %}
 ## .uniqueConstraint()
-Maps a unique constraint. If you don't wish to use a custom name for your constraint, wetland will use your property names to name it for you, separating them with an underscore and adding `'_unique'` at the end.
+Maps a unique constraint.
+If you don't wish to use a custom name for your constraint, wetland will use your property names to name it for you, 
+separating them with an underscore and adding `'_unique'` at the end.
 
 {% common %}
 ```js
@@ -417,7 +437,7 @@ mapping.uniqueConstraint(['property1', 'property2']);
 ```
 {% endmethod %}
 
-### <a name='field'></a>Field
+### Field
 |    Options     |   Type  |
 |:---------------|:-------:|
 | cascades       | array   |
@@ -439,7 +459,7 @@ mapping.uniqueConstraint(['property1', 'property2']);
 | unsigned       | boolean |
 | [key: string]  | any     |
 
-### <a name='joinColumn'></a>Join column
+### Join column
 |     Options          |   Type  |
 |:---------------------|:-------:|
 | indexName            | string  |
@@ -452,14 +472,14 @@ mapping.uniqueConstraint(['property1', 'property2']);
 | type                 | string  |
 | unique               | boolean |
 
-### <a name='joinTable'></a>Join table
+### Join table
 |    Options         | Type   |
 |:-------------------|:------:|
 | inverseJoinColumns | array  |
 | joinColumns        | array  |
 | name               | string |
 
-### <a name='relationship'></a>Relationship
+### Relationship
 |   Options    |       Type        |
 |:-------------|:-----------------:|
 | inversedBy   | string            |
