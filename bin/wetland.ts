@@ -14,6 +14,26 @@ program.version(require(__dirname + '/../../package.json').version)
   .option('-d, --dump-sql', 'dump the queries for the migration(s)')
   .usage('<command> [options]');
 
+function logExamples() {
+  console.log('  Examples:');
+  console.log('');
+  console.log('    $ wetland migrator:create create_user');
+  console.log('    $ wetland migrator:up --run');
+  console.log('    $ wetland migrator:down --dump-sql');
+  console.log('    $ wetland migrator:status');
+  console.log('');
+}
+
+function showUnknown(command?: string) {
+  if (command) {
+    console.log(colors.red(`\n  Unknown command '${command}'.`));
+  } else {
+    console.log(colors.red(`\n  No command provided.`));
+  }
+  program.outputHelp();
+  logExamples();
+}
+
 function getMigrator(provided: string): Migrator {
   let wetland;
 
@@ -149,14 +169,14 @@ program.command('migrator:down').action(options => migrate(options, 'down'));
 program.command('migrator:latest').action(options => migrate(options, 'latest'));
 program.command('migrator:revert').action(options => migrate(options, 'revert'));
 
-program.on('--help', function () {
-  console.log('  Examples:');
-  console.log('');
-  console.log('    $ wetland migrator:create create_user');
-  console.log('    $ wetland migrator:up --run');
-  console.log('    $ wetland migrator:down --dump-sql');
-  console.log('    $ wetland migrator:status');
-  console.log('');
+if (!process.argv.slice(2).length) {
+  showUnknown();
+}
+
+program.on('*', command => {
+  showUnknown(command);
 });
+
+program.on('--help', logExamples);
 
 program.parse(process.argv);
