@@ -18,3 +18,4 @@ notes.md
 .gitignore
 wallaby.js
 yarn.lock
+.data
