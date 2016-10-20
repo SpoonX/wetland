@@ -118,6 +118,10 @@ export class Run {
    * @returns {Run}
    */
   private loadMigrations(migrations: Array<string>): this {
+    if (migrations.length === 0) {
+      return this;
+    }
+
     this.migrations = migrations.map(migration => {
       if (!migration) {
         throw new Error('Invalid migration name supplied. Expected string.');
