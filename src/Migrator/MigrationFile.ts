@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as mkdirp from 'mkdirp';
 import * as Promise from 'bluebird';
 import {MigratorConfigInterface} from './MigratorConfigInterface';
 
@@ -14,6 +15,8 @@ export class MigrationFile {
    */
   public constructor(config: MigratorConfigInterface) {
     this.config = config;
+
+    this.ensureMigrationDirectory();
   }
 
   /**
@@ -33,18 +36,28 @@ export class MigrationFile {
    * @returns {Bluebird}
    */
   public create(name: string): Promise<any> {
-    let sourceFile  = `${__dirname}/templates/migration.${this.config.extension}.js`;
+    let sourceFile  = `${__dirname}/templates/migration.${this.config.extension}.dist`;
     let targetFile  = path.join(this.config.directory, `${this.makeMigrationName(name)}.${this.config.extension}`);
     let readStream  = fs.createReadStream(sourceFile);
     let writeStream = fs.createWriteStream(targetFile);
 
-    readStream.pipe(writeStream);
-
     return new Promise((resolve, reject) => {
+      readStream.pipe(writeStream);
       readStream.on('error', reject);
       writeStream.on('error', reject);
-      writeStream.on('close', () => resolve());
+      writeStream.on('close', () => resolve(targetFile));
     });
+  }
+
+  /**
+   * Make sure the migration directory exists.
+   */
+  private ensureMigrationDirectory() {
+    try {
+      fs.statSync(this.config.directory);
+    } catch (error) {
+      mkdirp.sync(this.config.directory);
+    }
   }
 
   /**
@@ -58,7 +71,8 @@ export class MigrationFile {
 
       return contents
         .filter(migration => migration.search(regexp) > -1)
-        .map(migration => migration.replace(regexp, ''));
+        .map(migration => migration.replace(regexp, ''))
+        .sort();
     });
   }
 
