@@ -1,6 +1,6 @@
 {
   "name": "wetland",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "bin" : {"wetland" : "./dist/bin/wetland.js"},
   "description": "An enterprise grade ORM for Node.js.",
   "main": "./dist/js/src/index.js",
