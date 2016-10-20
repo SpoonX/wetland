@@ -110,6 +110,24 @@ export class Migrator {
   }
 
   /**
+   * Get all migrations from the directory.
+   *
+   * @returns {Promise<Array<string>>}
+   */
+  public allMigrations(): Bluebird<Array<string>|null> {
+    return this.migrationFile.getMigrations();
+  }
+
+  /**
+   * Get all applies migrations.
+   *
+   * @returns {Promise<Array<Object>|null>}
+   */
+  public appliedMigrations(): Promise<Array<Object>|null> {
+    return this.migrationTable.getAllRun();
+  }
+
+  /**
    * Create a new migration file.
    *
    * @param {string} name
@@ -179,6 +197,10 @@ export class Migrator {
    * @returns {Promise}
    */
   public run(direction: string, action: string, migrations: string | Array<string>): Bluebird<string|any>|Promise<any> {
+    if (!migrations || (Array.isArray(migrations) && migrations.length === 0)) {
+      return Promise.resolve(null);
+    }
+
     if (!Array.isArray(migrations)) {
       migrations = [migrations as string];
     }
@@ -189,7 +211,8 @@ export class Migrator {
       return this.migrationTable.getLock()
         .then(() => run.run())
         .then(() => this.migrationTable.saveRun(direction, migrations as Array<string>))
-        .then(() => this.migrationTable.freeLock());
+        .then(() => this.migrationTable.freeLock())
+        .then(() => migrations.length);
     }
 
     if (action === Migrator.ACTION_GET_SQL) {
