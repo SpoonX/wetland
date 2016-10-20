@@ -163,6 +163,18 @@ export class MigrationTable {
   }
 
   /**
+   * Get the names of the migrations that were run.
+   *
+   * @returns {Promise<Array<string>|null>}
+   */
+  public getAllRun(): Promise<Array<Object>|null> {
+    return this.ensureMigrationTables().then(() => {
+      return this.connection(this.tableName)
+        .orderBy('id', 'desc') as Promise<Array<Object>>;
+    });
+  }
+
+  /**
    * Save the last run.
    *
    * @param {string}   direction
