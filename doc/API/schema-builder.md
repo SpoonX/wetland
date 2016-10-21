@@ -13,7 +13,7 @@ schemaBuilder.apply();
 
 {% method %}
 ## .bigInteger()
-Define a column type as `BIGINT`. Field object is defined by the [field options.](mapping.md#field)
+Define a column type as `BIGINT`. Field object is defined by the [field options.](./mapping.md#field-options)
 
 {% common %}
 ```js
