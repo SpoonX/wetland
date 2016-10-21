@@ -5,7 +5,7 @@ The mapping methods are used to create the entity's schema. Usage examples can b
 ## .addRelation()
 This method adds a relation to the mapping, although we recommend you to use `.oneToOne()`, `.oneToMany()`, 
 `.manyToMany()` or `.manyToOne()` instead, for practical reasons.
-The options available to create your relationship are described [here.](#relationship)
+The options available to create your relationship are described [here.](#relationship-options)
 
 {% common %}
 ```js
@@ -40,7 +40,7 @@ mapping.entity({repository: MyRepository, name: 'custom', store: MyOtherStore});
 {% method %}
 ## .extendField()
 Extend the field options for a property. This method is used internally by other methods in the Mapping class.
-The field options can be found [here.](#field)
+The field options can be found [here.](#field-options)
 
 {% common %}
 ```js
@@ -50,7 +50,7 @@ mapping.extendField('property', {type: 'integer'});
 
 {% method %}
 ## .field() 
-Maps a field for an entity. [Here](#field) is the list of field options you can use to map your property accordingly.
+Maps a field for an entity. [Here](#field-options) is the list of field options you can use to map your property accordingly.
 
 {% common %} 
 ```js
@@ -319,7 +319,7 @@ mapping.isRelation('property');
 ## .joinColumn()
 Register a join column.
 This method calls `.extendField()` on the property, assigning the options given to the `joinColumn` field.
-The full list of options can be found [here.](#join-column)
+The full list of options can be found [here.](#join-column-options)
 
 {% common %}
 ```js
@@ -333,7 +333,7 @@ mapping.forProperty('property').joinColumn({});
 ## .joinTable()
 Register a join table.
 This method also uses `.extendField()` to assign the options given to the `joinTable` field.
-The full list of options can be found [here.](#join-table)
+The full list of options can be found [here.](#join-table-options)
 
 {% common %}
 ```js
@@ -437,7 +437,7 @@ mapping.uniqueConstraint(['property1', 'property2']);
 ```
 {% endmethod %}
 
-### Field
+### Field options
 |    Options     |   Type  |
 |:---------------|:-------:|
 | cascades       | array   |
@@ -459,7 +459,7 @@ mapping.uniqueConstraint(['property1', 'property2']);
 | unsigned       | boolean |
 | [key: string]  | any     |
 
-### Join column
+### Join column options
 |     Options          |   Type  |
 |:---------------------|:-------:|
 | indexName            | string  |
@@ -472,14 +472,14 @@ mapping.uniqueConstraint(['property1', 'property2']);
 | type                 | string  |
 | unique               | boolean |
 
-### Join table
+### Join table options
 |    Options         | Type   |
 |:-------------------|:------:|
 | inverseJoinColumns | array  |
 | joinColumns        | array  |
 | name               | string |
 
-### Relationship
+### Relationship options
 |   Options    |       Type        |
 |:-------------|:-----------------:|
 | inversedBy   | string            |

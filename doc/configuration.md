@@ -129,7 +129,7 @@ const wetland = new Wetland({
 
 {% method %}
 ## Debug
-To debug, simply set `wetland.debug` to true.
+For debugging, simply set `wetland.debug` to true.
 
 {% common %}
 ```js
@@ -141,6 +141,9 @@ const wetland = new Wetland({
 
 {% method %}
 ## Migrator
+To configure a migration, change the properties on `wetland.migrator`. The options for the migrator config 
+can be found on the Migrator API.
+[//]: #anchor
 
 {% common %}
 ```js

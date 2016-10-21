@@ -110,7 +110,7 @@ scope.getStore(entity);
 
 {% method %}
 ## .getUnityOfWork()
-Returns an instance of unit of work. The methods of the unit of work are listed and described [here.](unitOfWork.md) 
+Returns an instance of unit of work. The methods of the unit of work are listed and described [here.](./unit-of-work.md)
 
 {% common %}
 ```js

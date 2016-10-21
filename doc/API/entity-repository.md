@@ -35,3 +35,14 @@ Gets a new query builder. Optionally you can create your alias by passing a stri
 entityRepository.getQueryBuilder('u');
 ```
 {% endmethod %}
+
+#### Find options
+
+|  Options  |                Type                         |
+|:----------|:-------------------------------------------:|
+| orderBy   | any                                         |
+| alias     | string                                      |
+| limit     | number                                      |
+| offset    | number                                      |
+| debug     | boolean                                     |
+| join      | object,  array of strings, array of objects |
