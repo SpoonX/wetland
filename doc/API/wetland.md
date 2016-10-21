@@ -1,5 +1,5 @@
 # Wetland
-Through the Wetland class we are able to connect with the database, 
+Through wetland we are able to connect with the database,
 register entities and access methods that belong to different classes throughout the ORM. 
 Here we are going to describe all of its methods and how to use them.
 
@@ -40,7 +40,7 @@ wetland.getManager();
 
 {% method %}
 ## .getMigrator()
-This method returns an instance of the Migrator class, that you can use to create your database migrations. 
+This method returns an instance of migrator, that you can use to create and run your database migrations. 
 
 {% common %}
 ```js
