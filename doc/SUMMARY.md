@@ -10,6 +10,7 @@
   * [Entity Manager](API/entity-manager.md)
   * [Entity Repository](API/entity-repository.md)
   * [Mapping](API/mapping.md)
+  * [Migrator](API/migrator.md)
   * [Query Builder](API/query-builder.md)
   * [Schema Builder](API/schema-builder.md)
   * [Scope](API/scope.md)
