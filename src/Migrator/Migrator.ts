@@ -119,7 +119,7 @@ export class Migrator {
   }
 
   /**
-   * Get all applies migrations.
+   * Get all applied migrations.
    *
    * @returns {Promise<Array<Object>|null>}
    */
