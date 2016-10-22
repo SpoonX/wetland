@@ -2,11 +2,8 @@ import {Homefront} from 'homefront';
 import {EntityRepository} from './EntityRepository';
 import {MetaData} from './MetaData';
 import {EntityManager} from './EntityManager';
-import {Scope} from './Scope';
 import {EntityCtor, EntityInterface, ProxyInterface} from './EntityInterface';
 import {ArrayCollection} from './ArrayCollection';
-import {Raw} from './Raw';
-
 
 export class Mapping<T> {
 
@@ -50,6 +47,16 @@ export class Mapping<T> {
   private target: EntityCtor<T>;
 
   /**
+   * @type {EntityManager}
+   */
+  private entityManager: EntityManager;
+
+  /**
+   * @type {Array}
+   */
+  private stagedMappings: Array<{method: string, parameters: any}> = [];
+
+  /**
    * Get the mapping for a specific entity.
    *
    * @param {EntityCtor} target
@@ -90,21 +97,67 @@ export class Mapping<T> {
   }
 
   /**
+   * Set the entity manager target was registered to.
+   *
+   * @param {EntityManager} entityManager
+   *
+   * @returns {Mapping}
+   */
+  public setEntityManager(entityManager: EntityManager): this {
+    this.entityManager = entityManager;
+
+    this.applyStagedMappings();
+
+    return this;
+  }
+
+  /**
+   * Apply staged mappings.
+   *
+   * @returns {Mapping}
+   */
+  private applyStagedMappings(): this {
+    this.stagedMappings.forEach(stagedMapping => {
+      this[stagedMapping.method](...stagedMapping.parameters);
+    });
+
+    return this;
+  }
+
+  /**
+   * Stage given method, or get the entity manager based on the presence of the entity manager.
+   *
+   * @param {string} method     The method to call.
+   * @param {*}      parameters The arguments to call the method with.
+   *
+   * @returns {EntityManager}
+   */
+  private stageOrGetManager(method: string, parameters: any): EntityManager {
+    if (!this.entityManager) {
+      this.stagedMappings.push({method, parameters});
+
+      return;
+    }
+
+    return this.entityManager;
+  }
+
+  /**
    * Raw command for current timestamp.
    *
-   * @returns {Raw}
+   * @returns {{}}
    */
-  public now(): Raw {
+  public now(): {__raw: string} {
     return Mapping.now();
   }
 
   /**
    * Raw command for current timestamp.
    *
-   * @returns {Raw}
+   * @returns {{}}
    */
-  public static now(): Raw {
-    return new Raw('CURRENT_TIMESTAMP');
+  public static now(): {__raw: string} {
+    return {__raw: 'CURRENT_TIMESTAMP'};
   }
 
   /**
@@ -593,20 +646,19 @@ export class Mapping<T> {
   /**
    * Get the join table for the relationship mapped via property.
    *
-   * @param {string}              property
-   * @param {EntityManager|Scope} entityManager
+   * @param {string} property
    *
    * @returns {JoinTable}
    */
-  public getJoinTable(property: string, entityManager: EntityManager| Scope): JoinTable {
+  public getJoinTable(property: string): JoinTable {
     let field       = this.mapping.fetchOrPut(`fields.${property}`, {});
     field.joinTable = field.joinTable || {};
 
-    if (!entityManager) {
-      throw new Error('EntityManager is required as a second argument for getJoinTable.');
+    if (!this.entityManager) {
+      throw new Error('EntityManager is required on the mapping. Make sure you registered the entity.');
     }
 
-    let relationMapping = Mapping.forEntity(entityManager.resolveEntityReference(field.relationship.targetEntity));
+    let relationMapping = Mapping.forEntity(this.entityManager.resolveEntityReference(field.relationship.targetEntity));
     let ownTableName    = this.getTableName();
     let withTableName   = relationMapping.getTableName();
     let ownPrimary      = this.getPrimaryKeyField();
@@ -826,7 +878,7 @@ export interface FieldOptions {
   generatedValue?: string,
   scale?: number,
   nullable?: boolean,
-  defaultTo?: any | Raw,
+  defaultTo?: any | Object,
   unsigned?: boolean,
   comment?: string,
   size?: number,

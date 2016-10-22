@@ -22,7 +22,7 @@ export class EntityManager {
    *
    * @type {{}}
    */
-  private entities: {[key: string]: EntityCtor<EntityInterface>} = {};
+  private entities: {[key: string]: {entity: EntityCtor<EntityInterface>, mapping: Mapping<EntityInterface>}} = {};
 
   /**
    * Construct a new core entity manager.
@@ -66,7 +66,7 @@ export class EntityManager {
       throw new Error(`No entity found for "${name}".`);
     }
 
-    return entity;
+    return entity.entity;
   }
 
   /**
@@ -74,7 +74,7 @@ export class EntityManager {
    *
    * @returns {{}}
    */
-  public getEntities(): {[key: string]: EntityCtor<EntityInterface>} {
+  public getEntities(): {[key: string]: {entity: EntityCtor<EntityInterface>, mapping: Mapping<EntityInterface>}} {
     return this.entities;
   }
 
@@ -86,11 +86,13 @@ export class EntityManager {
    * @returns {EntityManager}
    */
   public registerEntity<T>(entity: EntityCtor<T> & EntityInterface): EntityManager {
-    this.entities[this.getMapping(entity).getEntityName()] = entity;
+    let mapping = this.getMapping(entity).setEntityManager(this);
 
     if (typeof entity.setMapping === 'function') {
-      entity.setMapping(Mapping.forEntity(this.resolveEntityReference(entity)));
+      entity.setMapping(mapping);
     }
+
+    this.entities[mapping.getEntityName()] = {entity, mapping};
 
     return this;
   }

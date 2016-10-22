@@ -141,9 +141,9 @@ export class QueryBuilder<T> {
       let joinTable;
 
       if (join.inversedBy) {
-        joinTable = owningMapping.getJoinTable(property, this.entityManager);
+        joinTable = owningMapping.getJoinTable(property);
       } else {
-        joinTable = targetMapping.getJoinTable(join.mappedBy, this.entityManager);
+        joinTable = targetMapping.getJoinTable(join.mappedBy);
       }
 
       let joinTableAlias = this.createAlias(joinTable.name);

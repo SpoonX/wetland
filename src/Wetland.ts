@@ -201,6 +201,11 @@ export class Wetland {
     return this.entityManager.createScope();
   }
 
+  /**
+   * Get the root entity manager.
+   *
+   * @returns {EntityManager}
+   */
   public getEntityManager(): EntityManager {
     return this.entityManager;
   }
