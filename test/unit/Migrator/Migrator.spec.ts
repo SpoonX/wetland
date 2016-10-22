@@ -2,6 +2,7 @@ import {assert} from 'chai';
 import {migrations} from '../../resource/migrations';
 import {Wetland} from '../../../src/Wetland';
 import {Migrator} from '../../../src/Migrator/Migrator';
+import {Schema} from '../../resource/Schema';
 
 let getWetland = () => {
   return new Wetland({
@@ -16,6 +17,10 @@ let getWetland = () => {
 };
 
 describe('Migrator', () => {
+  beforeEach(done => {
+    Schema.resetDatabase(done);
+  });
+
   describe('.up()', () => {
     it('should run with action run', done => {
       let wetland    = getWetland();

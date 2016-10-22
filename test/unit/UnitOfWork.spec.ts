@@ -614,9 +614,9 @@ describe('UnitOfWork', () => {
               wetland.destroyConnections().then(() => {
                 done();
               });
-            });
-        });
-      });
+            }).catch(done);
+        }).catch(done);
+      }).catch(done);
     });
   });
 });
