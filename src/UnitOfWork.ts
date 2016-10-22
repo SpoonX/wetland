@@ -860,8 +860,8 @@ export class UnitOfWork {
         let owningSide = relation.mappedBy ? other : owning;
         let otherSide  = relation.mappedBy ? owning : other;
         let joinTable  = relation.mappedBy
-          ? Mapping.forEntity(other).getJoinTable(relation.mappedBy, this.entityManager)
-          : changedMapping.getJoinTable(property, this.entityManager);
+          ? Mapping.forEntity(other).getJoinTable(relation.mappedBy)
+          : changedMapping.getJoinTable(property);
 
         // Create a new row in join table.
         return this.getTransaction(owningSide)

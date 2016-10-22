@@ -8,7 +8,12 @@ let tmpMigrations  = path.join(migrationsDir, 'tmp');
 let cleanDirectory = directory => {
   try {
     fs.readdirSync(directory).forEach(file => {
-      fs.unlinkSync(path.join(directory, file));
+      try {
+        fs.unlinkSync(path.join(directory, file));
+      } catch (error) {
+        cleanDirectory(path.join(directory, file));
+        fs.unlinkSync(path.join(directory, file));
+      }
     });
     fs.rmdirSync(directory);
   } catch (e) {
@@ -87,7 +92,6 @@ describe('MigrationFile', () => {
 
       migrationFile.create('foo/created').catch(error => {
         assert.equal(error.code, 'ENOENT');
-
         done();
       });
     });

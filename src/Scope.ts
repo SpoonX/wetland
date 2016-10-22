@@ -164,7 +164,7 @@ export class Scope {
    *
    * @returns {{}}
    */
-  public getEntities(): {[key: string]: EntityCtor<EntityInterface>} {
+  public getEntities(): {[key: string]: {entity: EntityCtor<EntityInterface>, mapping: Mapping<EntityInterface>}} {
     return this.manager.getEntities();
   }
 

@@ -3,7 +3,6 @@ import {EntityInterface, EntityCtor} from './EntityInterface';
 import * as Knex from 'knex';
 import {Scope} from './Scope';
 import {Store} from './Store';
-import {Raw} from './Raw';
 
 export class SchemaBuilder {
 
@@ -124,7 +123,7 @@ export class SchemaBuilder {
 
     let entities = this.entityManager.getEntities();
 
-    Object.getOwnPropertyNames(entities).forEach(entity => this.processEntity(entities[entity]));
+    Object.getOwnPropertyNames(entities).forEach(entity => this.processEntity(entities[entity].entity));
 
     this.built = true;
 
@@ -259,9 +258,9 @@ export class SchemaBuilder {
       let joinTable;
 
       if (relation.inversedBy) {
-        joinTable = mapping.getJoinTable(property, this.entityManager);
+        joinTable = mapping.getJoinTable(property);
       } else {
-        joinTable = targetMapping.getJoinTable(relation.mappedBy, this.entityManager);
+        joinTable = targetMapping.getJoinTable(relation.mappedBy);
       }
 
       let processTableColumns = (side, foreign, reference)=> {
@@ -374,8 +373,8 @@ export class SchemaBuilder {
     }
 
     if (typeof field.defaultTo !== 'undefined') {
-      if (field.defaultTo instanceof Raw) {
-        column.defaultTo(<any>this.client.raw(field.defaultTo.getQuery()));
+      if (typeof field.defaultTo === 'object' && field.defaultTo.__raw) {
+        column.defaultTo(this.client.raw(field.defaultTo.__raw));
       } else {
         column.defaultTo(field.defaultTo);
       }
