@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.org/SpoonX/wetland.svg?branch=master)](https://travis-ci.org/SpoonX/wetland)
 [![npm version](https://badge.fury.io/js/wetland.svg)](https://badge.fury.io/js/wetland)
-[![Dependency Status](https://gemnasium.com/badges/github.com/SpoonX/wetland.svg)](https://gemnasium.com/github.com/SpoonX/wetland)
 [![Gitter chat](https://badges.gitter.im/SpoonX/Dev.svg)](https://gitter.im/SpoonX/Dev)
 [![Donate](https://img.shields.io/badge/donate-patreon-orange.svg?style=flat)](https://www.patreon.com/user?u=4274718)
 
