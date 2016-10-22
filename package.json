@@ -7,7 +7,7 @@
   "typings": "./dist/definitions/index.d.ts",
   "scripts": {
     "test": "mocha dist/test/helper dist/test/unit/**",
-    "dtest": "npm run build; npm run test",
+    "dtest": "npm run build && npm run test",
     "build": "rm -rf ./dist && tsc && gulp build && chmod ug+x dist/bin/wetland.js",
     "prepublish": "npm run build"
   },
