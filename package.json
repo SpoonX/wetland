@@ -3,8 +3,8 @@
   "version": "0.9.1",
   "bin" : {"wetland" : "./dist/bin/wetland.js"},
   "description": "An enterprise grade ORM for Node.js.",
-  "main": "./dist/js/src/index.js",
-  "typings": "./dist/definitions/index.d.ts",
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts",
   "scripts": {
     "test": "mocha dist/test/helper dist/test/unit/**",
     "dtest": "npm run build && npm run test",
