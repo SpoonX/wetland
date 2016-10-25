@@ -26,6 +26,9 @@ export class Wetland {
     debug        : false,
     dataDirectory: path.resolve(process.cwd(), '.data'),
     defaultStore : 'defaultStore',
+    mapping: {
+      defaultNamesToUnderscore: false
+    },
     entityManager: {
       refreshCreated: true,
       refreshUpdated: true

@@ -172,11 +172,27 @@ export class Mapping<T> {
    * @return {Mapping}
    */
   public field(property: string, options: FieldOptions): this {
-    Homefront.merge(this.mapping.fetchOrPut(`fields.${property}`, {name: property}), options);
+    if (!this.entityManager) {
+      this.stageOrGetManager('field', arguments);
+    }
+
+    let config = this.entityManager.getConfig();
+
+    let propertyName = config.fetch('mapping.defaultNamesToUnderscore')
+      ? this.nameToUnderscore(property)
+      : property;
+
+    Homefront.merge(this.mapping.fetchOrPut(`fields.${property}`, {name: propertyName}), options);
 
     this.mapColumn(this.getColumnName(property), property);
 
     return this;
+  }
+
+  private nameToUnderscore(property: string): string {
+    let name = property[0].toLowerCase() + property.slice(1);
+
+    return name.replace(/[A-Z]/g, '_$&').replace('__', '_').toLowerCase();
   }
 
   /**
