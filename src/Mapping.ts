@@ -302,7 +302,7 @@ export class Mapping<T> {
   public index(indexName: string | Array<string>, fields?: string | Array<string>): this {
     if (!fields) {
       fields    = (Array.isArray(indexName) ? indexName : [indexName]) as Array<string>;
-      indexName = `idx_${(fields as Array<string>).join('_').toLowerCase()}}`;
+      indexName = `idx_${(fields as Array<string>).join('_').toLowerCase()}`;
     }
 
     let indexes = this.mapping.fetchOrPut(`indexes.${indexName}`, new ArrayCollection);
