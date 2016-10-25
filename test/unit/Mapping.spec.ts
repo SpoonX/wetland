@@ -1,5 +1,5 @@
 import {Mapping, Field} from '../../src/Mapping';
-import {ToUnderscore} from '../resource/entity/defaultToUnderscore';
+import {ToUnderscore} from '../resource/entity/ToUnderscore';
 import {Product} from '../resource/entity/shop/product';
 import {Category} from '../resource/entity/shop/category';
 import {User} from '../resource/entity/shop/user';
@@ -7,7 +7,7 @@ import {EntityRepository} from '../../src/EntityRepository';
 import {Wetland} from '../../src/Wetland';
 import {assert} from 'chai';
 
-let wetland  = new Wetland({
+let wetland = new Wetland({
   mapping : {
     defaultNamesToUnderscore: true
   },
@@ -18,11 +18,21 @@ function getMapping(entity) {
   return wetland.getEntityManager().getMapping(entity);
 }
 
-
 describe('Mapping', () => {
   describe('forEntity()', () => {
     it('should get the mapping for a specific entity', () => {
       assert.instanceOf(Mapping.forEntity(ToUnderscore), Mapping);
+    });
+
+    it('should return an new mapping instance if no mapping was found', () => {
+      class Foo {
+        static setMapping(mapping) {
+          mapping.forProperty('id').primary().increments();
+        }
+      }
+      let map = Mapping.forEntity(new Foo());
+
+      assert.instanceOf(Mapping.forEntity(new Foo()), Mapping);
     });
   });
 
@@ -35,43 +45,49 @@ describe('Mapping', () => {
   });
 
   describe('.field()', () => {
-    it('should replace case to underscore if `config.defaultNamesToUnderscore` is true and `name` is not defined', () => {
+    it('should replace case to underscore by default and add the options', () => {
       let mapping = getMapping(ToUnderscore);
-      let fields  = {
-        id                   : {
-          primary       : true,
-          generatedValue: 'autoIncrement',
-          name          : 'underscore_id'
-        },
-        camelCaseToUnderscore: {
-          name: 'camel_case_to_underscore',
-          type: 'string'
-        },
-        PascalToUnderscore   : {
-          name: 'pascal_to_underscore',
-          type: 'integer'
-        },
-        already_underscore   : {
-          name: 'already_underscore',
-          type: 'boolean'
-        },
-        customName           : {
-          name: 'myCustomName',
-          type: 'string'
-        }
+      let camel = {
+        name: 'camel_case_to_underscore',
+        type: 'string',
+        size: 20
+      };
+      let pascal = {
+        name: 'pascal_to_underscore',
+        type: 'integer'
       };
 
-      assert.deepEqual(mapping.mapping.fetch('fields'), fields);
+      assert.deepEqual(mapping.getField('camelCaseToUnderscore'), camel);
+      assert.deepEqual(mapping.getField('PascalToUnderscore'), pascal);
+    });
+
+    it('should not duplicate underscores on properties containing both underscore and case', () => {
+      let mapping = getMapping(ToUnderscore);
+
+      assert.strictEqual(mapping.getField('camelCaseAnd_underscore').name, 'camel_case_and_underscore');
+    });
+
+    it('should not underscore custom property names', () => {
+      let mapping = getMapping(ToUnderscore);
+
+      assert.strictEqual(mapping.getField('customName').name, 'myCustomName');
+    });
+
+    it('should not change underscored lower case property names', () => {
+      let mapping = getMapping(ToUnderscore);
+
+      assert.strictEqual(mapping.getField('already_underscore').name, 'already_underscore');
     });
 
     it('should set column name to the property name', () => {
       let mapping     = getMapping(ToUnderscore);
       let columnNames = {
-        camel_case_to_underscore: 'camelCaseToUnderscore',
-        pascal_to_underscore    : 'PascalToUnderscore',
-        already_underscore      : 'already_underscore',
-        myCustomName            : 'customName',
-        underscore_id           : 'id'
+        camel_case_to_underscore : 'camelCaseToUnderscore',
+        pascal_to_underscore     : 'PascalToUnderscore',
+        already_underscore       : 'already_underscore',
+        myCustomName             : 'customName',
+        camel_case_and_underscore: 'camelCaseAnd_underscore',
+        underscore_id            : 'id'
       };
 
       assert.deepEqual(mapping.mapping.fetch('columns'), columnNames);
@@ -187,8 +203,7 @@ describe('Mapping', () => {
   describe('.getFields()', () => {
     it('should get the fields for mapped entity', () => {
       let mapping = getMapping(ToUnderscore);
-
-      let fields = {
+      let fields  = {
         id                   : {
           primary       : true,
           generatedValue: 'autoIncrement',
@@ -196,7 +211,8 @@ describe('Mapping', () => {
         },
         camelCaseToUnderscore: {
           name: 'camel_case_to_underscore',
-          type: 'string'
+          type: 'string',
+          size: 20
         },
         PascalToUnderscore   : {
           name: 'pascal_to_underscore',
@@ -204,6 +220,10 @@ describe('Mapping', () => {
         },
         already_underscore   : {
           name: 'already_underscore',
+          type: 'boolean'
+        },
+        camelCaseAnd_underscore : {
+          name: 'camel_case_and_underscore',
           type: 'boolean'
         },
         customName           : {
@@ -244,7 +264,7 @@ describe('Mapping', () => {
     it('should map generated values', () => {
       let mapping = getMapping(ToUnderscore);
 
-      assert.isNotNull(mapping.mapping.fetch('fields.id.generatedValue'));
+      assert.isNotNull(mapping.getField('id').generatedValue);
     });
   });
 
@@ -252,7 +272,7 @@ describe('Mapping', () => {
     it('should set auto increment', () => {
       let mapping = getMapping(ToUnderscore);
 
-      assert.strictEqual(mapping.mapping.fetch('fields.id.generatedValue'), 'autoIncrement');
+      assert.strictEqual(mapping.getField('id').generatedValue, 'autoIncrement');
     });
   });
 
@@ -292,7 +312,7 @@ describe('Mapping', () => {
     it('should set cascade values', () => {
       let mapping = getMapping(Product);
 
-      assert.sameMembers(mapping.mapping.fetch('fields.categories.cascades'), ['persist']);
+      assert.sameMembers(mapping.getField('categories').cascades, ['persist']);
     });
   });
 
@@ -385,7 +405,7 @@ describe('Mapping', () => {
 
   describe('.joinColumn(), .getJoinColumn()', () => {
     it('should register a join column and fetch said column via property', () => {
-      let mapping   = getMapping(Product);
+      let mapping    = getMapping(Product);
       let joinColumn = {
         name                : 'author_id',
         referencedColumnName: 'id',
