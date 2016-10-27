@@ -35,7 +35,6 @@ describe('QueryBuilder', () => {
       let query        = queryBuilder.select('task').join('innerJoin', 'list', 'l').getQuery().getSQL();
 
       assert.strictEqual(query, queries.join);
-
     });
   });
 

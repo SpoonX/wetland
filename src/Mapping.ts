@@ -172,11 +172,33 @@ export class Mapping<T> {
    * @return {Mapping}
    */
   public field(property: string, options: FieldOptions): this {
-    Homefront.merge(this.mapping.fetchOrPut(`fields.${property}`, {name: property}), options);
+    let entityManager = this.stageOrGetManager('field', arguments);
+
+    if (!entityManager) {
+      return;
+    }
+
+    let toUnderscore = this.entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
+    let propertyName = toUnderscore ? this.nameToUnderscore(property) : property;
+
+    Homefront.merge(this.mapping.fetchOrPut(`fields.${property}`, {name: propertyName}), options);
 
     this.mapColumn(this.getColumnName(property), property);
 
     return this;
+  }
+
+  /**
+   * Replace name case to underscore.
+   *
+   * @param {string} property
+   *
+   * @returns {string}
+   */
+  private nameToUnderscore(property: string): string {
+    let name = property[0].toLowerCase() + property.slice(1);
+
+    return name.replace(/[A-Z]/g, '_$&').replace('__', '_').toLowerCase();
   }
 
   /**
@@ -286,7 +308,7 @@ export class Mapping<T> {
   public index(indexName: string | Array<string>, fields?: string | Array<string>): this {
     if (!fields) {
       fields    = (Array.isArray(indexName) ? indexName : [indexName]) as Array<string>;
-      indexName = `idx_${(fields as Array<string>).join('_').toLowerCase()}}`;
+      indexName = `idx_${(fields as Array<string>).join('_').toLowerCase()}`;
     }
 
     let indexes = this.mapping.fetchOrPut(`indexes.${indexName}`, new ArrayCollection);
