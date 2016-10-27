@@ -172,15 +172,14 @@ export class Mapping<T> {
    * @return {Mapping}
    */
   public field(property: string, options: FieldOptions): this {
-    if (!this.entityManager) {
-      this.stageOrGetManager('field', arguments);
+    let entityManager = this.stageOrGetManager('field', arguments);
+
+    if (!entityManager) {
+      return;
     }
 
-    let config = this.entityManager.getConfig();
-
-    let propertyName = config.fetch('mapping.defaultNamesToUnderscore')
-      ? this.nameToUnderscore(property)
-      : property;
+    let toUnderscore = this.entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
+    let propertyName = toUnderscore ? this.nameToUnderscore(property) : property;
 
     Homefront.merge(this.mapping.fetchOrPut(`fields.${property}`, {name: propertyName}), options);
 
@@ -189,6 +188,13 @@ export class Mapping<T> {
     return this;
   }
 
+  /**
+   * Replace name case to underscore.
+   *
+   * @param {string} property
+   *
+   * @returns {string}
+   */
   private nameToUnderscore(property: string): string {
     let name = property[0].toLowerCase() + property.slice(1);
 

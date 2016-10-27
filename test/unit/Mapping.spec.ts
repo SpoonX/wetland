@@ -70,7 +70,7 @@ describe('Mapping', () => {
     it('should not underscore custom property names', () => {
       let mapping = getMapping(ToUnderscore);
 
-      assert.strictEqual(mapping.getField('customName').name, 'myCustomName');
+      assert.strictEqual(mapping.getField('customName').name, 'customColumnName');
     });
 
     it('should not change underscored lower case property names', () => {
@@ -85,7 +85,7 @@ describe('Mapping', () => {
         camel_case_to_underscore : 'camelCaseToUnderscore',
         pascal_to_underscore     : 'PascalToUnderscore',
         already_underscore       : 'already_underscore',
-        myCustomName             : 'customName',
+        customColumnName             : 'customName',
         camel_case_and_underscore: 'camelCaseAnd_underscore',
         underscore_id            : 'id'
       };
@@ -148,7 +148,7 @@ describe('Mapping', () => {
 
     it('should map indexes using a custom index name', () => {
       let mapping = getMapping(ToUnderscore);
-      let indexes = ['myCustomName', 'already_underscore'];
+      let indexes = ['customColumnName', 'already_underscore'];
 
       mapping.index('myIndex', indexes);
 
@@ -161,7 +161,7 @@ describe('Mapping', () => {
       let mapping = getMapping(ToUnderscore);
       let indexes = {
         idx_camel_case_to_underscore: ['camel_case_to_underscore'],
-        myIndex                     : ['myCustomName', 'already_underscore']
+        myIndex                     : ['customColumnName', 'already_underscore']
       };
 
       assert.deepEqual(mapping.getIndexes(), indexes);
@@ -196,7 +196,7 @@ describe('Mapping', () => {
     it('should get the column name of the property', () => {
       let mapping = getMapping(ToUnderscore);
 
-      assert.strictEqual(mapping.getFieldName('customName'), 'myCustomName');
+      assert.strictEqual(mapping.getFieldName('customName'), 'customColumnName');
     });
   });
 
@@ -227,7 +227,7 @@ describe('Mapping', () => {
           type: 'boolean'
         },
         customName           : {
-          name: 'myCustomName',
+          name: 'customColumnName',
           type: 'string'
         }
       };
