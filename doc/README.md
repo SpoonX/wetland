@@ -1,4 +1,4 @@
-# ![Wetland](https://cdn.rawgit.com/SpoonX/wetland/master/wetland.svg)
+# ![Wetland](https://cdn.rawgit.com/SpoonX/wetland/391040eba795183550bfff01d7c0ca56d01b5530/wetland.svg)
 
 Wetland is an enterprise grade object-relational mapper (ORM) for node.js.
 

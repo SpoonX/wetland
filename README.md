@@ -1,4 +1,4 @@
-# ![Wetland](https://cdn.rawgit.com/SpoonX/wetland/master/wetland.svg)
+# ![Wetland](https://cdn.rawgit.com/SpoonX/wetland/391040eba795183550bfff01d7c0ca56d01b5530/wetland.svg)
 
 [![Build Status](https://travis-ci.org/SpoonX/wetland.svg?branch=master)](https://travis-ci.org/SpoonX/wetland)
 [![npm version](https://badge.fury.io/js/wetland.svg)](https://badge.fury.io/js/wetland)
