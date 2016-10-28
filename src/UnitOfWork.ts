@@ -580,6 +580,8 @@ export class UnitOfWork {
     }
 
     return Promise.all(resolves).then(() => {
+      this.transactions = {};
+
       if (error) {
         throw error;
       }
