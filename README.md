@@ -1,4 +1,4 @@
-# ![Wetland](https://cloud.githubusercontent.com/assets/67802/19230467/ed74d496-8ed4-11e6-84bf-4bcc7c5c2fef.png)
+# ![Wetland](https://cdn.rawgit.com/SpoonX/wetland/master/wetland.svg)
 
 [![Build Status](https://travis-ci.org/SpoonX/wetland.svg?branch=master)](https://travis-ci.org/SpoonX/wetland)
 [![npm version](https://badge.fury.io/js/wetland.svg)](https://badge.fury.io/js/wetland)
