@@ -82,7 +82,7 @@ export class Wetland {
         .filter(match => match.search(/\.js$/) > -1)
         .map(entity => entity.replace(/\.js$/, ''))
         .forEach(entity => {
-          let filePath   = path.join(entityPath, entity);
+          let filePath   = path.resolve(entityPath, entity);
           let ToRegister = require(filePath);
 
           if (typeof ToRegister !== 'function') {
