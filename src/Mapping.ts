@@ -289,9 +289,7 @@ export class Mapping<T> {
       tableName : tableName,
       store     : null
     };
-    console.log(toUnderscore);
-    console.log(defaultMapping);
-    console.log('--------------');
+    
     Homefront.merge(this.mapping.fetchOrPut(`entity`, defaultMapping), options);
 
     return this;
