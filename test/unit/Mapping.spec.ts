@@ -132,21 +132,6 @@ describe('Mapping', () => {
   });
 
   describe('.entity()', () => {
-    it('should map custom options for an entity', () => {
-      let mapping = getMapping(Product);
-      let options = {
-        name     : 'entity_custom_name',
-        tableName: 'custom_table_name',
-        store    : 'defaultStore'
-      };
-
-      mapping.entity(options);
-
-      assert.strictEqual(mapping.mapping.fetch('entity.name'), options.name);
-      assert.strictEqual(mapping.mapping.fetch('entity.tableName'), options.tableName);
-      assert.strictEqual(mapping.mapping.fetch('entity.store'), options.store);
-    });
-
     it('should map entity with default options', () => {
       let wetland = new Wetland({entities: [FooEntity]});
       let mapping = wetland.getEntityManager().getMapping(FooEntity);
@@ -157,6 +142,22 @@ describe('Mapping', () => {
       assert.strictEqual(mapping.mapping.fetch('entity.repository'), EntityRepository);
       assert.strictEqual(mapping.mapping.fetch('entity.tableName'), 'fooentity');
       assert.isNull(mapping.mapping.fetch('entity.store'));
+    });
+    
+    it('should map custom options for an entity', () => {
+      let wetland = new Wetland({entities: [FooEntity]});
+      let mapping = wetland.getEntityManager().getMapping(FooEntity);
+      let options = {
+        name     : 'foo_custom_name',
+        tableName: 'custom_table_name',
+        store    : 'myStore'
+      };
+
+      mapping.entity(options);
+
+      assert.strictEqual(mapping.mapping.fetch('entity.name'), options.name);
+      assert.strictEqual(mapping.mapping.fetch('entity.tableName'), options.tableName);
+      assert.strictEqual(mapping.mapping.fetch('entity.store'), options.store);
     });
 
     it('should map an entity with default names set to underscore', () => {
@@ -272,15 +273,17 @@ describe('Mapping', () => {
 
   describe('.getEntityName()', () => {
     it('should get the name of the entity', () => {
-      let mapping = getMapping(Product);
+      let wetland = new Wetland({entities: [FooEntity]});
+      let mapping = wetland.getEntityManager().getMapping(FooEntity);
 
-      assert.strictEqual(mapping.getEntityName(), 'entity_custom_name');
+      assert.strictEqual(mapping.getEntityName(), 'foo_custom_name');
     });
   });
 
   describe('.getTableName()', () => {
     it('should get the name of the table', () => {
-      let mapping = getMapping(Product);
+      let wetland = new Wetland({entities: [FooEntity]});
+      let mapping = wetland.getEntityManager().getMapping(FooEntity);
 
       assert.strictEqual(mapping.getTableName(), 'custom_table_name');
     });
@@ -288,9 +291,10 @@ describe('Mapping', () => {
 
   describe('.getStoreName()', () => {
     it('should get the store mapped to this entity', () => {
-      let mapping = getMapping(Product);
+      let wetland = new Wetland({entities: [FooEntity]});
+      let mapping = wetland.getEntityManager().getMapping(FooEntity);
 
-      assert.strictEqual(mapping.getStoreName(), 'defaultStore');
+      assert.strictEqual(mapping.getStoreName(), 'myStore');
     });
   });
 
