@@ -49,12 +49,12 @@ describe('Mapping', () => {
   describe('.field()', () => {
     it('should replace case to underscore by default and add the options', () => {
       let mapping = getMapping(ToUnderscore);
-      let camel = {
+      let camel   = {
         name: 'camel_case_to_underscore',
         type: 'string',
         size: 20
       };
-      let pascal = {
+      let pascal  = {
         name: 'pascal_to_underscore',
         type: 'integer'
       };
@@ -96,8 +96,8 @@ describe('Mapping', () => {
     });
 
     it('should keep casing if `defaultNamesToUnderscore` is set to false', () => {
-      let wetland = new Wetland({entities: [FooEntity]});
-      let mapping = wetland.getEntityManager().getMapping(FooEntity);
+      let wetland    = new Wetland({entities: [FooEntity]});
+      let mapping    = wetland.getEntityManager().getMapping(FooEntity);
       let columnName = {
         camelCase : 'camelCase',
         PascalCase: 'PascalCase'
@@ -143,7 +143,7 @@ describe('Mapping', () => {
       assert.strictEqual(mapping.mapping.fetch('entity.tableName'), 'fooentity');
       assert.isNull(mapping.mapping.fetch('entity.store'));
     });
-    
+
     it('should map custom options for an entity', () => {
       let wetland = new Wetland({entities: [FooEntity]});
       let mapping = wetland.getEntityManager().getMapping(FooEntity);
@@ -239,29 +239,29 @@ describe('Mapping', () => {
     it('should get the fields for mapped entity', () => {
       let mapping = getMapping(ToUnderscore);
       let fields  = {
-        id                   : {
+        id                     : {
           primary       : true,
           generatedValue: 'autoIncrement',
           name          : 'underscore_id'
         },
-        camelCaseToUnderscore: {
+        camelCaseToUnderscore  : {
           name: 'camel_case_to_underscore',
           type: 'string',
           size: 20
         },
-        PascalToUnderscore   : {
+        PascalToUnderscore     : {
           name: 'pascal_to_underscore',
           type: 'integer'
         },
-        already_underscore   : {
+        already_underscore     : {
           name: 'already_underscore',
           type: 'boolean'
         },
-        camelCaseAnd_underscore : {
+        camelCaseAnd_underscore: {
           name: 'camel_case_and_underscore',
           type: 'boolean'
         },
-        customName           : {
+        customName             : {
           name: 'customColumnName',
           type: 'string'
         }

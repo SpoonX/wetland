@@ -281,7 +281,7 @@ export class Mapping<T> {
     }
 
     let toUnderscore = this.entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
-    let tableName = toUnderscore ? this.nameToUnderscore(this.target.name) : this.target.name.toLowerCase();
+    let tableName    = toUnderscore ? this.nameToUnderscore(this.target.name) : this.target.name.toLowerCase();
 
     let defaultMapping = {
       repository: EntityRepository,
@@ -289,7 +289,7 @@ export class Mapping<T> {
       tableName : tableName,
       store     : null
     };
-    
+
     Homefront.merge(this.mapping.fetchOrPut(`entity`, defaultMapping), options);
 
     return this;
