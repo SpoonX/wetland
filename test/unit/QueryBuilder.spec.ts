@@ -293,5 +293,12 @@ describe('QueryBuilder', () => {
 
       assert.strictEqual(query, queries.havingGroupBy);
     });
+
+    it('should create a select query with `groupBy` and multiple `having` clauses.', () => {
+      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
+      let query        = queryBuilder.select({count: 't.task', alias: 'tasks'}).groupBy('t.done').having({'tasks': {gt: 5, lte: 100}}).getQuery().getSQL();
+
+      assert.strictEqual(query, queries.havingMultiple);
+    });
   });
 });
