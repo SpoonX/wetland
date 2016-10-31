@@ -280,7 +280,7 @@ export class Mapping<T> {
       return;
     }
 
-    let toUnderscore = this.entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
+    let toUnderscore = entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
     let tableName    = toUnderscore ? this.nameToUnderscore(this.target.name) : this.target.name.toLowerCase();
 
     let defaultMapping = {
