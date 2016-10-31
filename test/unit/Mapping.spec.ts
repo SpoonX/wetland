@@ -3,16 +3,10 @@ import {ToUnderscore} from '../resource/entity/ToUnderscore';
 import {Product} from '../resource/entity/shop/product';
 import {Category} from '../resource/entity/shop/category';
 import {User} from '../resource/entity/shop/user';
+import {FooEntity} from '../resource/entity/Foo';
 import {EntityRepository} from '../../src/EntityRepository';
 import {Wetland} from '../../src/Wetland';
 import {assert} from 'chai';
-
-class FooEntity {
-  static setMapping(mapping) {
-    mapping.field('camelCase', {type: 'integer'});
-    mapping.field('PascalCase', {type: 'integer'});
-  }
-}
 
 let wetland = new Wetland({
   mapping : {
@@ -21,7 +15,11 @@ let wetland = new Wetland({
   entities: [ToUnderscore, Product, User]
 });
 
-function getMapping(entity) {
+let wetland2 = new Wetland({
+  entities: [FooEntity]
+});
+
+function getMapping(wetland, entity) {
   return wetland.getEntityManager().getMapping(entity);
 }
 
@@ -32,15 +30,13 @@ describe('Mapping', () => {
     });
 
     it('should return an new mapping instance if no mapping was found', () => {
-      let map = Mapping.forEntity(new FooEntity());
-
       assert.instanceOf(Mapping.forEntity(new FooEntity()), Mapping);
     });
   });
 
   describe('.getTarget()', () => {
     it('should return the entity this mapping is for', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
 
       assert.deepEqual(mapping.getTarget(), ToUnderscore);
     });
@@ -48,7 +44,7 @@ describe('Mapping', () => {
 
   describe('.field()', () => {
     it('should replace case to underscore by default and add the options', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
       let camel   = {
         name: 'camel_case_to_underscore',
         type: 'string',
@@ -64,25 +60,25 @@ describe('Mapping', () => {
     });
 
     it('should not duplicate underscores on properties containing both underscore and case', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
 
       assert.strictEqual(mapping.getField('camelCaseAnd_underscore').name, 'camel_case_and_underscore');
     });
 
     it('should not underscore custom property names', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
 
       assert.strictEqual(mapping.getField('customName').name, 'customColumnName');
     });
 
     it('should not change underscored lower case property names', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
 
       assert.strictEqual(mapping.getField('already_underscore').name, 'already_underscore');
     });
 
     it('should set column name to the property name', () => {
-      let mapping     = getMapping(ToUnderscore);
+      let mapping     = getMapping(wetland, ToUnderscore);
       let columnNames = {
         camel_case_to_underscore : 'camelCaseToUnderscore',
         pascal_to_underscore     : 'PascalToUnderscore',
@@ -96,8 +92,7 @@ describe('Mapping', () => {
     });
 
     it('should keep casing if `defaultNamesToUnderscore` is set to false', () => {
-      let wetland    = new Wetland({entities: [FooEntity]});
-      let mapping    = wetland.getEntityManager().getMapping(FooEntity);
+      let mapping    = getMapping(wetland2, FooEntity);
       let columnName = {
         camelCase : 'camelCase',
         PascalCase: 'PascalCase'
@@ -109,7 +104,7 @@ describe('Mapping', () => {
 
   describe('.getRepository()', () => {
     it('should get the repository class for this mapping entity', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
 
       assert.deepEqual(mapping.getRepository(), EntityRepository);
     });
@@ -117,7 +112,7 @@ describe('Mapping', () => {
 
   describe('.getColumnName()', () => {
     it('should get the column name for a property', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
 
       assert.strictEqual(mapping.getColumnName('camelCaseToUnderscore'), 'camel_case_to_underscore');
     });
@@ -125,7 +120,7 @@ describe('Mapping', () => {
 
   describe('.getPropertyName()', () => {
     it('should get the property name for a column name', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
 
       assert.strictEqual(mapping.getPropertyName('camel_case_to_underscore'), 'camelCaseToUnderscore');
     });
@@ -133,8 +128,7 @@ describe('Mapping', () => {
 
   describe('.entity()', () => {
     it('should map entity with default options', () => {
-      let wetland = new Wetland({entities: [FooEntity]});
-      let mapping = wetland.getEntityManager().getMapping(FooEntity);
+      let mapping = getMapping(wetland2, FooEntity);
 
       mapping.entity({});
 
@@ -145,8 +139,7 @@ describe('Mapping', () => {
     });
 
     it('should map custom options for an entity', () => {
-      let wetland = new Wetland({entities: [FooEntity]});
-      let mapping = wetland.getEntityManager().getMapping(FooEntity);
+      let mapping = getMapping(wetland2, FooEntity);
       let options = {
         name     : 'foo_custom_name',
         tableName: 'custom_table_name',
@@ -161,7 +154,7 @@ describe('Mapping', () => {
     });
 
     it('should map an entity with default names set to underscore', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
 
       mapping.entity({});
 
@@ -172,7 +165,7 @@ describe('Mapping', () => {
 
   describe('.index()', () => {
     it('should map an single index with default index name', () => {
-      let mapping    = getMapping(ToUnderscore);
+      let mapping    = getMapping(wetland, ToUnderscore);
       let columnName = mapping.getColumnName('camelCaseToUnderscore');
       let index      = {idx_camel_case_to_underscore: ['camel_case_to_underscore']};
 
@@ -182,7 +175,7 @@ describe('Mapping', () => {
     });
 
     it('should map indexes using a custom index name', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
       let indexes = ['customColumnName', 'already_underscore'];
 
       mapping.index('myIndex', indexes);
@@ -193,7 +186,7 @@ describe('Mapping', () => {
 
   describe('.getIndexes()', () => {
     it('should get the indexes', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
       let indexes = {
         idx_camel_case_to_underscore: ['camel_case_to_underscore'],
         myIndex                     : ['customColumnName', 'already_underscore']
@@ -205,7 +198,7 @@ describe('Mapping', () => {
 
   describe('.primary()', () => {
     it('should map a property to be the primary key', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
 
       assert.strictEqual(mapping.mapping.fetch('primary'), 'id');
     });
@@ -213,7 +206,7 @@ describe('Mapping', () => {
 
   describe('.getPrimaryKeyField()', () => {
     it('should get the column name for the primary key', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
 
       assert.strictEqual(mapping.getPrimaryKeyField(), 'underscore_id');
     });
@@ -221,7 +214,7 @@ describe('Mapping', () => {
 
   describe('.getPrimaryKey()', () => {
     it('should get the property that has be assigned as the primary key', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
 
       assert.strictEqual(mapping.getPrimaryKey(), 'id');
     });
@@ -229,7 +222,7 @@ describe('Mapping', () => {
 
   describe('.getFieldName()', () => {
     it('should get the column name of the property', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
 
       assert.strictEqual(mapping.getFieldName('customName'), 'customColumnName');
     });
@@ -237,7 +230,7 @@ describe('Mapping', () => {
 
   describe('.getFields()', () => {
     it('should get the fields for mapped entity', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
       let fields  = {
         id                     : {
           primary       : true,
@@ -273,8 +266,7 @@ describe('Mapping', () => {
 
   describe('.getEntityName()', () => {
     it('should get the name of the entity', () => {
-      let wetland = new Wetland({entities: [FooEntity]});
-      let mapping = wetland.getEntityManager().getMapping(FooEntity);
+      let mapping = getMapping(wetland2, FooEntity);
 
       assert.strictEqual(mapping.getEntityName(), 'foo_custom_name');
     });
@@ -282,8 +274,7 @@ describe('Mapping', () => {
 
   describe('.getTableName()', () => {
     it('should get the name of the table', () => {
-      let wetland = new Wetland({entities: [FooEntity]});
-      let mapping = wetland.getEntityManager().getMapping(FooEntity);
+      let mapping = getMapping(wetland2, FooEntity);
 
       assert.strictEqual(mapping.getTableName(), 'custom_table_name');
     });
@@ -291,8 +282,7 @@ describe('Mapping', () => {
 
   describe('.getStoreName()', () => {
     it('should get the store mapped to this entity', () => {
-      let wetland = new Wetland({entities: [FooEntity]});
-      let mapping = wetland.getEntityManager().getMapping(FooEntity);
+      let mapping = getMapping(wetland2, FooEntity);
 
       assert.strictEqual(mapping.getStoreName(), 'myStore');
     });
@@ -300,7 +290,7 @@ describe('Mapping', () => {
 
   describe('.generatedValue()', () => {
     it('should map generated values', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
 
       assert.isNotNull(mapping.getField('id').generatedValue);
     });
@@ -308,7 +298,7 @@ describe('Mapping', () => {
 
   describe('.increments()', () => {
     it('should set auto increment', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
 
       assert.strictEqual(mapping.getField('id').generatedValue, 'autoIncrement');
     });
@@ -316,7 +306,7 @@ describe('Mapping', () => {
 
   describe('.uniqueConstraint()', () => {
     it('should map an unique constraint', () => {
-      let mapping    = getMapping(ToUnderscore);
+      let mapping    = getMapping(wetland, ToUnderscore);
       let columnName = mapping.getColumnName('id');
       let constraint = {underscore_id_unique: ['underscore_id']};
 
@@ -326,7 +316,7 @@ describe('Mapping', () => {
     });
 
     it('should map an unique constraint with custom name', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
 
       mapping.uniqueConstraint('custom_unique', 'already_underscore');
 
@@ -336,7 +326,7 @@ describe('Mapping', () => {
 
   describe('.getUniqueConstraints()', () => {
     it('should get unique constraints', () => {
-      let mapping = getMapping(ToUnderscore);
+      let mapping = getMapping(wetland, ToUnderscore);
       let unique  = {
         underscore_id_unique: ['underscore_id'],
         custom_unique       : ['already_underscore']
@@ -348,7 +338,7 @@ describe('Mapping', () => {
 
   describe('.cascade()', () => {
     it('should set cascade values', () => {
-      let mapping = getMapping(Product);
+      let mapping = getMapping(wetland, Product);
 
       assert.sameMembers(mapping.getField('categories').cascades, ['persist']);
     });
@@ -356,13 +346,13 @@ describe('Mapping', () => {
 
   describe('.isRelation()', () => {
     it('should return true if property exist as relation', () => {
-      let mapping = getMapping(Product);
+      let mapping = getMapping(wetland, Product);
 
       assert.isTrue(mapping.isRelation('author'));
     });
 
     it('should return false if property does not exist as a relation', () => {
-      let mapping = getMapping(Product);
+      let mapping = getMapping(wetland, Product);
 
       assert.isFalse(mapping.isRelation('name'));
     });
@@ -370,7 +360,7 @@ describe('Mapping', () => {
 
   describe('.getRelations()', () => {
     it('should get the relations for mapped entity', () => {
-      let mapping   = getMapping(Product);
+      let mapping   = getMapping(wetland, Product);
       let relations = {
         image     : {
           type        : 'oneToOne',
@@ -394,7 +384,7 @@ describe('Mapping', () => {
 
   describe('.oneToOne()', () => {
     it('should map a one-to-one relationship', () => {
-      let mapping   = getMapping(Product);
+      let mapping   = getMapping(wetland, Product);
       let relations = mapping.getRelations();
 
       assert.strictEqual(relations['image'].type, 'oneToOne');
@@ -403,7 +393,7 @@ describe('Mapping', () => {
 
   describe('.oneToMany()', () => {
     it('should map a one-to-many relationship', () => {
-      let mapping   = getMapping(User);
+      let mapping   = getMapping(wetland, User);
       let relations = mapping.getRelations();
 
       assert.strictEqual(relations['products'].type, 'oneToMany');
@@ -412,7 +402,7 @@ describe('Mapping', () => {
 
   describe('.manyToOne()', () => {
     it('should map a many-to-one relationship', () => {
-      let mapping   = getMapping(Product);
+      let mapping   = getMapping(wetland, Product);
       let relations = mapping.getRelations();
 
       assert.strictEqual(relations['author'].type, 'manyToOne');
@@ -421,7 +411,7 @@ describe('Mapping', () => {
 
   describe('.manyToMany()', () => {
     it('should map a many-to-many relationship', () => {
-      let mapping   = getMapping(Product);
+      let mapping   = getMapping(wetland, Product);
       let relations = mapping.getRelations();
 
       assert.strictEqual(relations['categories'].type, 'manyToMany');
@@ -430,7 +420,7 @@ describe('Mapping', () => {
 
   describe('.joinTable(), .getJoinTables()', () => {
     it('should register a join table and fetch all join tables registered', () => {
-      let mapping   = getMapping(Product);
+      let mapping   = getMapping(wetland, Product);
       let joinTable = [{
         name              : 'product_custom_join_category',
         joinColumns       : [{referencedColumnName: 'id', name: 'product_id'}],
@@ -443,7 +433,7 @@ describe('Mapping', () => {
 
   describe('.joinColumn(), .getJoinColumn()', () => {
     it('should register a join column and fetch said column via property', () => {
-      let mapping    = getMapping(Product);
+      let mapping    = getMapping(wetland, Product);
       let joinColumn = {
         name                : 'author_id',
         referencedColumnName: 'id',
@@ -457,7 +447,7 @@ describe('Mapping', () => {
 
   describe('.getJoinTable()', () => {
     it('should get the join table for the relationship mapped via property', () => {
-      let mapping   = getMapping(Product);
+      let mapping   = getMapping(wetland, Product);
       let joinTable = {
         name              : 'product_custom_join_category',
         joinColumns       : [{referencedColumnName: 'id', name: 'product_id', type: 'integer'}],
