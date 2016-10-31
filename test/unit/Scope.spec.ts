@@ -21,7 +21,7 @@ function entityManager(entities?): Scope {
 describe('Scope', () => {
   describe('.getRepository()', () => {
     it('should return a default repository', () => {
-      let scope = entityManager();
+      let scope = entityManager([Simple]);
 
       assert.instanceOf(scope.getRepository(Simple), EntityRepository);
     });

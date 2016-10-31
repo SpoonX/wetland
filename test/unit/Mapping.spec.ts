@@ -7,6 +7,13 @@ import {EntityRepository} from '../../src/EntityRepository';
 import {Wetland} from '../../src/Wetland';
 import {assert} from 'chai';
 
+class FooEntity {
+  static setMapping(mapping) {
+    mapping.field('camelCase', {type: 'integer'});
+    mapping.field('PascalCase', {type: 'integer'});
+  }
+}
+
 let wetland = new Wetland({
   mapping : {
     defaultNamesToUnderscore: true
@@ -25,14 +32,9 @@ describe('Mapping', () => {
     });
 
     it('should return an new mapping instance if no mapping was found', () => {
-      class Foo {
-        static setMapping(mapping) {
-          mapping.forProperty('id').primary().increments();
-        }
-      }
-      let map = Mapping.forEntity(new Foo());
+      let map = Mapping.forEntity(new FooEntity());
 
-      assert.instanceOf(Mapping.forEntity(new Foo()), Mapping);
+      assert.instanceOf(Mapping.forEntity(new FooEntity()), Mapping);
     });
   });
 
@@ -47,12 +49,12 @@ describe('Mapping', () => {
   describe('.field()', () => {
     it('should replace case to underscore by default and add the options', () => {
       let mapping = getMapping(ToUnderscore);
-      let camel = {
+      let camel   = {
         name: 'camel_case_to_underscore',
         type: 'string',
         size: 20
       };
-      let pascal = {
+      let pascal  = {
         name: 'pascal_to_underscore',
         type: 'integer'
       };
@@ -85,12 +87,23 @@ describe('Mapping', () => {
         camel_case_to_underscore : 'camelCaseToUnderscore',
         pascal_to_underscore     : 'PascalToUnderscore',
         already_underscore       : 'already_underscore',
-        customColumnName             : 'customName',
+        customColumnName         : 'customName',
         camel_case_and_underscore: 'camelCaseAnd_underscore',
         underscore_id            : 'id'
       };
 
       assert.deepEqual(mapping.mapping.fetch('columns'), columnNames);
+    });
+
+    it('should keep casing if `defaultNamesToUnderscore` is set to false', () => {
+      let wetland    = new Wetland({entities: [FooEntity]});
+      let mapping    = wetland.getEntityManager().getMapping(FooEntity);
+      let columnName = {
+        camelCase : 'camelCase',
+        PascalCase: 'PascalCase'
+      };
+
+      assert.deepEqual(mapping.mapping.fetch('columns'), columnName);
     });
   });
 
@@ -119,12 +132,25 @@ describe('Mapping', () => {
   });
 
   describe('.entity()', () => {
+    it('should map entity with default options', () => {
+      let wetland = new Wetland({entities: [FooEntity]});
+      let mapping = wetland.getEntityManager().getMapping(FooEntity);
+
+      mapping.entity({});
+
+      assert.strictEqual(mapping.mapping.fetch('entity.name'), 'FooEntity');
+      assert.strictEqual(mapping.mapping.fetch('entity.repository'), EntityRepository);
+      assert.strictEqual(mapping.mapping.fetch('entity.tableName'), 'fooentity');
+      assert.isNull(mapping.mapping.fetch('entity.store'));
+    });
+
     it('should map custom options for an entity', () => {
-      let mapping = getMapping(ToUnderscore);
+      let wetland = new Wetland({entities: [FooEntity]});
+      let mapping = wetland.getEntityManager().getMapping(FooEntity);
       let options = {
-        name     : 'entity_custom_name',
-        tableName: 'to_underscore',
-        store    : 'defaultStore'
+        name     : 'foo_custom_name',
+        tableName: 'custom_table_name',
+        store    : 'myStore'
       };
 
       mapping.entity(options);
@@ -132,6 +158,15 @@ describe('Mapping', () => {
       assert.strictEqual(mapping.mapping.fetch('entity.name'), options.name);
       assert.strictEqual(mapping.mapping.fetch('entity.tableName'), options.tableName);
       assert.strictEqual(mapping.mapping.fetch('entity.store'), options.store);
+    });
+
+    it('should map an entity with default names set to underscore', () => {
+      let mapping = getMapping(ToUnderscore);
+
+      mapping.entity({});
+
+      assert.strictEqual(mapping.mapping.fetch('entity.name'), 'ToUnderscore');
+      assert.strictEqual(mapping.mapping.fetch('entity.tableName'), 'to_underscore');
     });
   });
 
@@ -204,29 +239,29 @@ describe('Mapping', () => {
     it('should get the fields for mapped entity', () => {
       let mapping = getMapping(ToUnderscore);
       let fields  = {
-        id                   : {
+        id                     : {
           primary       : true,
           generatedValue: 'autoIncrement',
           name          : 'underscore_id'
         },
-        camelCaseToUnderscore: {
+        camelCaseToUnderscore  : {
           name: 'camel_case_to_underscore',
           type: 'string',
           size: 20
         },
-        PascalToUnderscore   : {
+        PascalToUnderscore     : {
           name: 'pascal_to_underscore',
           type: 'integer'
         },
-        already_underscore   : {
+        already_underscore     : {
           name: 'already_underscore',
           type: 'boolean'
         },
-        camelCaseAnd_underscore : {
+        camelCaseAnd_underscore: {
           name: 'camel_case_and_underscore',
           type: 'boolean'
         },
-        customName           : {
+        customName             : {
           name: 'customColumnName',
           type: 'string'
         }
@@ -238,25 +273,28 @@ describe('Mapping', () => {
 
   describe('.getEntityName()', () => {
     it('should get the name of the entity', () => {
-      let mapping = getMapping(ToUnderscore);
+      let wetland = new Wetland({entities: [FooEntity]});
+      let mapping = wetland.getEntityManager().getMapping(FooEntity);
 
-      assert.strictEqual(mapping.getEntityName(), 'entity_custom_name');
+      assert.strictEqual(mapping.getEntityName(), 'foo_custom_name');
     });
   });
 
   describe('.getTableName()', () => {
     it('should get the name of the table', () => {
-      let mapping = getMapping(ToUnderscore);
+      let wetland = new Wetland({entities: [FooEntity]});
+      let mapping = wetland.getEntityManager().getMapping(FooEntity);
 
-      assert.strictEqual(mapping.getTableName(), 'to_underscore');
+      assert.strictEqual(mapping.getTableName(), 'custom_table_name');
     });
   });
 
   describe('.getStoreName()', () => {
     it('should get the store mapped to this entity', () => {
-      let mapping = getMapping(ToUnderscore);
+      let wetland = new Wetland({entities: [FooEntity]});
+      let mapping = wetland.getEntityManager().getMapping(FooEntity);
 
-      assert.strictEqual(mapping.getStoreName(), 'defaultStore');
+      assert.strictEqual(mapping.getStoreName(), 'myStore');
     });
   });
 

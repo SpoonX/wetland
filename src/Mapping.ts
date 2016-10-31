@@ -274,10 +274,19 @@ export class Mapping<T> {
    * @return {Mapping}
    */
   public entity(options: Object = {}): this {
+    let entityManager = this.stageOrGetManager('entity', arguments);
+
+    if (!entityManager) {
+      return;
+    }
+
+    let toUnderscore = this.entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
+    let tableName    = toUnderscore ? this.nameToUnderscore(this.target.name) : this.target.name.toLowerCase();
+
     let defaultMapping = {
       repository: EntityRepository,
       name      : this.target.name,
-      tableName : this.target.name.toLowerCase(),
+      tableName : tableName,
       store     : null
     };
 
