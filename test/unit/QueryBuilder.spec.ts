@@ -278,4 +278,20 @@ describe('QueryBuilder', () => {
       assert.strictEqual(query, queries.whereLTE);
     });
   });
+
+  describe('.having()', () => {
+    it('should create a select query with a `having` clause.', () => {
+      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
+      let query        = queryBuilder.select({count: 't.task', alias: 'tasks'}).having({'tasks': {lte: 13}}).getQuery().getSQL();
+
+      assert.strictEqual(query, queries.having);
+    });
+
+    it('should create a select query with `where`, `groupBy` and `having` clauses.', () => {
+      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
+      let query        = queryBuilder.select({count: 't.task', alias: 'tasks'}).where({'t.id': {gte: 10}}).groupBy('t.done').having({'tasks': {lte: 4}}).getQuery().getSQL();
+
+      assert.strictEqual(query, queries.havingGroupBy);
+    });
+  });
 });
