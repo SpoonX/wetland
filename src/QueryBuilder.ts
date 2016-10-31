@@ -44,6 +44,11 @@ export class QueryBuilder<T> {
   /**
    * @type {Array}
    */
+  private groupBys: Array<{groupBy: string | Array<string>}> = [];
+
+  /**
+   * @type {Array}
+   */
   private orderBys: Array<{orderBy: string | Array<string> | Object, direction: string | null}> = [];
 
   /**
@@ -325,6 +330,7 @@ export class QueryBuilder<T> {
     this.criteria.applyStaged();
     this.applySelects();
     this.applyOrderBys();
+    this.applyGroupBys();
 
     this.prepared = true;
 
@@ -493,6 +499,57 @@ export class QueryBuilder<T> {
    */
   public offset(offset): this {
     this.statement.offset(offset);
+
+    return this;
+  }
+
+  /**
+   * Set the group by.
+   *
+   * .groupBy('name')
+   * .groupBy(['name'])
+   * .groupBy(['name', 'age'])
+   *
+   * @param {string|string[]} groupBy
+   *
+   * @returns {QueryBuilder}
+   */
+  public groupBy(groupBy: string | Array<string>): this {
+   this.groupBys.push({groupBy});
+
+    return this;
+  }
+
+  /**
+   * Apply group by to the query.
+   *
+   * @param {string|string[]} groupBy
+   *
+   * @returns {QueryBuilder}
+   */
+  private applyGroupBy(groupBy: string | Array<string>): this {
+    let properties = [];
+
+    if (typeof groupBy === 'string') {
+      properties.push(this.criteria.mapToColumn(groupBy));
+    } else if (Array.isArray(groupBy)) {
+      groupBy.forEach(group => properties.push(this.criteria.mapToColumn(group)));
+    }
+
+    this.statement.groupBy(properties);
+
+    return this;
+  }
+
+  /**
+   * Apply group-by statements to the query.
+   *
+   * @returns {QueryBuilder}
+   */
+  private applyGroupBys(): this {
+    this.groupBys.forEach(groupBy => this.applyGroupBy(groupBy.groupBy));
+
+    this.groupBys = [];
 
     return this;
   }

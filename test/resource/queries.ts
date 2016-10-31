@@ -24,5 +24,7 @@ export let queries = {
   rightOuterJoin: "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` right outer join `list` as `l` on `t`.`list_id` = `l`.`id`",
   outerJoin     : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` outer join `list` as `l` on `t`.`list_id` = `l`.`id`",
   fullOuterJoin : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` full outer join `list` as `l` on `t`.`list_id` = `l`.`id`",
-  crossJoin     : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` cross join `list` as `l` on `t`.`list_id` = `l`.`id`"
+  crossJoin     : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` cross join `list` as `l` on `t`.`list_id` = `l`.`id`",
+  groupByOne    : "select `t`.`id` as `t.id`, `t`.`task` as `t.task` from `todo` as `t` group by `t`.`list`",
+  groupByMultiple: "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` group by `t`.`list`, `t`.`done`"
 };
