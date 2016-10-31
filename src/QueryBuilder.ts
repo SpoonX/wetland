@@ -373,13 +373,18 @@ export class QueryBuilder<T> {
     }
 
     // Support select functions. Don't add to hydrator, as they aren't part of the entities.
-    Object.getOwnPropertyNames(propertyAlias).forEach(selectFunction => {
-      if (this.functions.indexOf(selectFunction) === -1) {
-        throw new Error(`Unknown function "${selectFunction}" specified.`);
-      }
+    let select       = Object.getOwnPropertyNames(propertyAlias);
+    let selectFunction = select[0];
+    let selectAlias    = propertyAlias[select[1]];
+    let fieldName      = this.criteria.mapToColumn(propertyAlias[select[0]]);
 
-      this.statement[selectFunction](this.criteria.mapToColumn(propertyAlias[selectFunction]));
-    });
+    if (this.functions.indexOf(selectFunction) === -1) {
+      throw new Error(`Unknown function "${selectFunction}" specified.`);
+    }
+
+    select.length > 1
+      ? this.statement[selectFunction](`${fieldName} as ${selectAlias}`)
+      : this.statement[selectFunction](fieldName);
 
     return this;
   }
@@ -635,6 +640,31 @@ export class QueryBuilder<T> {
     if (Object.getOwnPropertyNames(criteria).length === 0) {
       return this;
     }
+
+    criteria['method'] = 'where';
+
+    this.criteria.stage(criteria);
+
+    this.prepared = false;
+
+    return this;
+  }
+
+  /**
+   * Sets the having clause.
+   *
+   * .having({})
+   *
+   * @param {{}} criteria
+   *
+   * @returns {QueryBuilder}
+   */
+  public having(criteria: Object): this {
+    if (!Object.getOwnPropertyNames(criteria).length) {
+      return this;
+    }
+
+    criteria['method'] = 'having';
 
     this.criteria.stage(criteria);
 

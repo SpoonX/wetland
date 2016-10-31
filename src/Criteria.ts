@@ -120,13 +120,18 @@ export class Criteria {
    * @return Criteria
    */
   public apply(criteria: Object, statement?: knex.QueryBuilder, parentKey?: string, parentKnexMethodName?: string): Criteria {
-    statement = statement || this.statement;
+    statement            = statement || this.statement;
+    parentKnexMethodName = parentKnexMethodName || criteria['method'];
 
     Object.keys(criteria).forEach(key => {
+      if (key === 'method') {
+        return;
+      }
+
       let value = criteria[key];
 
       if (!(value === null || typeof value !== 'object') && value.constructor === Object) {
-        return this.apply(value, statement, key);
+        return this.apply(value, statement, key, parentKnexMethodName);
       }
 
       if (this.operatorKnexMethod[key]) {
@@ -146,7 +151,7 @@ export class Criteria {
 
       key = this.mapToColumn(parentKey || key);
 
-      return statement[parentKnexMethodName || 'where'](key, operator, value);
+      return statement[parentKnexMethodName](key, operator, value);
     });
 
     return this;
