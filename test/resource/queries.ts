@@ -28,5 +28,6 @@ export let queries = {
   groupByOne     : "select `t`.`id` as `t.id`, `t`.`task` as `t.task` from `todo` as `t` group by `t`.`list`",
   groupByMultiple: "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` group by `t`.`list`, `t`.`done`",
   having         : "select count(`t`.`task`) as `tasks` from `todo` as `t` having `tasks` <= 13",
-  havingGroupBy  : "select count(`t`.`task`) as `tasks` from `todo` as `t` where `t`.`id` >= 10 group by `t`.`done` having `tasks` <= 4"
+  havingGroupBy  : "select count(`t`.`task`) as `tasks` from `todo` as `t` where `t`.`id` >= 10 group by `t`.`done` having `tasks` <= 4",
+  havingMultiple : "select count(`t`.`task`) as `tasks` from `todo` as `t` group by `t`.`done` having `tasks` > 5 and `tasks` <= 100"
 };
