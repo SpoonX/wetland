@@ -64,7 +64,7 @@ Sets the having clause.
 {% common %}
 ```js
 queryBuilder.having({'name': {lte: 12}});
-queryBuilder.having({'name': {gte: 10}, 'name': {lte: 50}});
+queryBuilder.having({'name': {gte: 10, lte: 50}});
 ```
 {% endmethod %}
 
