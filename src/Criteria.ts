@@ -7,6 +7,16 @@ import * as knex from 'knex';
 export class Criteria {
 
   /**
+   * @type {string}
+   */
+  public static CLAUSE_HAVING: string = 'having';
+
+  /**
+   * @type {string}
+   */
+  public static CLAUSE_WHERE: string = 'where';
+
+  /**
    * Available operators and the handlers.
    *
    * @type {{}}
@@ -37,7 +47,10 @@ export class Criteria {
    *
    * @type {{}}
    */
-  private operatorKnexMethod: {and: string, or: string} = {and: 'where', or: 'orWhere'};
+  private operatorKnexMethod: {and: {[key: string]: string}, or: {[key: string]: string}} = {
+    and: {[Criteria.CLAUSE_WHERE]: 'where', [Criteria.CLAUSE_HAVING]: 'having'},
+    or : {[Criteria.CLAUSE_WHERE]: 'orWhere', [Criteria.CLAUSE_HAVING]: 'orHaving'}
+  };
 
   /**
    * Mapping for the host entity.
@@ -65,7 +78,7 @@ export class Criteria {
    *
    * @type {Array}
    */
-  private staged: Array<Object> = [];
+  private staged: Array<{method: string, criteria: Object}> = [];
 
   /**
    * Construct a new Criteria parser.
@@ -84,12 +97,17 @@ export class Criteria {
   /**
    * Stage criteria to be applied later.
    *
-   * @param {{}} criteria
+   * @param {{}}     criteria
+   * @param {string} method
    *
    * @returns {Criteria}
    */
-  public stage(criteria: Object): Criteria {
-    this.staged.push(criteria);
+  public stage(criteria: Object, method: string = Criteria.CLAUSE_WHERE): Criteria {
+    if (method !== Criteria.CLAUSE_WHERE && method !== Criteria.CLAUSE_HAVING) {
+      throw new Error('Invalid criteria method supplied.');
+    }
+
+    this.staged.push({method, criteria});
 
     return this;
   }
@@ -101,7 +119,7 @@ export class Criteria {
    */
   public applyStaged(): Criteria {
     this.staged.forEach(criteria => {
-      this.apply(criteria);
+      this.apply(criteria.method, criteria.criteria);
     });
 
     this.staged = [];
@@ -111,27 +129,22 @@ export class Criteria {
 
   /**
    * Apply provided criteria to the statement.
-   *
+
+   * @param {string}            [parentKnexMethodName]
    * @param {{}}                criteria
    * @param {knex.QueryBuilder} [statement]
    * @param {string}            [parentKey]
-   * @param {string}            [parentKnexMethodName]
    *
    * @return Criteria
    */
-  public apply(criteria: Object, statement?: knex.QueryBuilder, parentKey?: string, parentKnexMethodName?: string): Criteria {
-    statement            = statement || this.statement;
-    parentKnexMethodName = parentKnexMethodName || criteria['method'];
+  public apply(parentKnexMethodName: string, criteria: Object, statement?: knex.QueryBuilder, parentKey?: string): Criteria {
+    statement = statement || this.statement;
 
     Object.keys(criteria).forEach(key => {
-      if (key === 'method') {
-        return;
-      }
-
       let value = criteria[key];
 
       if (!(value === null || typeof value !== 'object') && value.constructor === Object) {
-        return this.apply(value, statement, key, parentKnexMethodName);
+        return this.apply(parentKnexMethodName, value, statement, key);
       }
 
       if (this.operatorKnexMethod[key]) {
@@ -189,7 +202,7 @@ export class Criteria {
     }
 
     statement.where(subStatement => {
-      value.forEach(item => this.apply(item, subStatement, null, knexMethodName));
+      value.forEach(item => this.apply(knexMethodName, item, subStatement, null));
     });
   }
 }

@@ -641,9 +641,7 @@ export class QueryBuilder<T> {
       return this;
     }
 
-    criteria['method'] = 'where';
-
-    this.criteria.stage(criteria);
+    this.criteria.stage(criteria, 'where');
 
     this.prepared = false;
 
@@ -664,9 +662,7 @@ export class QueryBuilder<T> {
       return this;
     }
 
-    criteria['method'] = 'having';
-
-    this.criteria.stage(criteria);
+    this.criteria.stage(criteria, 'having');
 
     this.prepared = false;
 
