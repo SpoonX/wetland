@@ -16,6 +16,8 @@ export let queries = {
   whereIn        : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` where `t`.`task` in ('Pet cat', 'Pet cat again')",
   whereAnd       : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` where `t`.`task` = 'Rob bank' and `t`.`done` = false",
   whereLTE       : "select `t`.`id` as `t.id`, `t`.`task` as `t.task` from `todo` as `t` where `t`.`id` <= 13",
+  whereNestedIn  : "select `t`.`id` as `t.id`, `t`.`task` as `t.task` from `todo` as `t` where `task` in ('buy cake', 'rob bank') and (`id` < 100 or `done` = false)",
+  whereNestedOr : "select `t`.`id` as `t.id`, `t`.`task` as `t.task` from `todo` as `t` where (`id` >= 50 or `id` <= 20) and `done` = true",
   join           : "select `t`.`id` as `t.id`, `t`.`task` as `t.task` from `todo` as `t` inner join `list` as `l` on `t`.`list_id` = `l`.`id`",
   leftJoin       : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` left join `list` as `l` on `t`.`list_id` = `l`.`id`",
   rightJoin      : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` right join `list` as `l` on `t`.`list_id` = `l`.`id`",
@@ -29,5 +31,6 @@ export let queries = {
   groupByMultiple: "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t` group by `t`.`list`, `t`.`done`",
   having         : "select count(`t`.`task`) as `tasks` from `todo` as `t` having `tasks` <= 13",
   havingGroupBy  : "select count(`t`.`task`) as `tasks` from `todo` as `t` where `t`.`id` >= 10 group by `t`.`done` having `tasks` <= 4",
-  havingMultiple : "select count(`t`.`task`) as `tasks` from `todo` as `t` group by `t`.`done` having `tasks` > 5 and `tasks` <= 100"
+  havingMultiple : "select count(`t`.`task`) as `tasks` from `todo` as `t` group by `t`.`done` having `tasks` > 5 and `tasks` <= 100",
+  havingALot     : "select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done`, sum(`t`.`id`) as `sum_id` from `todo` as `t` inner join `list` as `l` on `t`.`list_id` = `l`.`id` where `t`.`done` = false group by `t`.`id` having `sum_id` <= 200"
 };
