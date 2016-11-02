@@ -143,12 +143,12 @@ export class Criteria {
     Object.keys(criteria).forEach(key => {
       let value = criteria[key];
 
-      if (!(value === null || typeof value !== 'object') && value.constructor === Object) {
-        return this.apply(parentKnexMethodName, value, statement, key);
+      if (this.operatorKnexMethod[key]) {
+        return this.queryByMethod(statement, key, value, this.operatorKnexMethod[key][parentKnexMethodName]);
       }
 
-      if (this.operatorKnexMethod[key]) {
-        return this.queryByMethod(statement, key, value, this.operatorKnexMethod[key]);
+      if (!(value === null || typeof value !== 'object') && value.constructor === Object) {
+        return this.apply(parentKnexMethodName, value, statement, key);
       }
 
       let operator = '=';

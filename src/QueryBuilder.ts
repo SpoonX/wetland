@@ -373,18 +373,16 @@ export class QueryBuilder<T> {
     }
 
     // Support select functions. Don't add to hydrator, as they aren't part of the entities.
-    let select       = Object.getOwnPropertyNames(propertyAlias);
-    let selectFunction = select[0];
-    let selectAlias    = propertyAlias[select[1]];
-    let fieldName      = this.criteria.mapToColumn(propertyAlias[select[0]]);
+    let select    = Object.getOwnPropertyNames(propertyAlias);
+    let fieldName = this.criteria.mapToColumn(propertyAlias[select[0]]);
 
-    if (this.functions.indexOf(selectFunction) === -1) {
-      throw new Error(`Unknown function "${selectFunction}" specified.`);
+    if (this.functions.indexOf(select[0]) === -1) {
+      throw new Error(`Unknown function "${select[0]}" specified.`);
     }
 
     select.length > 1
-      ? this.statement[selectFunction](`${fieldName} as ${selectAlias}`)
-      : this.statement[selectFunction](fieldName);
+      ? this.statement[select[0]](`${fieldName} as ${propertyAlias['alias']}`)
+      : this.statement[select[0]](fieldName);
 
     return this;
   }
