@@ -5,7 +5,6 @@ import {queries} from '../resource/queries';
 import {Todo} from '../resource/entity/todo/Todo';
 import {List} from '../resource/entity/todo/List';
 import {assert} from 'chai';
-import {EntityCtor} from "../../build/src/EntityInterface";
 
 let wetland = new Wetland({
   stores  : {
