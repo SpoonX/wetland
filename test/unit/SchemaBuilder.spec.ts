@@ -34,7 +34,7 @@ function testEntities(section, done) {
 
   let connection = wetland.getStore().getConnection(Store.ROLE_MASTER);
 
-  new SchemaBuilder(wetland.getManager()).create().apply().then(() => {
+  wetland.getSchemaManager().create().then(() => {
     return testProperty(connection, section, 'columns', 'columns')
       .then(() => testProperty(connection, section, 'constraints', 'key_column_usage'))
       .then(() => testProperty(connection, section, 'referentialConstraints', 'referential_constraints'))

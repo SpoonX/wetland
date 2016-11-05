@@ -545,7 +545,7 @@ describe('UnitOfWork', () => {
         entities: [Product, Category, Image, Tag, User, Profile]
       });
 
-      wetland.getMigrator().createSchema().apply().then(() => {
+      wetland.getSchemaManager().create().then(() => {
         let entityManager  = wetland.getManager();
         let unitOfWork     = entityManager.getUnitOfWork();
         let product        = new Product;
