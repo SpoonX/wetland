@@ -35,7 +35,6 @@ describe('QueryBuilder', () => {
       let query        = queryBuilder.select('task').join('innerJoin', 'list', 'l').getQuery().getSQL();
 
       assert.strictEqual(query, queries.join);
-
     });
   });
 
@@ -185,6 +184,29 @@ describe('QueryBuilder', () => {
       let query        = queryBuilder.select('t.done').limit(5).offset(15).getQuery().getSQL();
 
       assert.strictEqual(query, queries.offset);
+    });
+  });
+
+  describe('.groupBy()', () => {
+    it('should create a query that groups by given property as a string', () => {
+      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
+      let query        = queryBuilder.select('t.task').groupBy('t.list').getQuery().getSQL();
+
+      assert.strictEqual(query, queries.groupByOne);
+    });
+
+    it('should create a query that groups by given property as an array', () => {
+      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
+      let query        = queryBuilder.select('t.task').groupBy(['t.list']).getQuery().getSQL();
+
+      assert.strictEqual(query, queries.groupByOne);
+    });
+
+    it('should create a query that groups by multiple properties', () => {
+      let queryBuilder = wetland.getManager().getRepository(Todo).getQueryBuilder('t');
+      let query        = queryBuilder.select('t').groupBy(['t.list', 't.done']).getQuery().getSQL();
+
+      assert.strictEqual(query, queries.groupByMultiple);
     });
   });
 

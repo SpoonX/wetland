@@ -33,6 +33,9 @@ export class Wetland {
     debug        : false,
     dataDirectory: path.resolve(process.cwd(), '.data'),
     defaultStore : 'defaultStore',
+    mapping: {
+      defaultNamesToUnderscore: false
+    },
     entityManager: {
       refreshCreated: true,
       refreshUpdated: true
@@ -98,11 +101,16 @@ export class Wetland {
         .filter(match => match.search(/\.js$/) > -1)
         .map(entity => entity.replace(/\.js$/, ''))
         .forEach(entity => {
-          let filePath   = path.join(entityPath, entity);
-          let ToRegister = require(filePath);
+          let filePath     = path.resolve(entityPath, entity);
+          let entityModule = require(filePath);
+          let ToRegister   = entityModule;
 
           if (typeof ToRegister !== 'function') {
-            ToRegister = ToRegister[entity];
+            ToRegister = entityModule.default;
+          }
+
+          if (typeof ToRegister !== 'function') {
+            ToRegister = entityModule[entity];
           }
 
           if (typeof ToRegister !== 'function') {

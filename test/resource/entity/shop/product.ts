@@ -27,7 +27,7 @@ export class Product {
 
     mapping
       .cascade('categories', ['persist'])
-      .manyToMany('categories', {targetEntity: 'Category', inversedBy: 'products'})
+      .manyToMany('categories', {targetEntity: Category, inversedBy: 'products'})
       .joinTable('categories', {
         name              : 'product_custom_join_category',
         joinColumns       : [{referencedColumnName: 'id', name: 'product_id'}],

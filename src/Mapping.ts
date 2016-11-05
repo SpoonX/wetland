@@ -180,7 +180,33 @@ export class Mapping<T> {
    * @return {Mapping}
    */
   public field(property: string, options: FieldOptions): this {
-    return this.extendField(property, options);
+    let entityManager = this.stageOrGetManager('field', arguments);
+
+    if (!entityManager) {
+      return;
+    }
+
+    let toUnderscore = entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
+    let propertyName = toUnderscore ? this.nameToUnderscore(property) : property;
+
+    Homefront.merge(this.mapping.fetchOrPut(`fields.${property}`, {name: propertyName}), options);
+
+    this.mapColumn(this.getColumnName(property), property);
+
+    return this;
+  }
+
+  /**
+   * Replace name case to underscore.
+   *
+   * @param {string} property
+   *
+   * @returns {string}
+   */
+  private nameToUnderscore(property: string): string {
+    let name = property[0].toLowerCase() + property.slice(1);
+
+    return name.replace(/[A-Z]/g, '_$&').replace('__', '_').toLowerCase();
   }
 
   /**
@@ -263,10 +289,19 @@ export class Mapping<T> {
    * @return {Mapping}
    */
   public entity(options: Object = {}): this {
+    let entityManager = this.stageOrGetManager('entity', arguments);
+
+    if (!entityManager) {
+      return;
+    }
+
+    let toUnderscore = entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
+    let tableName    = toUnderscore ? this.nameToUnderscore(this.target.name) : this.target.name.toLowerCase();
+
     let defaultMapping = {
       repository: EntityRepository,
       name      : this.target.name,
-      tableName : this.target.name.toLowerCase(),
+      tableName : tableName,
       store     : null
     };
 

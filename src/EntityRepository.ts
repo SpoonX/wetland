@@ -82,6 +82,10 @@ export class EntityRepository<T> {
       queryBuilder.offset(options.offset);
     }
 
+    if (options.groupBy) {
+      queryBuilder.groupBy(options.groupBy);
+    }
+
     if (options.join && Array.isArray(options.join)) {
       options.join.forEach(join => {
         let column = join as string;
@@ -132,6 +136,7 @@ export class EntityRepository<T> {
 
 export interface FindOptions {
   orderBy?: any,
+  groupBy?: any,
   alias?: string,
   limit?: number,
   offset?: number,
