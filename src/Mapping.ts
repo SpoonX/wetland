@@ -188,8 +188,15 @@ export class Mapping<T> {
 
     let toUnderscore = entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
     let propertyName = toUnderscore ? this.nameToUnderscore(property) : property;
+    let field        = this.mapping.fetchOrPut(`fields.${property}`, {});
 
-    Homefront.merge(this.mapping.fetchOrPut(`fields.${property}`, {name: propertyName}), options);
+    if (field.name) {
+      this.mapping.remove(`columns.${this.getColumnName(property)}`);
+    } else {
+      field.name = propertyName;
+    }
+
+    Homefront.merge(field, options);
 
     this.mapColumn(this.getColumnName(property), property);
 
@@ -818,9 +825,18 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public extendField(property: string, additional: Object): this {
-    Homefront.merge(this.mapping.fetchOrPut(`fields.${property}`, {name: property}), additional);
+    let field     = this.mapping.fetchOrPut(`fields.${property}`, {});
+    let needsName = !field.name;
 
-    this.mapColumn(this.getColumnName(property) || property, property);
+    if (needsName) {
+      field.name = property;
+    }
+
+    Homefront.merge(field, additional);
+
+    if (needsName) {
+      this.mapColumn(this.getColumnName(property) || property, property);
+    }
 
     return this;
   }
