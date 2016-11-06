@@ -49,10 +49,32 @@ export class SchemaBuilder {
   private sql: string;
 
   /**
+   * @type {boolean}
+   */
+  private useForeignKeysGlobal: boolean;
+
+  /**
    * @param {Scope} entityManager
    */
   public constructor(entityManager: Scope) {
     this.entityManager = entityManager;
+  }
+
+  /**
+   * Returns if foreign keys should be used.
+   *
+   * @param {string} store
+   *
+   * @returns {boolean}
+   */
+  private useForeignKeys(store: string): boolean {
+    let manager = this.entityManager;
+
+    if (!this.useForeignKeysGlobal) {
+      this.useForeignKeysGlobal = manager.getConfig().fetch('useForeignKeys');
+    }
+
+    return this.useForeignKeysGlobal && manager.getStore(store).getClient() !== 'sqlite3';
   }
 
   /**
@@ -87,7 +109,7 @@ export class SchemaBuilder {
    *
    * @returns {string}
    */
-  public getCode() {
+  public getCode(): string {
     return this.code;
   }
 
@@ -96,7 +118,7 @@ export class SchemaBuilder {
    *
    * @returns {SchemaBuilder}
    */
-  private runCode() {
+  private runCode(): this {
     let migration = {
       getBuilder: store => {
         let connection    = this.entityManager.getStore(store).getConnection(Store.ROLE_MASTER);
@@ -149,9 +171,10 @@ export class SchemaBuilder {
       return ' '.repeat(spaceCount - change);
     };
 
-    Reflect.ownKeys(instructionSets).forEach(store => {
-      let instructions = instructionSets[store];
-      let code         = [];
+    Reflect.ownKeys(instructionSets).forEach((store: string) => {
+      let useForeignKeys = this.useForeignKeys(store);
+      let instructions   = instructionSets[store];
+      let code           = [];
 
       // Rename tables
       if (Array.isArray(instructions.rename) && instructions.rename.length) {
@@ -162,16 +185,16 @@ export class SchemaBuilder {
         code.push('');
       }
 
-      this.buildTable('alter', false, instructions, code, spacing);
-      this.buildTable('create', true, instructions, code, spacing);
+      this.buildTable(useForeignKeys, 'alter', false, instructions, code, spacing);
+      this.buildTable(useForeignKeys, 'create', true, instructions, code, spacing);
 
       instructions.alter.forEach(alterData => {
         let tableName = alterData.tableName;
 
-        if (alterData.info.foreign && alterData.info.foreign.length) {
+        if (useForeignKeys && alterData.info.foreign && alterData.info.foreign.length) {
           let mockInstructions = {alter: [{tableName, info: {foreign: alterData.info.foreign}}]};
 
-          this.buildTable('alter', true, mockInstructions, code, spacing);
+          this.buildTable(useForeignKeys, 'alter', true, mockInstructions, code, spacing);
         }
       });
 
@@ -196,13 +219,19 @@ export class SchemaBuilder {
   /**
    * Build table.
    *
+   * @param {boolean}   useForeign
    * @param {string}    action
    * @param {boolean}   createForeign
    * @param {{}}        instructions
    * @param {string[]}  code
    * @param {function}  spacing
    */
-  private buildTable(action: string, createForeign: boolean, instructions: any, code: Array<string>, spacing: (change?: number)=>string) {
+  private buildTable(useForeign: boolean,
+                     action: string,
+                     createForeign: boolean,
+                     instructions: any,
+                     code: Array<string>,
+                     spacing: (change?: number)=>string) {
     instructions[action].forEach(actionData => {
       let tableName      = actionData.tableName;
       let table          = actionData.info;
@@ -225,7 +254,7 @@ export class SchemaBuilder {
         spacing(2);
 
         // Drop foreign
-        if (hasDropForeign) {
+        if (useForeign && hasDropForeign) {
           table.dropForeign.forEach(dropForeign => {
             code.push(`${spacing()}table.dropForeign('${dropForeign}');`);
           });
@@ -296,7 +325,7 @@ export class SchemaBuilder {
         });
       }
 
-      if (createForeign && table.foreign && table.foreign.length) {
+      if (useForeign && createForeign && table.foreign && table.foreign.length) {
         ensureBuilder();
 
         this.createForeign(table, spacing, code);
