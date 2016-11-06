@@ -36,6 +36,9 @@ Typings are provided by default for TypeScript users. No additional typings need
 * All operating systems
 * Node.js 6.0+
 
+## Gotchas
+- When using sqlite3, foreign keys are disabled (this is due to alter table not working for foreign keys with sqlite).
+
 ## Usage
 
 The following is a snippet to give you an idea what it's like to work with wetland.
