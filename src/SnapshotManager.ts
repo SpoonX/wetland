@@ -485,7 +485,8 @@ export class SnapshotManager {
 
         if (!targetMapping.columns[joinColumn.referencedColumnName]) {
           throw new Error(
-            `Cannot create foreign key, column ${joinColumn.referencedColumnName} not found on target entity.`
+            `Cannot create foreign key for '${tableName}', ` +
+            `column '${joinColumn.referencedColumnName}' not found on target entity '${targetMapping.entity.tableName}'.`
           );
         }
 
