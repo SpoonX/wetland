@@ -170,16 +170,7 @@ Get the join table for the relationship mapped via property, returning an object
 
 {% common %}
 ```js
-mapping.getJoinTable('property', entityManager);
-```
-{% endmethod %}
-
-{% method %}
-## .getJoinTables()
-Get all join tables, returning an array of objects.
-{% common %}
-```js
-mapping.getJoinTables();
+mapping.getJoinTable('property');
 ```
 {% endmethod %}
 

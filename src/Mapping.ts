@@ -37,7 +37,7 @@ export class Mapping<T> {
    *
    * @type {Homefront}
    */
-  public mapping: Homefront = new Homefront;
+  private mapping: Homefront = new Homefront;
 
   /**
    * Entity this mapping is for.
@@ -64,6 +64,10 @@ export class Mapping<T> {
    * @return {Mapping}
    */
   public static forEntity<T>(target: EntityCtor<T> | T | ProxyInterface): Mapping<T> {
+    if (!target) {
+      throw new Error('Trying to get mapping for non-target.');
+    }
+
     target       = target['isEntityProxy'] ? (target as ProxyInterface).getTarget() : target;
     let entity   = MetaData.getConstructor(target) as EntityCtor<T>;
     let metadata = MetaData.forTarget(entity);
@@ -78,9 +82,13 @@ export class Mapping<T> {
   /**
    * Create a new mapping.
    *
-   * @param {EntityCtor} entity
+   * @param {EntityCtor} [entity]
    */
-  public constructor(entity: EntityCtor<T>) {
+  public constructor(entity?: EntityCtor<T>) {
+    if (!entity) {
+      return;
+    }
+
     this.target = entity;
 
     // Set up default entity mapping information.
@@ -178,10 +186,17 @@ export class Mapping<T> {
       return;
     }
 
-    let toUnderscore = this.entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
+    let toUnderscore = entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
     let propertyName = toUnderscore ? this.nameToUnderscore(property) : property;
+    let field        = this.mapping.fetchOrPut(`fields.${property}`, {});
 
-    Homefront.merge(this.mapping.fetchOrPut(`fields.${property}`, {name: propertyName}), options);
+    if (field.name) {
+      this.mapping.remove(`columns.${this.getColumnName(property)}`);
+    } else {
+      field.name = propertyName;
+    }
+
+    Homefront.merge(field, options);
 
     this.mapColumn(this.getColumnName(property), property);
 
@@ -239,6 +254,13 @@ export class Mapping<T> {
   }
 
   /**
+   * @returns {Homefront}
+   */
+  public getMappingData(): Homefront {
+    return this.mapping;
+  }
+
+  /**
    * Get the property name for a column name
    *
    * @param {string} column
@@ -280,7 +302,7 @@ export class Mapping<T> {
       return;
     }
 
-    let toUnderscore = this.entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
+    let toUnderscore = entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
     let tableName    = toUnderscore ? this.nameToUnderscore(this.target.name) : this.target.name.toLowerCase();
 
     let defaultMapping = {
@@ -293,6 +315,21 @@ export class Mapping<T> {
     Homefront.merge(this.mapping.fetchOrPut(`entity`, defaultMapping), options);
 
     return this;
+  }
+
+  /**
+   * Convenience method, returning an array of column names mapped from provided properties.
+   *
+   * @param {string|string[]} properties
+   *
+   * @returns {string[]}
+   */
+  public getColumnNames(properties: Array<string>): Array<string> {
+    if (!Array.isArray(properties)) {
+      properties = [properties];
+    }
+
+    return properties.map(column => this.getColumnName(column));
   }
 
   /**
@@ -315,14 +352,42 @@ export class Mapping<T> {
    * @return {Mapping}
    */
   public index(indexName: string | Array<string>, fields?: string | Array<string>): this {
-    if (!fields) {
-      fields    = (Array.isArray(indexName) ? indexName : [indexName]) as Array<string>;
-      indexName = `idx_${(fields as Array<string>).join('_').toLowerCase()}`;
+    let unprocessed = this.mapping.fetchOrPut(`unprocessed_indexes`, []);
+
+    unprocessed.push({indexName, fields});
+
+    return this;
+  }
+
+  /**
+   * Process unprocessed indexes.
+   *
+   * @returns {Mapping}
+   */
+  private processIndexes(): this {
+    let unprocessed = this.mapping.fetch(`unprocessed_indexes`);
+
+    if (!unprocessed) {
+      return;
     }
 
-    let indexes = this.mapping.fetchOrPut(`indexes.${indexName}`, new ArrayCollection);
+    unprocessed.forEach(index => {
+      let indexName = index.indexName;
+      let fields    = index.fields;
 
-    indexes.add(...(Array.isArray(fields) ? fields : [fields]) as Array<string>);
+      if (!fields) {
+        fields    = this.getColumnNames(Array.isArray(indexName) ? indexName : [indexName]);
+        indexName = `idx_${this.getTableName()}_${fields.join('_').toLowerCase()}`;
+      } else {
+        fields = this.getColumnNames(fields);
+      }
+
+      let indexes = this.mapping.fetchOrPut(`index.${indexName}`, new ArrayCollection);
+
+      indexes.add(...fields);
+    });
+
+    this.mapping.remove(`unprocessed_indexes`);
 
     return this;
   }
@@ -333,7 +398,80 @@ export class Mapping<T> {
    * @returns {{}}
    */
   public getIndexes(): {[key: string]: Array<string>} {
-    return this.mapping.fetch('indexes', {});
+    this.processIndexes();
+
+    return this.mapping.fetch('index', {});
+  }
+
+  /**
+   * Map a unique constraint.
+   *
+   *  - Compound:
+   *    mapping.uniqueConstraint('something_unique', ['property1', 'property2']);
+   *
+   *  - Single:
+   *    mapping.uniqueConstraint('something_unique', ['property']);
+   *    mapping.uniqueConstraint('something_unique', 'property');
+   *
+   *  - Generated uniqueConstraint name:
+   *    mapping.uniqueConstraint('property');
+   *    mapping.uniqueConstraint(['property1', 'property2']);
+   *
+   * @param {Array|string} constraintName
+   * @param {Array|string} [fields]
+   *
+   * @return {Mapping}
+   */
+  public uniqueConstraint(constraintName: string | Array<string>, fields?: string | Array<string>) {
+    let unprocessed = this.mapping.fetchOrPut(`unprocessed_uniques`, []);
+
+    unprocessed.push({constraintName, fields});
+
+    return this;
+  }
+
+  /**
+   * Process unprocessed constraints.
+   *
+   * @returns {Mapping}
+   */
+  private processUniqueConstraints(): this {
+    let unprocessed = this.mapping.fetch(`unprocessed_uniques`);
+
+    if (!unprocessed) {
+      return;
+    }
+
+    unprocessed.forEach(constraint => {
+      let constraintName = constraint.constraintName;
+      let fields         = constraint.fields;
+
+      if (!fields) {
+        fields         = this.getColumnNames(Array.isArray(constraintName) ? constraintName : [constraintName]);
+        constraintName = `${this.getTableName()}_${fields.join('_').toLowerCase()}_unique`;
+      } else {
+        fields = this.getColumnNames(fields);
+      }
+
+      let constraints = this.mapping.fetchOrPut(`unique.${constraintName}`, new ArrayCollection);
+
+      constraints.add(...fields);
+    });
+
+    this.mapping.remove(`unprocessed_uniques`);
+
+    return this;
+  }
+
+  /**
+   * Get the unique constraints.
+   *
+   * @returns {{}}
+   */
+  public getUniqueConstraints(): {[key: string]: Array<string>} {
+    this.processUniqueConstraints();
+
+    return this.mapping.fetch('unique', {});
   }
 
   /**
@@ -454,47 +592,6 @@ export class Mapping<T> {
   }
 
   /**
-   * Map a unique constraint.
-   *
-   *  - Compound:
-   *    mapping.uniqueConstraint('something_unique', ['property1', 'property2']);
-   *
-   *  - Single:
-   *    mapping.uniqueConstraint('something_unique', ['property']);
-   *    mapping.uniqueConstraint('something_unique', 'property');
-   *
-   *  - Generated uniqueConstraint name:
-   *    mapping.uniqueConstraint('property');
-   *    mapping.uniqueConstraint(['property1', 'property2']);
-   *
-   * @param {Array|string} constraintName
-   * @param {Array|string} [fields]
-   *
-   * @return {Mapping}
-   */
-  public uniqueConstraint(constraintName: string | Array<string>, fields?: string | Array<string>) {
-    if (!fields) {
-      fields         = (Array.isArray(constraintName) ? constraintName : [constraintName]) as Array<string>;
-      constraintName = (fields as Array<string>).join('_').toLowerCase() + '_unique';
-    }
-
-    let constraints = this.mapping.fetchOrPut(`uniqueConstraints.${constraintName}`, new ArrayCollection);
-
-    constraints.add(...(Array.isArray(fields) ? fields : [fields]) as Array<string>);
-
-    return this;
-  }
-
-  /**
-   * Get the unique constraints.
-   *
-   * @returns {{}}
-   */
-  public getUniqueConstraints(): {[key: string]: Array<string>} {
-    return this.mapping.fetch('uniqueConstraints', {});
-  }
-
-  /**
    * Set cascade values.
    *
    * @param {string}    property
@@ -515,6 +612,10 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public addRelation(property: string, options: Relationship): this {
+    if (!options.targetEntity) {
+      throw new Error('Required property "targetEntity" not found in options.');
+    }
+
     this.extendField(property, {relationship: options});
     Homefront.merge(this.mapping.fetchOrPut('relations', {}), {[property]: options});
 
@@ -550,12 +651,18 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public oneToOne(property: string, options: Relationship): this {
-    return this.addRelation(property, {
+    this.addRelation(property, {
       type        : Mapping.RELATION_ONE_TO_ONE,
       targetEntity: options.targetEntity,
       inversedBy  : options.inversedBy,
       mappedBy    : options.mappedBy
     });
+
+    if (!options.mappedBy) {
+      this.ensureJoinColumn(property);
+    }
+
+    return this;
   }
 
   /**
@@ -583,11 +690,15 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public manyToOne(property: string, options: Relationship): this {
-    return this.addRelation(property, {
+    this.addRelation(property, {
       targetEntity: options.targetEntity,
       type        : Mapping.RELATION_MANY_TO_ONE,
       inversedBy  : options.inversedBy
     });
+
+    this.ensureJoinColumn(property);
+
+    return this;
   }
 
   /**
@@ -617,18 +728,8 @@ export class Mapping<T> {
    */
   public joinTable(property: string, options: JoinTable): this {
     this.extendField(property, {joinTable: options});
-    this.mapping.fetchOrPut('joinTables', new ArrayCollection).add(options);
 
     return this;
-  }
-
-  /**
-   * Get all join tables.
-   *
-   * @returns {JoinTable[]}
-   */
-  public getJoinTables(): Array<JoinTable> {
-    return this.mapping.fetch('joinTables', []);
   }
 
   /**
@@ -640,53 +741,45 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public joinColumn(property: string, options: JoinColumn): this {
-    this.extendField(property, {
-      joinColumn: Homefront.merge({
-        name                : `${property}_id`,
-        referencedColumnName: 'id',
-        unique              : false,
-        nullable            : true
-      }, options)
-    });
-
-    return this;
+    return this.ensureJoinColumn(property, options);
   }
 
   /**
    * Get the join column for the relationship mapped via property.
    *
-   * @param {string} property
+   * @param {string}    property
+   * @param {JoinTable} [options]
    *
-   * @returns {JoinColumn}
+   * @returns {Mapping}
    */
-  public getJoinColumn(property: string): JoinColumn {
-    let field = this.mapping.fetchOrPut(`fields.${property}`, {});
+  public ensureJoinColumn(property: string, options?: JoinColumn): this {
+    let field        = this.mapping.fetchOrPut(`fields.${property}`, {joinColumn: {}});
+    field.joinColumn = Homefront.merge({
+      name                : `${property}_id`,
+      referencedColumnName: 'id',
+      unique              : false,
+      nullable            : true
+    }, options || field.joinColumn);
 
-    if (!field.joinColumn) {
-      field.joinColumn = {
-        name                : `${property}_id`,
-        referencedColumnName: 'id',
-        unique              : false,
-        nullable            : true
-      };
-    }
-
-    return field.joinColumn;
+    return this;
   }
 
   /**
-   * Get the join table for the relationship mapped via property.
+   * Get join table.
    *
    * @param {string} property
    *
    * @returns {JoinTable}
    */
   public getJoinTable(property: string): JoinTable {
-    let field       = this.mapping.fetchOrPut(`fields.${property}`, {});
-    field.joinTable = field.joinTable || {};
-
     if (!this.entityManager) {
       throw new Error('EntityManager is required on the mapping. Make sure you registered the entity.');
+    }
+
+    let field = this.mapping.fetchOrPut(`fields.${property}`, {joinTable: {name: ''}}) as FieldOptions;
+
+    if (field.joinTable && field.joinTable.complete) {
+      return field.joinTable;
     }
 
     let relationMapping = Mapping.forEntity(this.entityManager.resolveEntityReference(field.relationship.targetEntity));
@@ -694,8 +787,8 @@ export class Mapping<T> {
     let withTableName   = relationMapping.getTableName();
     let ownPrimary      = this.getPrimaryKeyField();
     let withPrimary     = relationMapping.getPrimaryKeyField();
-
-    return Homefront.merge({
+    field.joinTable     = Homefront.merge({
+      complete          : true,
       name              : `${ownTableName}_${withTableName}`,
       joinColumns       : [{
         referencedColumnName: ownPrimary,
@@ -708,6 +801,19 @@ export class Mapping<T> {
         type                : 'integer'
       }]
     }, field.joinTable) as JoinTable;
+
+    return field.joinTable;
+  }
+
+  /**
+   * Get join column.
+   *
+   * @param {string} property
+   *
+   * @returns {JoinColumn}
+   */
+  public getJoinColumn(property: string): JoinColumn {
+    return this.getField(property).joinColumn;
   }
 
   /**
@@ -719,13 +825,90 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public extendField(property: string, additional: Object): this {
-    Homefront.merge(this.mapping.fetchOrPut(`fields.${property}`, {}), additional);
+    let field     = this.mapping.fetchOrPut(`fields.${property}`, {});
+    let needsName = !field.name;
+
+    if (needsName) {
+      field.name = property;
+    }
+
+    Homefront.merge(field, additional);
+
+    if (needsName) {
+      this.mapColumn(this.getColumnName(property) || property, property);
+    }
 
     return this;
   }
 
+  /**
+   * Get a Field scope mapping.
+   *
+   * @param {string} property
+   *
+   * @returns {Field}
+   */
   public forProperty(property: string) {
     return new Field(property, this);
+  }
+
+  /**
+   * Complete the mapping.
+   *
+   * @returns {Mapping}
+   */
+  public completeMapping(): this {
+    let relations = this.getRelations();
+
+    for (let property in relations) {
+      let relation = relations[property];
+
+      // Make sure joinTable is complete.
+      if (relation.type === Mapping.RELATION_MANY_TO_MANY && relation.inversedBy) {
+        this.getJoinTable(property);
+      }
+
+      if (!relation.mappedBy) {
+        this.ensureJoinColumn(property);
+      }
+
+      // Make sure refs are strings
+      if (typeof relation.targetEntity !== 'string') {
+        let reference         = this.entityManager.resolveEntityReference(relation.targetEntity);
+        relation.targetEntity = Mapping.forEntity(reference).getEntityName();
+      }
+    }
+
+    this.processIndexes();
+    this.processUniqueConstraints();
+
+    return this;
+  }
+
+  /**
+   * Returns the mapping in complete mode. Doesn't include the repository.
+   *
+   * @returns {{}}
+   */
+  public serializable(): Object {
+    return this.completeMapping().mapping.expand();
+  }
+
+  /**
+   * Restore a serialized mapping.
+   *
+   * NOTE: Unless provided, there won't be an entity reference.
+   *
+   * @param {{}} mappingData
+   *
+   * @returns {Mapping}
+   */
+  public static restore(mappingData: Object): Mapping<ProxyInterface> {
+    let mapping = new Mapping();
+
+    mapping.getMappingData().merge(mappingData);
+
+    return mapping;
   }
 }
 
@@ -923,6 +1106,7 @@ export interface FieldOptions {
 
 export interface JoinTable {
   name: string,
+  complete?: boolean,
   joinColumns?: Array<JoinColumn>,
   inverseJoinColumns?: Array<JoinColumn>
 }

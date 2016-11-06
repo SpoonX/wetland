@@ -1,4 +1,4 @@
-import {Mapping, Field} from '../../src/Mapping';
+import {Mapping} from '../../src/Mapping';
 import {ToUnderscore} from '../resource/entity/ToUnderscore';
 import {Product} from '../resource/entity/shop/product';
 import {Category} from '../resource/entity/shop/category';
@@ -88,7 +88,7 @@ describe('Mapping', () => {
         underscore_id            : 'id'
       };
 
-      assert.deepEqual(mapping.mapping.fetch('columns'), columnNames);
+      assert.deepEqual(mapping.getMappingData().fetch('columns'), columnNames);
     });
 
     it('should keep casing if `defaultNamesToUnderscore` is set to false', () => {
@@ -98,7 +98,7 @@ describe('Mapping', () => {
         PascalCase: 'PascalCase'
       };
 
-      assert.deepEqual(mapping.mapping.fetch('columns'), columnName);
+      assert.deepEqual(mapping.getMappingData().fetch('columns'), columnName);
     });
   });
 
@@ -132,10 +132,10 @@ describe('Mapping', () => {
 
       mapping.entity({});
 
-      assert.strictEqual(mapping.mapping.fetch('entity.name'), 'FooEntity');
-      assert.strictEqual(mapping.mapping.fetch('entity.repository'), EntityRepository);
-      assert.strictEqual(mapping.mapping.fetch('entity.tableName'), 'fooentity');
-      assert.isNull(mapping.mapping.fetch('entity.store'));
+      assert.strictEqual(mapping.getMappingData().fetch('entity.name'), 'FooEntity');
+      assert.strictEqual(mapping.getMappingData().fetch('entity.repository'), EntityRepository);
+      assert.strictEqual(mapping.getMappingData().fetch('entity.tableName'), 'fooentity');
+      assert.isNull(mapping.getMappingData().fetch('entity.store'));
     });
 
     it('should map custom options for an entity', () => {
@@ -148,9 +148,9 @@ describe('Mapping', () => {
 
       mapping.entity(options);
 
-      assert.strictEqual(mapping.mapping.fetch('entity.name'), options.name);
-      assert.strictEqual(mapping.mapping.fetch('entity.tableName'), options.tableName);
-      assert.strictEqual(mapping.mapping.fetch('entity.store'), options.store);
+      assert.strictEqual(mapping.getMappingData().fetch('entity.name'), options.name);
+      assert.strictEqual(mapping.getMappingData().fetch('entity.tableName'), options.tableName);
+      assert.strictEqual(mapping.getMappingData().fetch('entity.store'), options.store);
     });
 
     it('should map an entity with default names set to underscore', () => {
@@ -158,29 +158,32 @@ describe('Mapping', () => {
 
       mapping.entity({});
 
-      assert.strictEqual(mapping.mapping.fetch('entity.name'), 'ToUnderscore');
-      assert.strictEqual(mapping.mapping.fetch('entity.tableName'), 'to_underscore');
+      assert.strictEqual(mapping.getMappingData().fetch('entity.name'), 'ToUnderscore');
+      assert.strictEqual(mapping.getMappingData().fetch('entity.tableName'), 'to_underscore');
     });
   });
 
   describe('.index()', () => {
     it('should map an single index with default index name', () => {
-      let mapping    = getMapping(wetland, ToUnderscore);
-      let columnName = mapping.getColumnName('camelCaseToUnderscore');
-      let index      = {idx_camel_case_to_underscore: ['camel_case_to_underscore']};
+      let mapping = getMapping(wetland, ToUnderscore);
+      let index   = {idx_to_underscore_camel_case_to_underscore: ['camel_case_to_underscore']};
 
-      mapping.index(columnName);
+      mapping.index('camelCaseToUnderscore');
 
-      assert.deepEqual(mapping.mapping.fetch('indexes'), index);
+      assert.deepEqual(mapping.getIndexes(), index);
     });
 
     it('should map indexes using a custom index name', () => {
-      let mapping = getMapping(wetland, ToUnderscore);
-      let indexes = ['customColumnName', 'already_underscore'];
+      let mapping  = getMapping(wetland, ToUnderscore);
+      let indexes  = ['customName', 'already_underscore'];
+      let expected = {
+        idx_to_underscore_camel_case_to_underscore: ['camel_case_to_underscore'],
+        myIndex                                   : ['customColumnName', 'already_underscore']
+      };
 
       mapping.index('myIndex', indexes);
 
-      assert.sameMembers(mapping.mapping.fetch('indexes.myIndex'), indexes);
+      assert.deepEqual(mapping.getIndexes(), expected);
     });
   });
 
@@ -188,8 +191,8 @@ describe('Mapping', () => {
     it('should get the indexes', () => {
       let mapping = getMapping(wetland, ToUnderscore);
       let indexes = {
-        idx_camel_case_to_underscore: ['camel_case_to_underscore'],
-        myIndex                     : ['customColumnName', 'already_underscore']
+        idx_to_underscore_camel_case_to_underscore: ['camel_case_to_underscore'],
+        myIndex                                   : ['customColumnName', 'already_underscore']
       };
 
       assert.deepEqual(mapping.getIndexes(), indexes);
@@ -200,7 +203,7 @@ describe('Mapping', () => {
     it('should map a property to be the primary key', () => {
       let mapping = getMapping(wetland, ToUnderscore);
 
-      assert.strictEqual(mapping.mapping.fetch('primary'), 'id');
+      assert.strictEqual(mapping.getMappingData().fetch('primary'), 'id');
     });
   });
 
@@ -305,22 +308,25 @@ describe('Mapping', () => {
   });
 
   describe('.uniqueConstraint()', () => {
-    it('should map an unique constraint', () => {
-      let mapping    = getMapping(wetland, ToUnderscore);
-      let columnName = mapping.getColumnName('id');
-      let constraint = {underscore_id_unique: ['underscore_id']};
+    it('should map a unique constraint', () => {
+      let mapping  = getMapping(wetland, ToUnderscore);
+      let expected = {to_underscore_underscore_id_unique: ['underscore_id']};
 
-      mapping.uniqueConstraint(columnName);
+      mapping.uniqueConstraint('id');
 
-      assert.deepEqual(mapping.mapping.fetch('uniqueConstraints'), constraint);
+      assert.deepEqual(mapping.getUniqueConstraints(), expected);
     });
 
-    it('should map an unique constraint with custom name', () => {
-      let mapping = getMapping(wetland, ToUnderscore);
+    it('should map a unique constraint with custom name', () => {
+      let mapping  = getMapping(wetland, ToUnderscore);
+      let expected = {
+        to_underscore_underscore_id_unique: ['underscore_id'],
+        custom_unique                     : ['already_underscore']
+      };
 
       mapping.uniqueConstraint('custom_unique', 'already_underscore');
 
-      assert.sameMembers(mapping.mapping.fetch('uniqueConstraints.custom_unique'), ['already_underscore']);
+      assert.deepEqual(mapping.getUniqueConstraints(), expected);
     });
   });
 
@@ -328,8 +334,8 @@ describe('Mapping', () => {
     it('should get unique constraints', () => {
       let mapping = getMapping(wetland, ToUnderscore);
       let unique  = {
-        underscore_id_unique: ['underscore_id'],
-        custom_unique       : ['already_underscore']
+        to_underscore_underscore_id_unique: ['underscore_id'],
+        custom_unique                     : ['already_underscore']
       };
 
       assert.deepEqual(mapping.getUniqueConstraints(), unique);
@@ -421,13 +427,14 @@ describe('Mapping', () => {
   describe('.joinTable(), .getJoinTables()', () => {
     it('should register a join table and fetch all join tables registered', () => {
       let mapping   = getMapping(wetland, Product);
-      let joinTable = [{
+      let joinTable = {
+        complete          : true,
         name              : 'product_custom_join_category',
-        joinColumns       : [{referencedColumnName: 'id', name: 'product_id'}],
-        inverseJoinColumns: [{referencedColumnName: 'id', name: 'category_id'}]
-      }];
+        joinColumns       : [{referencedColumnName: 'id', name: 'product_id', type: 'integer'}],
+        inverseJoinColumns: [{referencedColumnName: 'id', name: 'category_id', type: 'integer'}]
+      };
 
-      assert.sameDeepMembers(mapping.getJoinTables(), joinTable);
+      assert.deepEqual(mapping.getJoinTable('categories'), joinTable);
     });
   });
 
@@ -450,6 +457,7 @@ describe('Mapping', () => {
       let mapping   = getMapping(wetland, Product);
       let joinTable = {
         name              : 'product_custom_join_category',
+        complete          : true,
         joinColumns       : [{referencedColumnName: 'id', name: 'product_id', type: 'integer'}],
         inverseJoinColumns: [{referencedColumnName: 'id', name: 'category_id', type: 'integer'}]
       };

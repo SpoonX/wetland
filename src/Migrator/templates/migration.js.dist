@@ -1,10 +1,10 @@
 class Migration {
   static up(migration) {
-    // @todo Implement up.
+{{ up }}
   }
 
   static down(migration) {
-    // @todo Implement down.
+{{ down }}
   }
 }
 

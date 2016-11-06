@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as mkdirp from 'mkdirp';
 import * as Promise from 'bluebird';
 import {MigratorConfigInterface} from './MigratorConfigInterface';
+const replace = require('stream-replace');
 
 export class MigrationFile {
   /**
@@ -32,20 +33,35 @@ export class MigrationFile {
    * Create a new migration file.
    *
    * @param {string} name
+   * @param {{}}     [code]
    *
    * @returns {Bluebird}
    */
-  public create(name: string): Promise<any> {
-    let sourceFile  = `${__dirname}/templates/migration.${this.config.extension}.dist`;
-    let targetFile  = path.join(this.config.directory, `${this.makeMigrationName(name)}.${this.config.extension}`);
-    let readStream  = fs.createReadStream(sourceFile);
-    let writeStream = fs.createWriteStream(targetFile);
+  public create(name: string, code?: {up: string, down: string}): Promise<any> {
+    let sourceFile    = `${__dirname}/templates/migration.${this.config.extension}.dist`;
+    let migrationName = `${this.makeMigrationName(name)}.${this.config.extension}`;
+    let targetFile    = path.join(this.config.directory, migrationName);
+    let readStream    = fs.createReadStream(sourceFile);
+    let writeStream   = fs.createWriteStream(targetFile);
+    code              = code || {up: null, down: null};
+
+    if (!code.up) {
+      code.up = '    // @todo Implement';
+    }
+
+    if (!code.down) {
+      code.down = '    // @todo Implement';
+    }
 
     return new Promise((resolve, reject) => {
-      readStream.pipe(writeStream);
+      readStream
+        .pipe(replace(/\{\{ up }}/, code.up))
+        .pipe(replace(/\{\{ down }}/, code.down))
+        .pipe(writeStream);
+
       readStream.on('error', reject);
       writeStream.on('error', reject);
-      writeStream.on('close', () => resolve(targetFile));
+      writeStream.on('close', () => resolve(migrationName));
     });
   }
 

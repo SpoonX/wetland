@@ -3,7 +3,6 @@ import * as Bluebird from 'bluebird';
 import * as Knex from 'knex';
 import {Wetland} from '../Wetland';
 import {Scope} from '../Scope';
-import {SchemaBuilder} from '../SchemaBuilder';
 import {Run} from './Run';
 import {MigratorConfigInterface} from './MigratorConfigInterface';
 import {MigrationFile} from './MigrationFile';
@@ -41,11 +40,6 @@ export class Migrator {
    * @type {Scope}
    */
   private manager: Scope;
-
-  /**
-   * @type {SchemaBuilder}
-   */
-  private schemaBuilder: SchemaBuilder;
 
   /**
    * @type {MigratorConfig}
@@ -97,25 +91,35 @@ export class Migrator {
   }
 
   /**
-   * Create your database schema.
-   *
-   * @returns {SchemaBuilder}
-   */
-  public createSchema(): SchemaBuilder {
-    if (!this.schemaBuilder) {
-      this.schemaBuilder = new SchemaBuilder(this.manager);
-    }
-
-    return this.schemaBuilder.create();
-  }
-
-  /**
    * Get all migrations from the directory.
    *
    * @returns {Promise<Array<string>>}
    */
   public allMigrations(): Bluebird<Array<string>|null> {
     return this.migrationFile.getMigrations();
+  }
+
+  /**
+   * Run dev migrations.
+   *
+   * @param {boolean} revert
+   *
+   * @returns {Bluebird<any>}
+   */
+  public devMigrations(revert: boolean): Bluebird<any> {
+    let snapshot = this.wetland.getSnapshotManager();
+
+    return snapshot
+      .fetch()
+      .then(previous => this.wetland.getSchemaManager().apply(previous, revert))
+      .then(() => snapshot.create())
+      .catch(error => {
+        if (revert) {
+          return Promise.resolve();
+        }
+
+        return this.devMigrations(true).then(() => Bluebird.reject(error));
+      });
   }
 
   /**
@@ -131,11 +135,12 @@ export class Migrator {
    * Create a new migration file.
    *
    * @param {string} name
+   * @param {{}}     [code]
    *
    * @returns {Promise<any>}
    */
-  public create(name: string): Bluebird<any> {
-    return this.migrationFile.create(name);
+  public create(name: string, code?: {up: string, down: string}): Bluebird<any> {
+    return this.migrationFile.create(name, code);
   }
 
   /**
@@ -159,8 +164,7 @@ export class Migrator {
    * @returns {Promise}
    */
   public down(action: string): Promise<string> {
-    return this.migrationTable.getLastMigrationName()
-      .then(name => this.run(Migrator.DIRECTION_DOWN, action, name));
+    return this.migrationTable.getLastMigrationName().then(name => this.run(Migrator.DIRECTION_DOWN, action, name));
   }
 
   /**

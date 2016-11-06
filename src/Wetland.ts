@@ -7,6 +7,8 @@ import {Migrator} from './Migrator/Migrator';
 import * as fs from 'fs';
 import * as mkdirp from 'mkdirp';
 import * as path from 'path';
+import {SnapshotManager} from './SnapshotManager';
+import {SchemaManager} from './SchemaManager';
 
 export class Wetland {
   /**
@@ -18,6 +20,11 @@ export class Wetland {
    * @type {Migrator}
    */
   private migrator: Migrator;
+
+  /**
+   * @type {SnapshotManager}
+   */
+  private snapshotManager: SnapshotManager;
 
   /**
    * @type {Homefront}
@@ -41,15 +48,27 @@ export class Wetland {
   private stores: {[key: string]: Store} = {};
 
   /**
+   * @type {SchemaManager}
+   */
+  private schema: SchemaManager;
+
+  /**
    * Construct a new wetland instance.
    *
-   * @param {{}} config
+   * @param {{}} [config]
    */
   public constructor(config?: Object) {
     this.ensureDataDirectory(this.config.fetch('dataDirectory'));
-
     this.setupExitListeners();
+    this.initializeConfig(config);
+  }
 
+  /**
+   * Initialize the config.
+   *
+   * @param {{}} config
+   */
+  private initializeConfig(config: Object) {
     if (config) {
       this.config.merge(config);
     }
@@ -229,6 +248,32 @@ export class Wetland {
     }
 
     return this.migrator;
+  }
+
+  /**
+   * Get the schema.
+   *
+   * @returns {SchemaManager}
+   */
+  public getSchemaManager(): SchemaManager {
+    if (!this.schema) {
+      this.schema = new SchemaManager(this);
+    }
+
+    return this.schema;
+  }
+
+  /**
+   * Get the snapshot engine.
+   *
+   * @returns {SnapshotManager}
+   */
+  public getSnapshotManager(): SnapshotManager {
+    if (!this.snapshotManager) {
+      this.snapshotManager = new SnapshotManager(this);
+    }
+
+    return this.snapshotManager;
   }
 
   /**

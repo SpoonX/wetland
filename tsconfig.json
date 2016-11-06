@@ -1,26 +1,22 @@
 {
-  "version": "2.0.0",
-  "compileOnSave": true,
+  "version"        : "2.0.0",
+  "compileOnSave"  : true,
   "compilerOptions": {
-    "declaration": true,
-    "target": "es6",
-    "moduleResolution": "node",
-    "module": "commonjs",
+    "declaration"           : true,
+    "target"                : "es6",
+    "moduleResolution"      : "node",
+    "module"                : "commonjs",
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "outDir": "dist",
-    "baseUrl": ".",
-    "paths": {
-      "wetland": ["src/index"]
-    },
-    "lib": [
+    "emitDecoratorMetadata" : true,
+    "outDir"                : "dist",
+    "lib"                   : [
       "es5",
       "es6",
       "es7"
     ]
   },
-  "lib": "es2015",
-  "exclude": [
+  "lib"            : "es2015",
+  "exclude"        : [
     "dist",
     ".*",
     "node_modules",
