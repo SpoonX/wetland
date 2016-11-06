@@ -30,13 +30,14 @@ export class Wetland {
    * @type {Homefront}
    */
   private config: Homefront = new Homefront({
-    debug        : false,
-    dataDirectory: path.resolve(process.cwd(), '.data'),
-    defaultStore : 'defaultStore',
-    mapping: {
+    debug         : false,
+    useForeignKeys: true,
+    dataDirectory : path.resolve(process.cwd(), '.data'),
+    defaultStore  : 'defaultStore',
+    mapping       : {
       defaultNamesToUnderscore: false
     },
-    entityManager: {
+    entityManager : {
       refreshCreated: true,
       refreshUpdated: true
     }
