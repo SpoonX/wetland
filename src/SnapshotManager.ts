@@ -157,7 +157,6 @@ export class SnapshotManager {
    * @returns {Object}
    */
   public diff(oldMapping: Object, newMapping: Object): Object {
-    let useForeignKeys  = true;
     let dependencies    = {};
     let instructions    = {};
     let diff            = diffObjectKeys(oldMapping, newMapping);
