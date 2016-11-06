@@ -27,9 +27,9 @@ export class Store {
   public static ROLE_SLAVE = 'slave';
 
   /**
-   * @type {{}}
+   * @type {string}
    */
-  private config: Object;
+  private client: string;
 
   /**
    * @type {string}
@@ -124,7 +124,18 @@ export class Store {
       this.connections[Store.ROLE_SLAVE].push(connection);
     }
 
+    this.client = config.client;
+
     return this;
+  }
+
+  /**
+   * Get the name of the client.
+   *
+   * @returns {string}
+   */
+  public getClient(): string {
+    return this.client;
   }
 
   /**
