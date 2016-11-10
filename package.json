@@ -43,7 +43,6 @@
     "homefront": "^1.3.2",
     "knex": "^0.12.6",
     "mkdirp": "^0.5.1",
-    "reflect-metadata": "^0.1.3",
     "stream-replace": "^1.0.0",
     "to-datetime": "^1.0.1"
   },
