@@ -80,7 +80,7 @@ export class Criteria {
    *
    * @type {Array}
    */
-  private staged: Array<Object> = [];
+  private staged: Array<{criteria: Object, condition?: string, statement?: QueryBuilder}> = [];
 
   /**
    * Construct a new Criteria parser.
@@ -99,12 +99,14 @@ export class Criteria {
   /**
    * Stage criteria to be applied later.
    *
-   * @param {{}} criteria
+   * @param {{}}           criteria
+   * @param {string}       condition
+   * @param {QueryBuilder} statement
    *
    * @returns {Criteria}
    */
-  public stage(criteria: Object): Criteria {
-    this.staged.push(criteria);
+  public stage(criteria: Object, condition = this.defaultCondition, statement?: QueryBuilder): Criteria {
+    this.staged.push({criteria, condition, statement});
 
     return this;
   }
@@ -115,7 +117,7 @@ export class Criteria {
    * @returns {Criteria}
    */
   public applyStaged(): Criteria {
-    this.staged.forEach(criteria => this.apply(criteria));
+    this.staged.forEach(criteria => this.apply(criteria.criteria, criteria.condition, criteria.statement));
 
     this.staged = [];
 
