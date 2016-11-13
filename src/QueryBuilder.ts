@@ -1,9 +1,10 @@
 import * as knex from 'knex';
 import {Query} from './Query';
 import {Mapping} from './Mapping';
-import {Criteria} from './Criteria';
 import {Scope, Entity} from './Scope';
 import {Hydrator} from './Hydrator';
+import {Having} from './Criteria/Having';
+import {Where} from './Criteria/Where';
 
 export class QueryBuilder<T> {
   /**
@@ -57,9 +58,14 @@ export class QueryBuilder<T> {
   private mapping: Mapping<T>;
 
   /**
-   * @type {Criteria}
+   * @type {Where}
    */
-  private criteria: Criteria;
+  private whereCriteria: Where;
+
+  /**
+   * @type {Having}
+   */
+  private havingCriteria: Having;
 
   /**
    * @type {{}}
@@ -95,13 +101,14 @@ export class QueryBuilder<T> {
    * @param {string}            alias
    */
   public constructor(entityManager: Scope, statement: knex.QueryBuilder, mapping: Mapping<T>, alias: string) {
-    this.alias         = alias;
-    this.mappings      = {[alias]: mapping};
-    this.statement     = statement;
-    this.criteria      = new Criteria(this.statement, mapping, this.mappings);
-    this.entityManager = entityManager;
-    this.hydrator      = new Hydrator(entityManager);
-    this.query         = new Query(statement, this.hydrator);
+    this.alias          = alias;
+    this.mappings       = {[alias]: mapping};
+    this.statement      = statement;
+    this.whereCriteria  = new Where(this.statement, mapping, this.mappings);
+    this.havingCriteria = new Having(this.statement, mapping, this.mappings);
+    this.entityManager  = entityManager;
+    this.hydrator       = new Hydrator(entityManager);
+    this.query          = new Query(statement, this.hydrator);
 
     this.hydrator.addRecipe(null, alias, this.mappings[alias]);
   }
@@ -327,7 +334,8 @@ export class QueryBuilder<T> {
       return this;
     }
 
-    this.criteria.applyStaged();
+    this.whereCriteria.applyStaged();
+    this.havingCriteria.applyStaged();
     this.applySelects();
     this.applyOrderBys();
     this.applyGroupBys();
@@ -373,13 +381,16 @@ export class QueryBuilder<T> {
     }
 
     // Support select functions. Don't add to hydrator, as they aren't part of the entities.
-    Object.getOwnPropertyNames(propertyAlias).forEach(selectFunction => {
-      if (this.functions.indexOf(selectFunction) === -1) {
-        throw new Error(`Unknown function "${selectFunction}" specified.`);
-      }
+    let select    = Object.getOwnPropertyNames(propertyAlias);
+    let fieldName = this.whereCriteria.mapToColumn(propertyAlias[select[0]]);
 
-      this.statement[selectFunction](this.criteria.mapToColumn(propertyAlias[selectFunction]));
-    });
+    if (this.functions.indexOf(select[0]) === -1) {
+      throw new Error(`Unknown function "${select[0]}" specified.`);
+    }
+
+    select.length > 1
+      ? this.statement[select[0]](`${fieldName} as ${propertyAlias['alias']}`)
+      : this.statement[select[0]](fieldName);
 
     return this;
   }
@@ -406,7 +417,7 @@ export class QueryBuilder<T> {
     if (propertyAlias.indexOf('.') > -1) {
       let parts              = propertyAlias.split('.');
       let property           = parts[1];
-      let column             = this.criteria.mapToColumn(propertyAlias);
+      let column             = this.whereCriteria.mapToColumn(propertyAlias);
       hydrateColumns[column] = property;
       alias                  = parts[0];
       aliasRecipe            = this.hydrator.getRecipe(alias);
@@ -515,7 +526,7 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public groupBy(groupBy: string | Array<string>): this {
-   this.groupBys.push({groupBy});
+    this.groupBys.push({groupBy});
 
     return this;
   }
@@ -531,9 +542,9 @@ export class QueryBuilder<T> {
     let properties = [];
 
     if (typeof groupBy === 'string') {
-      properties.push(this.criteria.mapToColumn(groupBy));
+      properties.push(this.whereCriteria.mapToColumn(groupBy));
     } else if (Array.isArray(groupBy)) {
-      groupBy.forEach(group => properties.push(this.criteria.mapToColumn(group)));
+      groupBy.forEach(group => properties.push(this.whereCriteria.mapToColumn(group)));
     }
 
     this.statement.groupBy(properties);
@@ -583,7 +594,7 @@ export class QueryBuilder<T> {
    */
   private applyOrderBy(orderBy: string | Array<string> | Object, direction?): this {
     if (typeof orderBy === 'string') {
-      this.statement.orderBy(this.criteria.mapToColumn(orderBy), direction);
+      this.statement.orderBy(this.whereCriteria.mapToColumn(orderBy), direction);
     } else if (Array.isArray(orderBy)) {
       orderBy.forEach(order => this.applyOrderBy(order));
     } else if (typeof orderBy === 'object') {
@@ -632,11 +643,32 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public where(criteria: Object): this {
-    if (Object.getOwnPropertyNames(criteria).length === 0) {
+    if (!Object.getOwnPropertyNames(criteria).length) {
       return this;
     }
 
-    this.criteria.stage(criteria);
+    this.whereCriteria.stage(criteria);
+
+    this.prepared = false;
+
+    return this;
+  }
+
+  /**
+   * Sets the having clause.
+   *
+   * .having({})
+   *
+   * @param {{}} criteria
+   *
+   * @returns {QueryBuilder}
+   */
+  public having(criteria: Object): this {
+    if (!Object.getOwnPropertyNames(criteria).length) {
+      return this;
+    }
+
+    this.havingCriteria.stage(criteria);
 
     this.prepared = false;
 

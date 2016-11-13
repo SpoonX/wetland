@@ -1,5 +1,4 @@
 import {assert} from 'chai';
-import {EntityManager} from '../../src/EntityManager';
 import {Wetland} from '../../src/Wetland';
 import {Scope} from '../../src/Scope';
 import {UnitOfWork} from '../../src/UnitOfWork';
