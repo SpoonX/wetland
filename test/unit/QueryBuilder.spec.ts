@@ -42,7 +42,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.join);
+      assert.strictEqual(query, queries.queryBuilder.join);
     });
   });
 
@@ -55,7 +55,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.leftJoin);
+      assert.strictEqual(query, queries.queryBuilder.leftJoin);
     });
   });
 
@@ -68,7 +68,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.rightJoin);
+      assert.strictEqual(query, queries.queryBuilder.rightJoin);
     });
   });
 
@@ -81,7 +81,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.innerJoin);
+      assert.strictEqual(query, queries.queryBuilder.innerJoin);
     });
   });
 
@@ -94,7 +94,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.leftOuterJoin);
+      assert.strictEqual(query, queries.queryBuilder.leftOuterJoin);
     });
   });
 
@@ -107,7 +107,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.rightOuterJoin);
+      assert.strictEqual(query, queries.queryBuilder.rightOuterJoin);
     });
   });
 
@@ -120,7 +120,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.outerJoin);
+      assert.strictEqual(query, queries.queryBuilder.outerJoin);
     });
   });
 
@@ -133,7 +133,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.fullOuterJoin);
+      assert.strictEqual(query, queries.queryBuilder.fullOuterJoin);
     });
   });
 
@@ -146,7 +146,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.crossJoin);
+      assert.strictEqual(query, queries.queryBuilder.crossJoin);
     });
   });
 
@@ -164,7 +164,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.selectAll);
+      assert.strictEqual(query, queries.queryBuilder.selectAll);
     });
 
     it('should create a query by passing one string as argument', () => {
@@ -174,7 +174,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.selectOne);
+      assert.strictEqual(query, queries.queryBuilder.selectOne);
     });
 
     it('should create a query by passing one array of strings as argument', () => {
@@ -184,7 +184,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.selectArray);
+      assert.strictEqual(query, queries.queryBuilder.selectArray);
     });
 
     it('should create a `sum()` query', () => {
@@ -194,7 +194,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.selectSum);
+      assert.strictEqual(query, queries.queryBuilder.selectSum);
     });
   });
 
@@ -222,7 +222,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.update);
+      assert.strictEqual(query, queries.queryBuilder.update);
     });
   });
 
@@ -235,7 +235,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.limit);
+      assert.strictEqual(query, queries.queryBuilder.limit);
     });
   });
 
@@ -249,7 +249,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.offset);
+      assert.strictEqual(query, queries.queryBuilder.offset);
     });
   });
 
@@ -262,7 +262,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.groupByOne);
+      assert.strictEqual(query, queries.queryBuilder.groupByOne);
     });
 
     it('should create a query that groups by given property as an array', () => {
@@ -273,7 +273,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.groupByOne);
+      assert.strictEqual(query, queries.queryBuilder.groupByOne);
     });
 
     it('should create a query that groups by multiple properties', () => {
@@ -284,7 +284,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.groupByMultiple);
+      assert.strictEqual(query, queries.queryBuilder.groupByMultiple);
     });
   });
 
@@ -297,7 +297,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.orderByAsc);
+      assert.strictEqual(query, queries.queryBuilder.orderByAsc);
     });
 
     it('should create a query that sorts by a property (desc)', () => {
@@ -308,7 +308,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.orderByDesc);
+      assert.strictEqual(query, queries.queryBuilder.orderByDesc);
     });
 
     it('should create a query by passing the conditionals as an object', () => {
@@ -319,7 +319,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.orderByDescObj);
+      assert.strictEqual(query, queries.queryBuilder.orderByDescObj);
     });
 
     it('should create a query by passing the conditionals as an array of objects', () => {
@@ -330,7 +330,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.orderByDescArr);
+      assert.strictEqual(query, queries.queryBuilder.orderByDescArr);
     });
   });
 
@@ -343,7 +343,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.deleteById);
+      assert.strictEqual(query, queries.queryBuilder.deleteById);
     });
   });
 
@@ -356,7 +356,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.where);
+      assert.strictEqual(query, queries.queryBuilder.where);
     });
 
     it('should create a select query with a `where in` clause.', () => {
@@ -367,7 +367,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.whereIn);
+      assert.strictEqual(query, queries.queryBuilder.whereIn);
     });
 
     it('should create a select query with a `where and` clause.', () => {
@@ -378,7 +378,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.whereAnd);
+      assert.strictEqual(query, queries.queryBuilder.whereAnd);
     });
 
     it('should create a select query with a `where` clause and an operator.', () => {
@@ -389,7 +389,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.whereLTE);
+      assert.strictEqual(query, queries.queryBuilder.whereLTE);
     });
 
     it('should create a select query with a nested `where or` clause', () => {
@@ -400,7 +400,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.whereNestedOr);
+      assert.strictEqual(query, queries.queryBuilder.whereNestedOr);
     });
 
     it('should create a select query with a nested `where and` clause', () => {
@@ -411,7 +411,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.whereNestedIn);
+      assert.strictEqual(query, queries.queryBuilder.whereNestedIn);
     });
   });
 
@@ -421,7 +421,7 @@ describe('QueryBuilder', () => {
       let query        = queryBuilder.select({count: 't.task', alias: 'tasks'})
         .having({'tasks': {lte: 13}}).getQuery().getSQL();
 
-      assert.strictEqual(query, queries.having);
+      assert.strictEqual(query, queries.queryBuilder.having);
     });
 
     it('should create a select query with `where`, `groupBy` and `having` clauses.', () => {
@@ -433,7 +433,7 @@ describe('QueryBuilder', () => {
         .having({'tasks': {lte: 4}})
         .getQuery().getSQL();
 
-      assert.strictEqual(query, queries.havingGroupBy);
+      assert.strictEqual(query, queries.queryBuilder.havingGroupBy);
     });
 
     it('should create a select query with `groupBy` and multiple `having` clauses.', () => {
@@ -445,7 +445,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.havingMultiple);
+      assert.strictEqual(query, queries.queryBuilder.havingMultiple);
     });
 
     it('should create a super cool query with a lot of clauses.', () => {
@@ -460,7 +460,7 @@ describe('QueryBuilder', () => {
         .getQuery()
         .getSQL();
 
-      assert.strictEqual(query, queries.havingALot);
+      assert.strictEqual(query, queries.queryBuilder.havingALot);
     });
   });
 });
