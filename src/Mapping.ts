@@ -239,14 +239,19 @@ export class Mapping<T> {
   /**
    * Get the options for provided `property` (field).
    *
-   * @param {string} property
+   * @param {string}  property
+   * @param {boolean} [tolerant] Don't throw an error, but return null
    *
    * @returns {FieldOptions}
    */
-  public getField(property: string): FieldOptions {
+  public getField(property: string, tolerant: boolean = false): FieldOptions {
     let field = this.mapping.fetch(`fields.${property}`);
 
     if (!field) {
+      if (tolerant) {
+        return null;
+      }
+
       throw new Error(`Unknown field "${property}" supplied.`);
     }
 
