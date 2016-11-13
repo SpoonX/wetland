@@ -47,6 +47,28 @@ queryBuilder.getQuery();
 {% endmethod %}
 
 {% method %}
+## .groupBy()
+Sets the group by.
+
+{% common %}
+```js
+queryBuilder.groupBy('name');
+queryBuilder.groupBy(['name', 'age']);
+```
+{% endmethod %}
+
+{% method %}
+## .having()
+Sets the having clause.
+
+{% common %}
+```js
+queryBuilder.having({'name': {lte: 12}});
+queryBuilder.having({'name': {gte: 10, lte: 50}});
+```
+{% endmethod %}
+
+{% method %}
 ## .innerJoin()
 Performs an inner join.
 
