@@ -33,12 +33,12 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('.join()', () => {
+  describe('.makeJoin()', () => {
     it('should create a select query with a join clause by specifying the type of join manually', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
         .select('task')
-        .join('innerJoin', 'list', 'l')
+        .makeJoin('innerJoin', 'list', 'l')
         .getQuery()
         .getSQL();
 
@@ -56,6 +56,30 @@ describe('QueryBuilder', () => {
         .getSQL();
 
       assert.strictEqual(query, queries.queryBuilder.leftJoin);
+    });
+  });
+
+  describe('.join()', () => {
+    it('should create a custom join query', () => {
+      let queryBuilder = getQueryBuilder();
+      let query        = queryBuilder
+        .select('t')
+        .join('leftJoin', 'list', 'l', {'t.list_id': 'l.id'})
+        .getQuery()
+        .getSQL();
+
+      assert.strictEqual(query, queries.queryBuilder.customOnJoinSimple);
+    });
+
+    it('should create a more complex custom join query', () => {
+      let queryBuilder = getQueryBuilder();
+      let query        = queryBuilder
+        .select('t')
+        .join('leftJoin', 'list', 'l', {or: [{'t.list_id': 'l.id'}, {'t.task': 'l.name'}]})
+        .getQuery()
+        .getSQL();
+
+      assert.strictEqual(query, queries.queryBuilder.customOnJoinComplex);
     });
   });
 
