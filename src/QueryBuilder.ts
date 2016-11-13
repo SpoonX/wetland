@@ -146,7 +146,20 @@ export class QueryBuilder<T> {
     column                     = column.indexOf('.') > -1 ? column : `${this.alias}.${column}`;
     let [alias, property]      = column.split('.');
     let owningMapping          = this.mappings[alias];
-    let join                   = owningMapping.getField(property).relationship;
+    let field;
+
+    if (property) {
+      field = owningMapping.getField(property, true);
+    }
+
+    if (!field || !field.relationship) {
+      throw new Error(
+        'Invalid relation supplied for join. Property not found on entity, or relation not defined. ' +
+        'Are you registering the joins in the wrong order?'
+      );
+    }
+
+    let join                   = field.relationship;
     this.mappings[targetAlias] = Mapping.forEntity(this.entityManager.resolveEntityReference(join.targetEntity));
     let targetMapping          = this.mappings[targetAlias];
     let joinType               = this.singleJoinTypes.indexOf(join.type) > -1 ? 'single' : 'collection';
