@@ -1,10 +1,11 @@
 import * as knex from 'knex';
 import {Query} from './Query';
-import {Mapping} from './Mapping';
+import {Mapping, JoinColumn} from './Mapping';
 import {Scope, Entity} from './Scope';
 import {Hydrator} from './Hydrator';
 import {Having} from './Criteria/Having';
 import {Where} from './Criteria/Where';
+import {On} from './Criteria/On';
 
 export class QueryBuilder<T> {
   /**
@@ -63,6 +64,11 @@ export class QueryBuilder<T> {
   private whereCriteria: Where;
 
   /**
+   * @type {On}
+   */
+  private onCriteria;
+
+  /**
    * @type {Having}
    */
   private havingCriteria: Having;
@@ -106,6 +112,7 @@ export class QueryBuilder<T> {
     this.statement      = statement;
     this.whereCriteria  = new Where(this.statement, mapping, this.mappings);
     this.havingCriteria = new Having(this.statement, mapping, this.mappings);
+    this.onCriteria     = new On(this.statement, mapping, this.mappings);
     this.entityManager  = entityManager;
     this.hydrator       = new Hydrator(entityManager);
     this.query          = new Query(statement, this.hydrator);
@@ -135,7 +142,7 @@ export class QueryBuilder<T> {
    *
    * @returns {QueryBuilder}
    */
-  public join(joinMethod: string, column: string, targetAlias: string): this {
+  public makeJoin(joinMethod: string, column: string, targetAlias: string): this {
     column                     = column.indexOf('.') > -1 ? column : `${this.alias}.${column}`;
     let [alias, property]      = column.split('.');
     let owningMapping          = this.mappings[alias];
@@ -145,7 +152,7 @@ export class QueryBuilder<T> {
     let joinType               = this.singleJoinTypes.indexOf(join.type) > -1 ? 'single' : 'collection';
     let joinColumn             = owningMapping.getJoinColumn(property);
     let owning                 = alias;
-    let other                  = targetAlias;
+    let inversed               = targetAlias;
 
     this.hydrator.addRecipe(alias, targetAlias, targetMapping, joinType, property);
 
@@ -160,38 +167,57 @@ export class QueryBuilder<T> {
 
       let joinTableAlias = this.createAlias(joinTable.name);
 
-      // Join from owning to join-table.
-      this.statement[joinMethod](`${joinTable.name} as ${joinTableAlias}`, statement => {
-        joinTable.joinColumns.forEach(joinColumn => {
-          statement.on(`${owning}.${joinColumn.referencedColumnName}`, '=', `${joinTableAlias}.${joinColumn.name}`);
-        });
+      // Join from owning to makeJoin-table.
+      let onCriteriaOwning = {};
+
+      joinTable.joinColumns.forEach((joinColumn: JoinColumn) => {
+        onCriteriaOwning[`${owning}.${joinColumn.referencedColumnName}`] = `${joinTableAlias}.${joinColumn.name}`;
       });
 
-      // Join from join-table to other.
-      this.statement[joinMethod](`${targetMapping.getTableName()} as ${other}`, statement => {
-        joinTable.inverseJoinColumns.forEach(inverseJoinColumn => {
-          statement.on(`${joinTableAlias}.${inverseJoinColumn.name}`, '=', `${other}.${inverseJoinColumn.referencedColumnName}`);
-        });
+      this.join(joinMethod, joinTable.name, joinTableAlias, onCriteriaOwning);
+
+      // Join from makeJoin-table to inversed.
+      let onCriteriaInversed = {};
+
+      joinTable.inverseJoinColumns.forEach((inverseJoinColumn: JoinColumn) => {
+        onCriteriaInversed[`${joinTableAlias}.${inverseJoinColumn.name}`] = `${inversed}.${inverseJoinColumn.referencedColumnName}`;
       });
+
+      this.join(joinMethod, targetMapping.getTableName(), inversed, onCriteriaInversed);
 
       return this;
     }
 
     if (join.mappedBy) {
       joinColumn = targetMapping.getJoinColumn(join.mappedBy);
-      owning     = other;
-      other      = alias;
+      owning     = inversed;
+      inversed   = alias;
     }
 
-    this.statement[joinMethod](
-      `${targetMapping.getTableName()} as ${targetAlias}`,
-      `${owning}.${joinColumn.name}`,
-      `${other}.${joinColumn.referencedColumnName}`
-    );
+    let onCriteria = {[`${owning}.${joinColumn.name}`]: `${inversed}.${joinColumn.referencedColumnName}`};
+
+    this.join(joinMethod, targetMapping.getTableName(), targetAlias, onCriteria);
 
     return this;
   }
 
+  /**
+   * Perform a custom join (bring-your-own on criteria!)
+   *
+   * @param {string} joinMethod
+   * @param {string} table
+   * @param {string} alias
+   * @param {{}}     on
+   *
+   * @returns {QueryBuilder}
+   */
+  public join(joinMethod: string, table: string, alias: string, on: Object): this {
+    this.statement[joinMethod](`${table} as ${alias}`, statement => {
+      this.onCriteria.stage(on, undefined, statement);
+    });
+
+    return this;
+  }
 
   /**
    * Perform a join.
@@ -202,9 +228,8 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public leftJoin(column: string, targetAlias: string): this {
-    return this.join('leftJoin', column, targetAlias);
+    return this.makeJoin('leftJoin', column, targetAlias);
   }
-
 
   /**
    * Perform a join.
@@ -215,9 +240,8 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public innerJoin(column: string, targetAlias: string): this {
-    return this.join('innerJoin', column, targetAlias);
+    return this.makeJoin('innerJoin', column, targetAlias);
   }
-
 
   /**
    * Perform a join.
@@ -228,9 +252,8 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public leftOuterJoin(column: string, targetAlias: string): this {
-    return this.join('leftOuterJoin', column, targetAlias);
+    return this.makeJoin('leftOuterJoin', column, targetAlias);
   }
-
 
   /**
    * Perform a join.
@@ -241,7 +264,7 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public rightJoin(column: string, targetAlias: string): this {
-    return this.join('rightJoin', column, targetAlias);
+    return this.makeJoin('rightJoin', column, targetAlias);
   }
 
 
@@ -254,7 +277,7 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public rightOuterJoin(column: string, targetAlias: string): this {
-    return this.join('rightOuterJoin', column, targetAlias);
+    return this.makeJoin('rightOuterJoin', column, targetAlias);
   }
 
 
@@ -267,7 +290,7 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public outerJoin(column: string, targetAlias: string): this {
-    return this.join('outerJoin', column, targetAlias);
+    return this.makeJoin('outerJoin', column, targetAlias);
   }
 
   /**
@@ -279,7 +302,7 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public fullOuterJoin(column: string, targetAlias: string): this {
-    return this.join('fullOuterJoin', column, targetAlias);
+    return this.makeJoin('fullOuterJoin', column, targetAlias);
   }
 
   /**
@@ -291,7 +314,7 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public crossJoin(column: string, targetAlias: string): this {
-    return this.join('crossJoin', column, targetAlias);
+    return this.makeJoin('crossJoin', column, targetAlias);
   }
 
   /**
@@ -336,6 +359,7 @@ export class QueryBuilder<T> {
 
     this.whereCriteria.applyStaged();
     this.havingCriteria.applyStaged();
+    this.onCriteria.applyStaged();
     this.applySelects();
     this.applyOrderBys();
     this.applyGroupBys();
