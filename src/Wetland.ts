@@ -9,6 +9,7 @@ import * as mkdirp from 'mkdirp';
 import * as path from 'path';
 import {SnapshotManager} from './SnapshotManager';
 import {SchemaManager} from './SchemaManager';
+import {Populate} from './Populate';
 
 export class Wetland {
   /**
@@ -275,6 +276,13 @@ export class Wetland {
     }
 
     return this.snapshotManager;
+  }
+
+  /**
+   * @returns {Populate}
+   */
+  public getPopulator(scope: Scope): Populate {
+    return new Populate(scope);
   }
 
   /**
