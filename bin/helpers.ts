@@ -152,7 +152,7 @@ export function bootstrap() {
   try {
     require(process.cwd() + '/package.json');
   } catch (error) {
-    showError('Unable to locate package.json, refusing to run. Please use wetland from your project root.');
+    showError('Unable to locate package.json, refusing to run. Please use wetland from your project root');
   }
 
   require('app-module-path').addPath(path.resolve(process.cwd(), 'node_modules'));
