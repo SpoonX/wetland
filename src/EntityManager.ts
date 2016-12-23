@@ -136,7 +136,7 @@ export class EntityManager {
     }
 
     if (typeof hint === 'object') {
-      return hint.constructor as {new ()};
+      return hint as {new ()};
     }
 
     return typeof hint === 'function' ? hint as {new ()} : null;
