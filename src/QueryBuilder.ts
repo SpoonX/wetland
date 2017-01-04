@@ -347,8 +347,13 @@ export class QueryBuilder<T> {
 
   /**
    * Figure out if given target is a collection. If so, populate. Otherwise, left join.
+   *
+   * @param {string} column
+   * @param {string} targetAlias
+   *
+   * @returns {QueryBuilder}
    */
-  public quickJoin(column: string, targetAlias?: string) {
+  public quickJoin(column: string, targetAlias?: string): QueryBuilder<{new ()}> {
     let {join, alias, property}      = this.getRelationship(column);
     let parentQueryBuilder           = this.getChild(alias) || this;
     targetAlias                      = targetAlias || parentQueryBuilder.createAlias(property);
