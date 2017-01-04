@@ -155,7 +155,17 @@ export function bootstrap() {
     showError('Unable to locate package.json, refusing to run. Please use wetland from your project root');
   }
 
-  require('app-module-path').addPath(path.resolve(process.cwd(), 'node_modules'));
+  let paths = [];
+
+  if (process.env.NODE_PATH) {
+    paths = process.env.NODE_PATH.split(':');
+  }
+
+  paths.push(path.resolve(process.cwd(), 'node_modules'));
+
+  process.env.NODE_PATH = paths.join(':');
+
+  require("module").Module._initPaths();
 }
 
 export function registerHelpHandler(command?, examples?) {
