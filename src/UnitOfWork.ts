@@ -97,6 +97,11 @@ export class UnitOfWork {
   private transactions: Object = {};
 
   /**
+   * @type {Array}
+   */
+  private afterCommit: Array<{target: EntityInterface, method: string}> = [];
+
+  /**
    * Create a new UnitOfWork.
    *
    * @param {Scope} entityManager
@@ -554,10 +559,45 @@ export class UnitOfWork {
       .then(() => this.deleteDeleted())
       .then(() => this.updateRelationships())
       .then(() => this.commitOrRollback(true))
+      .then(() => this.processAfterCommit())
       .then(() => this.entityManager.getConfig().fetch('entityManager.refreshUpdated') && this.refreshDirty())
       .then(() => this.entityManager.getConfig().fetch('entityManager.refreshCreated') && this.refreshNew())
       .then(() => !skipClean && this.clean())
       .catch(error => this.commitOrRollback(false, error));
+  }
+
+  private processAfterCommit() {
+    let methods = [];
+
+    this.afterCommit.forEach(action => {
+      methods.push(action.target[action.method]);
+    });
+
+    return Promise.all(methods);
+  }
+
+  /**
+   * Apply lifecycle callbacks for entity.
+   *
+   * @param {string}          method
+   * @param {EntityInterface} entity
+   * @param {*[]}             [parameters]
+   *
+   * @returns {Promise<any>}
+   */
+  private lifecycleCallback(method: string, entity: EntityInterface, ...parameters?: Array<any>): Promise<any> {
+    let beforeMethod = 'before' + method[0].toUpperCase() + method.substr(1);
+    let afterMethod  = 'after' + method[0].toUpperCase() + method.substr(1);
+
+    if (typeof entity[afterMethod] === 'function') {
+      this.afterCommit.push({target: entity, method: afterMethod});
+    }
+
+    let callbackResult = typeof entity[beforeMethod] === 'function'
+      ? entity[beforeMethod](...parameters, this.entityManager)
+      : null;
+
+    return Promise.resolve(callbackResult);
   }
 
   /**
@@ -758,15 +798,17 @@ export class UnitOfWork {
       let mapping    = Mapping.forEntity(target);
       let primaryKey = mapping.getPrimaryKey();
 
-      return queryBuilder.insert(target, primaryKey).getQuery().execute().then(result => {
-        if (target.isEntityProxy) {
-          target[primaryKey] = {_skipDirty: result[0]};
+      return this.lifecycleCallback('create', target)
+        .then(() => queryBuilder.insert(target, primaryKey).getQuery().execute())
+        .then(result => {
+          if (target.isEntityProxy) {
+            target[primaryKey] = {_skipDirty: result[0]};
 
-          target.activateProxying();
-        } else {
-          target[primaryKey] = result[0];
-        }
-      });
+            target.activateProxying();
+          } else {
+            target[primaryKey] = result[0];
+          }
+        });
     });
   }
 
@@ -788,7 +830,8 @@ export class UnitOfWork {
         });
       }
 
-      return queryBuilder.update(newValues).where({[primaryKey]: target[primaryKey]}).getQuery().execute();
+      return this.lifecycleCallback('update', target, newValues)
+        .then(() => queryBuilder.update(newValues).where({[primaryKey]: target[primaryKey]}).getQuery().execute());
     });
   }
 
@@ -802,7 +845,9 @@ export class UnitOfWork {
       let primaryKey = Mapping.forEntity(target).getPrimaryKeyField();
 
       // @todo Use target's mapping to delete relations for non-cascaded properties.
-      return queryBuilder.remove().where({[primaryKey]: target[primaryKey]}).getQuery().execute();
+
+      return this.lifecycleCallback('remove', target, this.deletedObjects)
+        .then(() => queryBuilder.remove().where({[primaryKey]: target[primaryKey]}).getQuery().execute());
     });
   }
 
@@ -929,6 +974,7 @@ export class UnitOfWork {
     }
 
     this.transactions = {};
+    this.afterCommit  = [];
 
     return this;
   }
@@ -946,6 +992,7 @@ export class UnitOfWork {
 
     this.deletedObjects = new ArrayCollection;
     this.transactions   = {};
+    this.afterCommit    = [];
 
     return this;
   }
