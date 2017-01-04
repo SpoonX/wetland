@@ -13,7 +13,8 @@
     "test": "mocha dist/test/helper dist/test/unit/**",
     "dtest": "npm run build && npm run test",
     "build": "rm -rf ./dist && tsc && gulp build && chmod ug+x dist/bin/*",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "postpublish": "git push upstream master && git push upstream --tags"
   },
   "repository": {
     "type": "git",
