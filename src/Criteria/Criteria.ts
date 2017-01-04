@@ -220,9 +220,18 @@ export class Criteria {
    * @returns {string}
    */
   public mapToColumn(property: string): string {
+    if (property.indexOf('.') === -1 && this.mappings[property]) {
+      return `${property}.${this.mappings[property].getPrimaryKeyField()}`;
+    }
+
     if (property.indexOf('.') > -1) {
       let parts = property.split('.');
-      parts[1]  = this.mappings[parts[0]].getFieldName(parts[1], parts[1]);
+
+      if (!this.mappings[parts[0]]) {
+        return property;
+      }
+
+      parts[1] = this.mappings[parts[0]].getFieldName(parts[1], parts[1]);
 
       return parts.join('.');
     }

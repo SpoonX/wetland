@@ -11,16 +11,17 @@ export class EntityProxy {
    *
    * @param {EntityInterface} entity
    * @param {Scope}           entityManager
+   * @param {boolean}         active
    *
    * @returns {Object}
    */
-  public static patchEntity<T>(entity: T, entityManager: Scope): T & ProxyInterface {
+  public static patchEntity<T>(entity: T, entityManager: Scope, active: boolean = false): T & ProxyInterface {
     // Don't re-patch an entity.
     if (entity['isEntityProxy']) {
       return entity;
     }
 
-    let proxyActive = false;
+    let proxyActive = active;
     let metaData    = MetaData.forInstance(entity);
     let mapping     = Mapping.forEntity(entity);
     let unitOfWork  = entityManager.getUnitOfWork();
@@ -62,6 +63,25 @@ export class EntityProxy {
     }
 
     /**
+     * Check if value is a setDirty value.
+     *
+     * @param {{}}      target
+     * @param {string}  property
+     * @param {*}       value
+     *
+     * @returns {boolean}
+     */
+    function setDirty(target: Object, property: string, value: any): boolean {
+      if (typeof value === 'object' && value !== null && '_skipDirty' in value) {
+        target[property] = value._skipDirty;
+
+        return true;
+      }
+
+      return false;
+    }
+
+    /**
      * Proxy a collection.
      *
      * @param {string}  property   Where does this collection live?
@@ -76,11 +96,31 @@ export class EntityProxy {
 
       // Create a new proxy, and ensure there's an existing collection.
       entity[property] = new Proxy<Object>(collection, <Object> {
-        set: (collection: Collection<Object>, key: string, relationEntity: any) => {
-          collection[key] = relationEntity;
+        set: (collection: Collection<Object>, key: string | number, relationEntity: any) => {
+
+          // Check if this is a set _skipDirty, if so return.
+          if (setDirty(collection, key as string, relationEntity)) {
+            return true;
+          }
 
           // If it's not a number, or we're not observing, just return.
-          if (isNaN(parseInt(key, 10)) || !isProxyActive()) {
+          if (isNaN(parseInt(key as string, 10)) || !isProxyActive()) {
+            collection[key] = relationEntity;
+
+            return true;
+          }
+
+          let entityIndex   = collection.indexOf(relationEntity);
+          let previousValue = collection[key];
+          collection[key]   = relationEntity;
+
+          // Unique removed. Mark as removed.
+          if (typeof previousValue !== 'undefined' && collection.indexOf(previousValue) === -1) {
+            unitOfWork.registerCollectionChange(UnitOfWork.RELATIONSHIP_REMOVED, entityProxy, property, previousValue);
+          }
+
+          // Added relation already existed. No need to mark as a relation change (we're probably in a splice).
+          if (entityIndex > -1) {
             return true;
           }
 
@@ -105,30 +145,66 @@ export class EntityProxy {
         },
 
         deleteProperty: (collection: Collection<Object>, key: string) => {
-          if (isProxyActive()) {
-            unitOfWork.registerCollectionChange(UnitOfWork.RELATIONSHIP_REMOVED, entityProxy, property, collection[key]);
+          if (!isProxyActive()) {
+            collection.splice(parseInt(key, 10), 1);
+
+            return true;
           }
 
+          let previousValue = collection[key];
+
           collection.splice(parseInt(key, 10), 1);
+
+          if (collection.indexOf(previousValue) > -1) {
+            return true;
+          }
+
+          unitOfWork.registerCollectionChange(UnitOfWork.RELATIONSHIP_REMOVED, entityProxy, property, previousValue);
 
           return true;
         }
       });
     }
 
+    let proxyMethods = {
+      isEntityProxy: true,
+
+      activateProxying: () => {
+        proxyActive = true;
+
+        return entityProxy;
+      },
+
+      deactivateProxying: () => {
+        proxyActive = false;
+
+        return entityProxy;
+      },
+
+      getTarget: () => {
+        return entity;
+      },
+
+      isProxyingActive: () => {
+        return isProxyActive()
+      }
+    };
+
     // Return the actual proxy for the entity.
     entityProxy = new Proxy<T & ProxyInterface>(entity, <Object> {
       set: (target: Object, property: string, value: any) => {
         // Allow all dirty checks to be skipped.
-        if (typeof value === 'object' && value !== null && '_skipDirty' in value) {
-          target[property] = value._skipDirty;
-
+        if (setDirty(target, property, value)) {
           return true;
         }
 
-        // If there's no relation, or the proxy isn't active, just set value.
-        if (!relations || !relations[property] || !isProxyActive()) {
-          unitOfWork.registerDirty(target, property);
+        // If there's no relation, set the value.
+        if (!relations || !relations[property]) {
+
+          // We're proxying and the value changed. Register as dirty.
+          if (isProxyActive() && target[property] !== value) {
+            unitOfWork.registerDirty(target, property);
+          }
 
           target[property] = value;
 
@@ -145,6 +221,8 @@ export class EntityProxy {
 
           proxyCollection(property, true);
 
+          target[property].add(...value);
+
           return true;
         }
 
@@ -155,6 +233,10 @@ export class EntityProxy {
           throw new TypeError(
             `Can't assign to '${target.constructor.name}.${property}'. Expected instance of '${ExpectedEntity.name}'.`
           );
+        }
+
+        if (target[property] === value) {
+          return true;
         }
 
         // If we already hold a value, stage its removal it.
@@ -172,28 +254,8 @@ export class EntityProxy {
       },
 
       get: (target, property) => {
-        let methods = {
-          isEntityProxy     : true,
-          activateProxying  : () => {
-            proxyActive = true;
-
-            return this;
-          },
-          deactivateProxying: () => {
-            proxyActive = false;
-
-            return this;
-          },
-          getTarget         : () => {
-            return entity;
-          },
-          isProxyingActive  : () => {
-            return isProxyActive()
-          }
-        };
-
-        if (methods[property]) {
-          return methods[property];
+        if (proxyMethods[property]) {
+          return proxyMethods[property];
         }
 
         return target[property];
@@ -204,7 +266,7 @@ export class EntityProxy {
 
         if (relation && (relation.type === Mapping.RELATION_MANY_TO_MANY || relation.type === Mapping.RELATION_ONE_TO_MANY)) {
           throw new Error(
-            `It is not allowed to delete a collection. Trying to delete '${target.constructor.name}.${property}'.`
+            `It is not allowed to delete a collection; trying to delete '${target.constructor.name}.${property}'.`
           );
         }
 

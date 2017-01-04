@@ -10,17 +10,19 @@ export class EntityRepository<T> {
   /**
    * @type {Scope}
    */
-  private entityManager: Scope;
+  protected entityManager: Scope;
 
   /**
    * @type {{}}
    */
-  private entity: EntityCtor<T>;
+  protected entity: EntityCtor<T>;
 
   /**
    * @type {Mapping}
    */
-  private mapping: Mapping<T>;
+  protected mapping: Mapping<T>;
+
+  protected queryOptions: Array<string> = ['orderBy', 'limit', 'offset', 'groupBy', 'select'];
 
   /**
    * Construct a new EntityRepository.
@@ -64,30 +66,31 @@ export class EntityRepository<T> {
    */
   public find(criteria: Object|null, options: FindOptions = {}): Promise<Array<T>> {
     options.alias    = options.alias || this.mapping.getTableName();
-    let queryBuilder = this.getQueryBuilder(options.alias).select(options.alias);
+    let queryBuilder = this.getQueryBuilder(options.alias);
+
+    if (!options.select) {
+      queryBuilder.select(options.alias);
+    }
 
     if (criteria) {
       queryBuilder.where(criteria);
     }
 
-    if (options.orderBy) {
-      queryBuilder.orderBy(options.orderBy);
+    // Apply limit, offset etc.
+    this.applyOptions(queryBuilder, options);
+
+    if (!options.populate) {
+      return queryBuilder.getQuery().getResult();
     }
 
-    if (options.limit) {
-      queryBuilder.limit(options.limit);
+    if (options.populate === true) {
+      options.populate = Reflect.ownKeys(this.mapping.getRelations());
+    } else if (typeof options.populate === 'string') {
+      options.populate = [options.populate];
     }
 
-    if (options.offset) {
-      queryBuilder.offset(options.offset);
-    }
-
-    if (options.groupBy) {
-      queryBuilder.groupBy(options.groupBy);
-    }
-
-    if (options.join && Array.isArray(options.join)) {
-      options.join.forEach(join => {
+    if (Array.isArray(options.populate) && options.populate.length) {
+      options.populate.forEach(join => {
         let column = join as string;
         let alias  = join as string;
 
@@ -95,20 +98,24 @@ export class EntityRepository<T> {
           column = Object.keys(join)[0];
           alias  = join[column];
         } else if (join.indexOf('.') > -1) {
-          alias  = join.split('.')[1];
+          alias = join.split('.')[1];
         }
 
-        queryBuilder.leftJoin(column, alias).select(alias);
+        let targetBuilder = queryBuilder.quickJoin(column, alias);
+
+        if (!options.select) {
+          targetBuilder.select(alias);
+        }
+      });
+    } else if (options.populate && !Array.isArray(options.populate)) {
+      Object.getOwnPropertyNames(options.populate).forEach(column => {
+        let targetBuilder = queryBuilder.quickJoin(column, options.populate[column]);
+
+        if (!options.select) {
+          targetBuilder.select(options.populate[column]);
+        }
       });
     }
-
-    if (options.join && !Array.isArray(options.join)) {
-      Object.getOwnPropertyNames(options.join).forEach(column => {
-        queryBuilder.leftJoin(column, options.join[column]).select(options.join[column]);
-      });
-    }
-
-    let query = queryBuilder.getQuery();
 
     return queryBuilder.getQuery().getResult();
   }
@@ -130,16 +137,27 @@ export class EntityRepository<T> {
 
     options.limit = 1;
 
-    return this.find(criteria, options).then(result => result[0]);
+    return this.find(criteria, options).then(result => result ? result[0] : result);
+  }
+
+  public applyOptions(queryBuilder: QueryBuilder<T>, options) {
+    this.queryOptions.forEach(clause => {
+      if (options[clause]) {
+        queryBuilder[clause](options[clause]);
+      }
+    });
+
+    return queryBuilder;
   }
 }
 
 export interface FindOptions {
+  select?: Array<string>,
   orderBy?: any,
   groupBy?: any,
   alias?: string,
   limit?: number,
   offset?: number,
   debug?: boolean,
-  join?: {} | Array<string|{}>
+  populate?: boolean | {} | Array<string|{}>
 }

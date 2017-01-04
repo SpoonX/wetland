@@ -129,6 +129,8 @@ export class Mapping<T> {
       this[stagedMapping.method](...stagedMapping.parameters);
     });
 
+    this.stagedMappings = [];
+
     return this;
   }
 
@@ -288,6 +290,23 @@ export class Mapping<T> {
     this.mapping.put(`columns.${column}`, property);
 
     return this;
+  }
+
+  /**
+   * Get the field names (property names) from the mapping.
+   *
+   * @param {boolean} includeRelations
+   */
+  public getFieldNames(includeRelations: boolean = false): Array<string> {
+    let fields = this.getFields();
+
+    return Reflect.ownKeys(fields).reduce((fieldNames, fieldName) => {
+      if (!fields[fieldName].relationship || includeRelations) {
+        fieldNames.push(fieldName);
+      }
+
+      return fieldNames;
+    }, []);
   }
 
   /**
@@ -645,6 +664,15 @@ export class Mapping<T> {
    */
   public getRelations(): {[key: string]: Relationship} {
     return this.mapping.fetch('relations');
+  }
+
+  /**
+   * Get the relations for mapped entity.
+   *
+   * @returns {Relationship}
+   */
+  public getRelation(property: string): Relationship {
+    return this.mapping.fetch('relations.' + property);
   }
 
   /**

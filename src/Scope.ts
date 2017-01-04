@@ -8,6 +8,8 @@ import {Wetland} from './Wetland';
 import {Hydrator} from './Hydrator';
 import {Homefront} from 'homefront';
 import {EntityProxy} from './EntityProxy';
+import {ArrayCollection} from './ArrayCollection';
+import {IdentityMap} from './IdentityMap';
 
 export class Scope {
 
@@ -27,6 +29,13 @@ export class Scope {
   private wetland: Wetland;
 
   /**
+   * Maintain list of hydrated entities.
+   *
+   * @type {IdentityMap}
+   */
+  private identityMap: IdentityMap = new IdentityMap;
+
+  /**
    * Construct a new Scope.
    *
    * @param {EntityManager} manager
@@ -36,6 +45,15 @@ export class Scope {
     this.manager    = manager;
     this.wetland    = wetland;
     this.unitOfWork = new UnitOfWork(this);
+  }
+
+  /**
+   * Get the identity map for this scope.
+   *
+   * @returns {IdentityMap}
+   */
+  public getIdentityMap(): IdentityMap {
+    return this.identityMap;
   }
 
   /**
@@ -62,21 +80,31 @@ export class Scope {
   }
 
   /**
-   * Get a reference to a persisted row without actually loading it.
+   * Get a reference to a persisted row without actually loading it. Returns entity from identity map when available.
    *
-   * @param {Entity} entity
-   * @param {*}      primaryKeyValue
+   * @param {Entity}  entity
+   * @param {*}       primaryKeyValue
+   * @param {boolean} proxy Whether or not to proxy the reference (if used for updates for instance).
    *
    * @returns {EntityInterface}
    */
-  public getReference(entity: Entity, primaryKeyValue: any): EntityInterface {
-    let ReferenceClass    = this.resolveEntityReference(entity);
+  public getReference(entity: Entity, primaryKeyValue: any, proxy: boolean = true): ProxyInterface {
+    let ReferenceClass = this.resolveEntityReference(entity);
+    let fromMap        = this.identityMap.fetch(ReferenceClass, primaryKeyValue);
+
+    if (fromMap) {
+      return fromMap;
+    }
+
     let reference         = new ReferenceClass;
     let primaryKey        = Mapping.forEntity(ReferenceClass).getPrimaryKey();
     reference[primaryKey] = primaryKeyValue;
 
-    // Not super important, but it's a nice-to-have to prevent mutations on the reference as it is stricter.
     this.unitOfWork.registerClean(reference);
+
+    if (proxy) {
+      return this.attach(reference);
+    }
 
     return reference;
   }
@@ -118,6 +146,17 @@ export class Scope {
     });
 
     return Promise.all(refreshes);
+  }
+
+  /**
+   * Get the mapping for provided entity. Can be an instance, constructor or the name of the entity.
+   *
+   * @param {EntityInterface|string|{}} entity
+   *
+   * @returns {Mapping}
+   */
+  public getMapping<T>(entity: T): Mapping<T> {
+    return this.manager.getMapping(entity);
   }
 
   /**
@@ -172,11 +211,12 @@ export class Scope {
    * Attach an entity (proxy it).
    *
    * @param {EntityInterface} entity
+   * @param {boolean}         active
    *
    * @returns {EntityInterface&ProxyInterface}
    */
-  public attach<T>(entity: T): T {
-    return EntityProxy.patchEntity(entity, this);
+  public attach<T>(entity: T, active: boolean = false): T {
+    return EntityProxy.patchEntity(entity, this, active);
   }
 
   /**

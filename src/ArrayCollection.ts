@@ -21,6 +21,23 @@ export class ArrayCollection<T> extends Array {
   }
 
   /**
+   * Loop over each item in the collection, without worrying about index changes.
+   *
+   * @param {Function} callback
+   *
+   * @returns {ArrayCollection}
+   */
+  each(callback: (target: any) => void): ArrayCollection<T> {
+    let target;
+
+    while (target = this.pop()) {
+      callback(target);
+    }
+
+    return this;
+  }
+
+  /**
    * Remove items from the collection when part of the collection.
    *
    * @param {...*} items

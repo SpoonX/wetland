@@ -607,7 +607,7 @@ describe('UnitOfWork', () => {
         assert.strictEqual(unitOfWork.getRelationshipsChangedObjects().length, 1);
 
         entityManager.flush().then(() => {
-          entityManager.getRepository(User).findOne({name: 'test tag one creator'}, {join: {'profile': 'p'}})
+          entityManager.getRepository(User).findOne({name: 'test tag one creator'}, {populate: {'profile': 'p'}})
             .then(user => {
               assert.strictEqual(user.profile.slogan, 'No harm, try harder.');
 

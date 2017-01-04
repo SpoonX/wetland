@@ -17,6 +17,8 @@ export {Mapping, Field, FieldOptions, JoinColumn, JoinTable, Relationship} from 
 export {QueryBuilder} from './QueryBuilder';
 export {EntityManager} from './EntityManager';
 export {Scope} from './Scope';
+export {Populate} from './Populate';
 export {Criteria} from './Criteria/Criteria';
 export {Where} from './Criteria/Where';
 export {Having} from './Criteria/Having';
+export {Entity} from './Entity';
