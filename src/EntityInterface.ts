@@ -1,5 +1,5 @@
 import {Mapping} from './Mapping';
-import {Scope} from "./Scope";
+import {Scope} from './Scope';
 
 export interface EntityInterface {
   /**
@@ -20,8 +20,6 @@ export interface EntityInterface {
   beforeRemove?(entityManager: Scope): Promise<any> | void;
 
   afterRemove?(entityManager: Scope): Promise<any> | void;
-
-
 }
 
 export interface ProxyInterface extends EntityInterface {
