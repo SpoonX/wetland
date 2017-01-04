@@ -570,9 +570,10 @@ export class UnitOfWork {
    */
   private commitOrRollback(commit: boolean = true, error?: Error): Promise<any> {
     let resolves = [];
+    let method   = commit ? 'commit' : 'rollback';
 
     Object.getOwnPropertyNames(this.transactions).forEach(store => {
-      resolves.push(this.transactions[store].transaction[commit ? 'commit' : 'rollback']());
+      resolves.push(this.transactions[store].transaction[method]());
     });
 
     if (!commit) {
@@ -752,6 +753,7 @@ export class UnitOfWork {
    * @returns {Promise<any>}
    */
   private insertNew(): Promise<any> {
+
     return this.persist(this.newObjects, <T>(queryBuilder: QueryBuilder<T>, target: T & ProxyInterface) => {
       let mapping    = Mapping.forEntity(target);
       let primaryKey = mapping.getPrimaryKey();
@@ -937,10 +939,10 @@ export class UnitOfWork {
    * @returns {UnitOfWork}
    */
   public clean(): UnitOfWork {
-    this.newObjects.forEach(created => this.registerClean(created));
-    this.dirtyObjects.forEach(updated => this.registerClean(updated));
-    this.relationshipsChangedObjects.forEach(changed => this.registerClean(changed));
-    this.deletedObjects.forEach(deleted => this.clearEntityState(deleted));
+    this.newObjects.each(created => this.registerClean(created));
+    this.dirtyObjects.each(updated => this.registerClean(updated));
+    this.relationshipsChangedObjects.each(changed => this.registerClean(changed));
+    this.deletedObjects.each(deleted => this.clearEntityState(deleted));
 
     this.deletedObjects = new ArrayCollection;
     this.transactions   = {};
