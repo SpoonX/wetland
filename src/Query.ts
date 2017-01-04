@@ -1,5 +1,6 @@
 import * as knex from 'knex';
 import {Hydrator} from './Hydrator';
+import {QueryBuilder} from './QueryBuilder';
 
 export class Query {
 
@@ -14,14 +15,42 @@ export class Query {
   private statement: knex.QueryBuilder;
 
   /**
+   * The parent of this Query.
+   *
+   * @type {{}}
+   */
+  private parent: {column: string, primaries: Array<number|string>};
+
+  /**
+   * The child queries.
+   *
+   * @type {Array}
+   */
+  private children: Array<QueryBuilder<{new ()}>> = [];
+
+  /**
    * Construct a new Query.
    *
    * @param {knex.QueryBuilder} statement
    * @param {Hydrator}          hydrator
+   * @param {[]}                children
    */
-  public constructor(statement: knex.QueryBuilder, hydrator: Hydrator) {
+  public constructor(statement: knex.QueryBuilder, hydrator: Hydrator, children: Array<QueryBuilder<{new ()}>> = []) {
     this.statement = statement;
     this.hydrator  = hydrator;
+    this.children  = children;
+  }
+
+  /**
+   * Set the parent for this query.
+   *
+   * @param parent
+   * @returns {Query}
+   */
+  public setParent(parent: {column: string, primaries: Array<number|string>}): this {
+    this.parent = parent;
+
+    return this;
   }
 
   /**
@@ -30,7 +59,51 @@ export class Query {
    * @returns {Promise<[]>}
    */
   public execute(): Promise<Array<Object>> {
-    return this.statement.then();
+    let query = this.restrictToParent();
+
+    if (process.env.LOG_QUERIES) {
+      console.log('Executing query:', query.toString());
+    }
+
+    return query.then();
+  }
+
+  /**
+   * Restrict this query to parents.
+   *
+   * @returns {any}
+   */
+  private restrictToParent(): knex.QueryBuilder {
+    let statement = this.statement;
+
+    if (!this.parent || !this.parent.primaries.length) {
+      return statement;
+    }
+
+    let parent = this.parent;
+
+    if (parent.primaries.length === 1) {
+      statement.where(parent.column, parent.primaries[0]);
+
+      return statement;
+    }
+
+    let client    = statement['client'];
+    let unionized = client.queryBuilder();
+
+    parent.primaries.forEach(primary => {
+      let toUnion = statement.clone().where(parent.column, primary);
+
+      if (client.config.client === 'sqlite3') {
+        unionized.union(client.queryBuilder().select('*').from(client.raw(toUnion).wrap('(', ')')));
+
+        return unionized;
+      }
+
+      unionized.union(toUnion, true);
+    });
+
+    return unionized;
   }
 
   /**
@@ -53,8 +126,18 @@ export class Query {
    *
    * @returns {Promise<{}[]>}
    */
-  public getResult(): Promise<Array<Object>> {
-    return this.execute().then(result => this.hydrator.hydrateAll(result));
+  public getResult(): Promise<any> {
+    return this.execute().then(result => {
+      if (!result || !result.length) {
+        return null;
+      }
+
+      let hydrated = this.hydrator.hydrateAll(result);
+
+      return Promise.all(this.children.map(child => {
+        return child.getQuery().getResult();
+      })).then(() => hydrated);
+    });
   }
 
   /**
