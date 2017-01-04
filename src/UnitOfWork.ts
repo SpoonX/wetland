@@ -581,11 +581,11 @@ export class UnitOfWork {
    *
    * @param {string}          method
    * @param {EntityInterface} entity
-   * @param {*[]}             [parameters]
+   * @param {*[]}             parameters
    *
    * @returns {Promise<any>}
    */
-  private lifecycleCallback(method: string, entity: EntityInterface, ...parameters?: Array<any>): Promise<any> {
+  private lifecycleCallback(method: string, entity: EntityInterface, ...parameters: Array<any>): Promise<any> {
     let beforeMethod = 'before' + method[0].toUpperCase() + method.substr(1);
     let afterMethod  = 'after' + method[0].toUpperCase() + method.substr(1);
 
