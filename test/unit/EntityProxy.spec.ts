@@ -5,6 +5,8 @@ import {Wetland} from '../../src/Wetland';
 import {Simple} from '../resource/entity/Simple';
 import {Parent} from '../resource/entity/Parent';
 import {SimpleDifferent} from '../resource/entity/SimpleDifferent';
+import {ArrayCollection} from '../../src/ArrayCollection';
+import {MetaData} from '../../src/MetaData';
 
 function getUnitOfWork(entities?): UnitOfWork {
   let wetland = new Wetland({});
@@ -91,6 +93,53 @@ describe('EntityProxy', () => {
       assert.deepEqual(unitOfWork.getRelationshipsChangedObjects(), [patched]);
     });
 
+    it('should register collection changes when adding an entity to a collection extended', () => {
+      let unitOfWork    = getUnitOfWork();
+      let parent        = new Parent;
+      let patched       = EntityProxy.patchEntity(parent, unitOfWork.getEntityManager());
+      let simple        = new Simple;
+      let simpleTwo     = EntityProxy.patchEntity(new Simple, unitOfWork.getEntityManager());
+      let simpleThree   = new Simple;
+
+      simple.name      = 'hello';
+      simpleTwo.name   = 'world';
+      simpleThree.name = 'Cake';
+      patched.name     = 'Simple test';
+
+      parent.simples.add(simple, simpleTwo);
+
+      unitOfWork.registerClean(parent, true);
+      unitOfWork.registerClean(simpleTwo, true);
+
+      patched.activateProxying();
+      simpleTwo.activateProxying();
+
+      assert.deepEqual(unitOfWork.getRelationshipsChangedObjects(), []);
+      assert.deepEqual(unitOfWork.getNewObjects(), []);
+      assert.deepEqual(unitOfWork.getDirtyObjects(), []);
+      assert.deepEqual(unitOfWork.getCleanObjects(), [parent, simpleTwo.getTarget()]);
+
+      let meta = MetaData.forInstance(patched);
+
+      patched.simples.splice(0);
+
+      simpleTwo.name = 'universe';
+
+      let newSimples = new ArrayCollection;
+
+      newSimples.add(simple, simpleTwo, simpleThree);
+
+      patched.simples = newSimples;
+
+      let metaSimple = MetaData.forInstance(simpleTwo);
+
+      assert.strictEqual(meta.fetch('entityState.relations.added.simples')[0], simpleThree);
+      assert.deepEqual(meta.fetch('entityState.relations.removed'), {}); // broken
+      assert.deepEqual(unitOfWork.getDirtyObjects(), [simpleTwo]);
+      assert.deepEqual(metaSimple.fetch('entityState.dirty'), ['name']);
+      assert.deepEqual(unitOfWork.getRelationshipsChangedObjects(), [patched]);
+    });
+
     it('should not register collection changes when re-adding an entity to a collection', () => {
       let unitOfWork = getUnitOfWork();
       let parent     = new Parent;
@@ -142,7 +191,7 @@ describe('EntityProxy', () => {
 
       assert.throws(() => {
         delete patched.simples;
-      }, `It is not allowed to delete a collection. Trying to delete 'Parent.simples'.`);
+      }, `It is not allowed to delete a collection; trying to delete 'Parent.simples'.`);
     });
   });
 });
