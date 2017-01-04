@@ -49,8 +49,7 @@ export class ArrayCollection<T> extends Array {
       let itemIndex = this.indexOf(item);
 
       if (itemIndex > -1) {
-        // Triggers a splice in proxy. Performance win is pretty big.
-        delete this[itemIndex];
+        this.splice(itemIndex, 1);
       }
     });
 
