@@ -4,6 +4,7 @@
 * [Installation](installation.md)
 * [Configuration](configuration.md)
 * [Quick Start](quick-start.md)
+* [Edge cases](edge-cases.md)
 
 ### API documentation
 
