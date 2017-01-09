@@ -12,7 +12,7 @@ Optionals [finding options](#find-options) can be used as a second argument.
 
 {% common %}
 ```js
-entityRepository.find({name: 'Wesley'} , {join: ['project']});
+entityRepository.find({name: 'Wesley'} , {populate: ['project']});
 ```
 {% endmethod %}
 
@@ -22,7 +22,7 @@ Finds a single entity. In this method, criteria can be either an object, a numbe
 
 {% common %}
 ```js
-entityRepository.findOne({'u.name': 'Wesley', 'project.name': 'wetland'}, {alias: 'u', join: ['u.project']});
+entityRepository.findOne({'u.name': 'Wesley', 'project.name': 'wetland'}, {alias: 'u', populate: ['u.project']});
 ```
 {% endmethod %}
 
@@ -45,4 +45,4 @@ entityRepository.getQueryBuilder('u');
 | limit     | number                                      |
 | offset    | number                                      |
 | debug     | boolean                                     |
-| join      | object,  array of strings, array of objects |
+| populate  | object,  array of strings, array of objects |

@@ -64,7 +64,7 @@ let manager = wetland.getManager();
 let repository = manager.getRepository(Foo);
 
 // Get some results, and join.
-repository.find({name: 'cake'}, {joins: ['candles', 'baker', 'baker.address']})
+repository.find({name: 'cake'}, {populate: ['candles', 'baker', 'baker.address']})
   .then(results => {
     // ...
   });
