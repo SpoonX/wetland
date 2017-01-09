@@ -1,31 +1,33 @@
 import {Mapping} from './Mapping';
 
 export class Entity {
-  private mapping: Mapping<this>;
-
-  private fieldNames: Array<string>;
-
-  constructor() {
-    this.mapping = Mapping.forEntity(this);
-  }
-
-  getFieldNames(): Array<string> {
-    if (!this.fieldNames) {
-      this.fieldNames = this.mapping.getFieldNames();
+  public static toObject(source: {toJSON?: Function} & Object): Object {
+    if (Array.isArray(source)) {
+      return source.map(target => Entity.toObject(target));
     }
 
-    return this.fieldNames;
-  }
+    let mapping = Mapping.forEntity(source);
 
-  public static toObject(source: Object, mapping?: Mapping<{new ()}>, fieldNames?): Object {
-    return (fieldNames || mapping.getFieldNames()).reduce((asObject, fieldName) => {
+    if (!mapping) {
+      return source;
+    }
+
+    let object = mapping.getFieldNames().reduce((asObject, fieldName) => {
       asObject[fieldName] = source[fieldName];
 
       return asObject;
-    }, {});
+    }, {}) as Object;
+
+    Reflect.ownKeys(mapping.getRelations()).forEach(fieldName => {
+      if (typeof source[fieldName] !== 'undefined') {
+        object[fieldName] = source[fieldName];
+      }
+    });
+
+    return object;
   }
 
   public toObject(): Object {
-    return Entity.toObject(this, null, this.getFieldNames());
+    return Entity.toObject(this);
   }
 }
