@@ -672,7 +672,7 @@ export class Mapping<T> {
    * @returns {Relationship}
    */
   public getRelation(property: string): Relationship {
-    return this.mapping.fetch('relations.' + property);
+    return this.mapping.fetch(`relations.${property}`);
   }
 
   /**
