@@ -37,6 +37,15 @@ export class EntityRepository<T> {
   }
 
   /**
+   * Get a reference to the entity manager.
+   *
+   * @returns {Scope}
+   */
+  protected getEntityManager(): Scope {
+    return this.entityManager;
+  }
+
+  /**
    * Get a new query builder.
    *
    * @param {string}            [alias]
@@ -84,7 +93,11 @@ export class EntityRepository<T> {
     }
 
     if (options.populate === true) {
-      options.populate = Reflect.ownKeys(this.mapping.getRelations());
+      let relations = this.mapping.getRelations();
+
+      if (relations) {
+        options.populate = Reflect.ownKeys(relations);
+      }
     } else if (typeof options.populate === 'string') {
       options.populate = [options.populate];
     }
