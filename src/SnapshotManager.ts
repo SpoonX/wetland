@@ -351,6 +351,13 @@ export class SnapshotManager {
 
       Reflect.ownKeys(toCreate.relations).forEach(property => {
         let relation = toCreate.relations[property];
+
+        if (newMapping[relation.targetEntity] === undefined) {
+          throw new Error(
+            `Unable to find "${relation.targetEntity}" on "${entity}". Check the targetEntity name, and class name for typos.`
+          );
+        }
+
         let prepared = createRelation(newMapping[entity], property, newMapping[relation.targetEntity], true);
 
         if (!prepared) {
