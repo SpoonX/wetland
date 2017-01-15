@@ -254,7 +254,7 @@ export class Mapping<T> {
         return null;
       }
 
-      throw new Error(`Unknown field "${property}" supplied.`);
+      throw new Error(`Unknown field "${property}" supplied on entity "${this.getEntityName()}".`);
     }
 
     return field;
