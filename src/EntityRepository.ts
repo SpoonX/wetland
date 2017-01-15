@@ -95,7 +95,7 @@ export class EntityRepository<T> {
     if (options.populate === true) {
       let relations = this.mapping.getRelations();
 
-      if (typeof relations === 'object') {
+      if (typeof relations === 'object' && relations !== null) {
         options.populate = Reflect.ownKeys(relations);
       }
     } else if (typeof options.populate === 'string') {
