@@ -2,9 +2,6 @@
 
 Wetland is an enterprise grade object-relational mapper (ORM) for node.js.
 
-_**Note:** This module is under active development.
-While it's usable and well tested, some key features are still in progress._
-
 ## Features
 The major features this ORM provides are listed below.
 Looking at the tests will provide more detailed information, pending full documentation.
