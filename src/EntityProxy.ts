@@ -213,6 +213,10 @@ export class EntityProxy {
 
         // To many? Only allowed if collection is empty. Also, ensure this new collection is proxied.
         if (entity[property] instanceof Array) {
+          if (entity[property].length > 0 && entity[property] === target[property]) {
+            return true;
+          }
+
           if (entity[property].length > 0) {
             throw new Error(
               `Can't assign to '${target.constructor.name}.${property}'. Collection is not empty.`
