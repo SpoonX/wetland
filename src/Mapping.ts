@@ -190,7 +190,9 @@ export class Mapping<T> {
 
     let toUnderscore = entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
     let propertyName = toUnderscore ? this.nameToUnderscore(property) : property;
-    let field        = this.mapping.fetchOrPut(`fields.${property}`, {});
+    let field        = this.mapping.fetchOrPut(`fields.${property}`, {
+      cascades: entityManager.getConfig().fetch('mapping.defaults.cascades', [])
+    });
 
     if (field.name) {
       this.mapping.remove(`columns.${this.getColumnName(property)}`);

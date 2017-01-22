@@ -8,7 +8,6 @@ import {Wetland} from './Wetland';
 import {Hydrator} from './Hydrator';
 import {Homefront} from 'homefront';
 import {EntityProxy} from './EntityProxy';
-import {ArrayCollection} from './ArrayCollection';
 import {IdentityMap} from './IdentityMap';
 
 export class Scope {
@@ -84,7 +83,7 @@ export class Scope {
    *
    * @param {Entity}  entity
    * @param {*}       primaryKeyValue
-   * @param {boolean} proxy Whether or not to proxy the reference (if used for updates for instance).
+   * @param {boolean} [proxy]          Whether or not to proxy the reference (if used for updates for instance).
    *
    * @returns {EntityInterface}
    */
@@ -103,7 +102,11 @@ export class Scope {
     this.unitOfWork.registerClean(reference);
 
     if (proxy) {
-      return this.attach(reference);
+      let proxied = this.attach(reference);
+
+      this.identityMap.register(ReferenceClass, proxied);
+
+      return proxied;
     }
 
     return reference;

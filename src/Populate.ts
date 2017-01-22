@@ -1,9 +1,8 @@
 import {Scope} from './Scope';
-import {EntityCtor, ProxyInterface} from './EntityInterface';
-import {ArrayCollection} from './ArrayCollection';
+import {EntityCtor} from './EntityInterface';
+import {ArrayCollection as Collection} from './ArrayCollection';
 import {Mapping} from './Mapping';
 import {UnitOfWork} from './UnitOfWork';
-import {IdentityMap} from './IdentityMap';
 
 export class Populate {
 
@@ -34,7 +33,7 @@ export class Populate {
   public findDataForUpdate(primaryKey: string | number, Entity: EntityCtor<{new ()}>, data: Object): Promise<any> {
     let repository = this.entityManager.getRepository(Entity);
     let mapping    = this.entityManager.getMapping(Entity);
-    let options    = {populate: new ArrayCollection(), alias: mapping.getTableName()};
+    let options    = {populate: new Collection(), alias: mapping.getTableName()};
     let relations  = mapping.getRelations();
 
     Reflect.ownKeys(data).forEach(property => {
@@ -65,168 +64,100 @@ export class Populate {
   }
 
   /**
+   * Assign data based on a collection.
+   *
+   * @param {EntityCtor}      Entity
+   * @param {{}}              data
+   * @param {{}}              [base]
+   * @param {boolean|number}  [recursive]
+   *
+   * @returns {Collection<T>}
+   */
+  private assignCollection<T>(Entity: EntityCtor<T>, data: Array<Object>, base?: Collection<T>, recursive: boolean | number = 1): Array<T> {
+    base = base || new Collection;
+
+    base.splice(0);
+
+    data.forEach(rowData => {
+      base.push(this.assign(Entity, rowData, null, recursive));
+    });
+
+    return base;
+  }
+
+  /**
    * Assign data to base. Create new if not provided.
    *
-   * @param {EntityCtor}  Entity
-   * @param {{}}          data
-   * @param {{}}          [base]
+   * @param {EntityCtor}      Entity
+   * @param {{}}              data
+   * @param {{}}              [base]
+   * @param {boolean|number}  [recursive]
    *
-   * @returns {ArrayCollection<T>|T}
+   * @returns {T}
    */
-  public assign<T>(Entity: EntityCtor<T>, data: Object | Array<Object>, base?: T | ArrayCollection<T>): T | Array<T> {
-    let mapping   = this.entityManager.getMapping(Entity);
-    let relations = mapping.getRelations();
+  public assign<T>(Entity: EntityCtor<T>, data: Object, base?: T | Collection<T>, recursive: boolean | number = 1): T {
+    let mapping = this.entityManager.getMapping(Entity);
+    let fields  = mapping.getFields();
+    let primary = mapping.getPrimaryKey();
 
-    // If no base was supplied, this is a new entity. Create and stage for persist.
-    if (!base) {
-      base = new Entity;
+    // Ensure base.
+    if (!(base instanceof Entity)) {
+      if (typeof data === 'string' || typeof data === 'number') {
+        // Convenience, allow the primary key value.
+        return this.entityManager.getReference(Entity, data, false) as T;
+      }
 
-      this.entityManager.persist(base);
+      if (data[primary]) {
+        // Get the reference (from identity map or mocked)
+        base = this.entityManager.getReference(Entity, data[primary]) as T;
+
+        base['activateProxying']();
+      } else {
+        // Create a new instance and persist.
+        base = new Entity();
+
+        this.entityManager.persist(base);
+      }
     }
 
-    // Let's fill up our base, heh.
-    Reflect.ownKeys(data).forEach(property => {
-      // Not a relation? Simply assign.
-      if (!relations || !relations[property]) {
+    Reflect.ownKeys(data).forEach((property: string) => {
+      let field = fields[property];
+
+      // Only allow mapped fields to be assigned.
+      if (!field) {
+        return;
+      }
+
+      // Only relationships require special treatment. This isn't one, so just assign and move on.
+      if (!field.relationship) {
         base[property] = data[property];
 
         return;
       }
 
-      // Relation, let's figure out what kind of relation.
-      let relation      = relations[property];
-      let reference     = this.entityManager.resolveEntityReference(relation.targetEntity);
-      let targetMapping = Mapping.forEntity(reference);
-      let primaryKey    = targetMapping.getPrimaryKey();
-      let type          = relation.type;
+      // Should we remove a relationship?
+      if (!data[property]) {
+        delete base[property];
 
-      // Not a collection.
-      if (type !== Mapping.RELATION_ONE_TO_MANY && type !== Mapping.RELATION_MANY_TO_MANY) {
+        return;
+      }
 
-        // Unset relation.
-        if (data[property] === null || data[property] === false) {
-          delete base[property];
+      if (!recursive) {
+        return;
+      }
 
-          return;
-        }
+      let level = recursive;
 
-        // Primary key value it is!
-        if (typeof data[property] === 'string' || typeof data[property] === 'number') {
-          return base[property] = this.entityManager.getReference(reference, data[property], false);
-        }
+      if (typeof level === 'number') {
+        level--;
+      }
 
-        // No arrays allowed.
-        if (Array.isArray(data[property])) {
-          throw new Error('Relation is not a *ToMany relation, yet an array was supplied.');
-        }
+      let targetConstructor = this.entityManager.resolveEntityReference(field.relationship.targetEntity);
 
-        // At this point we're expecting an object.
-        if (typeof data[property] !== 'object' || data[property] === null) {
-          throw new Error(
-            `Invalid type for relation on '${mapping.getEntityName()}.${property}'. Got type '${typeof data[property]}'`
-          );
-        }
-
-        // Figure out if we'll be updating a reference, creating a new record or updating existing.
-        if (!data[property][primaryKey]) {
-          // No PK value, create and link.
-          base[property] = this.entityManager.attach(new reference, true);
-
-          this.entityManager.persist(base[property]);
-        } else if ((!(base[property] instanceof reference)) || data[property][primaryKey] !== base[property][primaryKey]) {
-          // Non-matching PKs. We're using base to assign.
-          base[property] = this.entityManager.getReference(reference, data[property][primaryKey]);
-
-          base[property].activateProxying();
-        }
-
-        let targetRelations = targetMapping.getRelations();
-
-        // Assign properties
-        Reflect.ownKeys(data[property]).forEach(dataProperty => {
-          if (targetRelations && targetRelations[dataProperty]) {
-            return;
-          }
-
-          base[property][dataProperty] = data[property][dataProperty];
-        });
+      if (Array.isArray(data[property])) {
+        base[property] = this.assignCollection(targetConstructor, data[property], base[property], level);
       } else {
-        let entityMap = {};
-
-        if (base[property]) {
-          // Create a map out of base data (id => entity)
-          base[property].forEach(entity => {
-            entityMap[entity[primaryKey]] = entity;
-          });
-
-          // Mark all current relations as divorced. Home wrecker...
-          base[property].splice(0);
-        } else {
-          base[property] = new ArrayCollection;
-        }
-
-        let assignEntity = entity => {
-          if (typeof entity === 'string' || typeof entity === 'number') {
-            return base[property].push(this.entityManager.getReference(reference, entity, false));
-          }
-
-          // At this point, value has to be an object.
-          if (typeof entity !== 'object' || entity === null) {
-            throw new Error(
-              `Invalid type for relation on '${mapping.getEntityName()}.${property}'. Got type '${typeof entity}'`
-            );
-          }
-
-          // I sort of loved the titanic... Also, this is the thing we'll be setting the values from data on.
-          let canvas;
-
-          // Let's decide what we'll be drawing on
-          if (!entity[primaryKey]) {
-            // No PK, so new record + relation.
-            canvas = this.entityManager.attach(new reference, true);
-
-            this.entityManager.persist(canvas);
-          } else if (entityMap[entity[primaryKey]]) {
-            // Existing relation and record.
-            canvas = entityMap[entity[primaryKey]];
-          } else {
-            // New relation, existing record.
-            canvas = this.entityManager.getReference(reference, entity[primaryKey], true);
-
-            canvas.activateProxying();
-          }
-
-          // Apply values
-          let targetRelations = targetMapping.getRelations();
-
-          // Assign properties
-          Reflect.ownKeys(entity).forEach(dataProperty => {
-            if (targetRelations[dataProperty]) {
-              return;
-            }
-
-            canvas[dataProperty] = entity[dataProperty];
-          });
-
-          base[property].push(canvas);
-        };
-
-        if (!Array.isArray(data[property]) || (Array.isArray(data[property]) && !data[property].length)) {
-          // Falsy value, nothing left to do here.
-          if (!data[property] || (Array.isArray(data[property]) && !data[property].length)) {
-            return;
-          }
-
-          return assignEntity(data[property]);
-        }
-
-        data[property].forEach(entity => {
-          if (!entity) {
-            throw new Error('Value for collection is falsy.');
-          }
-
-          assignEntity(entity);
-        });
+        base[property] = this.assign(targetConstructor, data[property], base[property], level);
       }
     });
 

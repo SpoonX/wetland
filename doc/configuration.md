@@ -101,6 +101,27 @@ const wetland = new Wetland({
 {% endmethod %}
 
 {% method %}
+## Mapping
+Using the mapping config key you're able to configure some of the mapping's behavior.
+
+{% common %}
+```js
+const wetland = new Wetland({
+  mapping: {
+    // Automatically convert camel-cased property names...
+    // ... to underscored column-names.
+    defaultNamesToUnderscore: false,
+
+    // Default values for mappings.
+    // Useful to set auto-persist (defaults to empty array).
+    defaults: {cascades: ['persist']}
+  }
+});
+```
+
+{% endmethod %}
+
+{% method %}
 ## Entity Path
 If you have multiple entities on a single directory and you want to register them without having to require each one of them, 
 you can simply write the path to your directory on `wetland.entityPath` to register all the entities in that directory.
