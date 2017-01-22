@@ -46,13 +46,15 @@ describe('Mapping', () => {
     it('should replace case to underscore by default and add the options', () => {
       let mapping = getMapping(wetland, ToUnderscore);
       let camel   = {
-        name: 'camel_case_to_underscore',
-        type: 'string',
-        size: 20
+        name    : 'camel_case_to_underscore',
+        cascades: [],
+        type    : 'string',
+        size    : 20
       };
       let pascal  = {
-        name: 'pascal_to_underscore',
-        type: 'integer'
+        name    : 'pascal_to_underscore',
+        cascades: [],
+        type    : 'integer'
       };
 
       assert.deepEqual(mapping.getField('camelCaseToUnderscore'), camel);
@@ -241,25 +243,30 @@ describe('Mapping', () => {
           name          : 'underscore_id'
         },
         camelCaseToUnderscore  : {
-          name: 'camel_case_to_underscore',
-          type: 'string',
-          size: 20
+          name    : 'camel_case_to_underscore',
+          cascades: [],
+          type    : 'string',
+          size    : 20
         },
         PascalToUnderscore     : {
-          name: 'pascal_to_underscore',
-          type: 'integer'
+          name    : 'pascal_to_underscore',
+          cascades: [],
+          type    : 'integer'
         },
         already_underscore     : {
-          name: 'already_underscore',
-          type: 'boolean'
+          name    : 'already_underscore',
+          cascades: [],
+          type    : 'boolean'
         },
         camelCaseAnd_underscore: {
-          name: 'camel_case_and_underscore',
-          type: 'boolean'
+          name    : 'camel_case_and_underscore',
+          cascades: [],
+          type    : 'boolean'
         },
         customName             : {
-          name: 'customColumnName',
-          type: 'string'
+          name    : 'customColumnName',
+          cascades: [],
+          type    : 'string'
         }
       };
 
