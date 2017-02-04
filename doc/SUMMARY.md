@@ -5,6 +5,7 @@
 * [Configuration](configuration.md)
 * [Quick Start](quick-start.md)
 * [Edge cases](edge-cases.md)
+* [Migrations](migrations.md)
 
 ### API documentation
 
