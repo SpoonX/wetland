@@ -3,11 +3,9 @@
     "edit-link",
     "github",
     "theme-api",
-    "anchors",
-    "expandable-chapters"
+    "anchors"
   ],
   "pluginsConfig": {
-    "expandable-chapters":{},
     "edit-link": {
       "base": "https://github.com/SpoonX/wetland/edit/master/doc",
       "label": "Edit This Page"
