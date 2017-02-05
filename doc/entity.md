@@ -1,30 +1,27 @@
 # Entity
 
-An entity is the way you describe objects you want to work with in wetland, wetland will create the sql schema for you.
+Entities are objects with a conceptual identity assigned within your domain. They're regular classes that hold a state you describe. Entities are mapped when registered with the entity manager, allowing you to describe what the entity looks like on the persisted side (the database).
 
-## Entity example :
+In short, entities are simple classes that describe tables in your database, of which instances hold state in your application and map to specific rows in your database.
+
+## Entity example
 
 Here's a user with an id in autoincrement mode, a username and a password.
 
 ```js
-const {Entity} = require('wetland');
-
-class User extends Entity {
-  constructor() {
-    super(...arguments);
-
-    // Default values for username and password
-    this.username = null;
-    this.password = null;
-  }
-
+class User {
+  /**
+   * @param {Mapping} mapping
+   *
+   * @see https://wetland.spoonx.org/API/mapping.html
+   */
   static setMapping(mapping) {
     // Primary key
     mapping.forProperty('id').increments().primary();
 
     // Fields
     mapping.field('username', {type: 'string'});
-    mapping.field('password', {type: 'string'});
+    mapping.forProperty('password').field({type: 'string'});
   }
 }
 ```
@@ -56,7 +53,7 @@ class AnyEntity extends Entity {
     // Will be executed before removal of the entity
   }
 
-  afterRemove?(entityManager) {
+  afterRemove (entityManager) {
     // Will be executed after removal of the entity
   }
 }
@@ -85,6 +82,7 @@ module.exports = class User extends Entity {
     // Default values for username and password
     this.username = null;
     this.password = null;
+    // This constructor is fully optional
   }
 
   static setMapping(mapping) {
@@ -97,10 +95,10 @@ module.exports = class User extends Entity {
   }
 
   beforeCreate() {
-    return Joi.validate(this, validationSchema, (error) => {
+    return Joi.validate(this, validationSchema, error => {
 
       if (error) {
-        return Promise.reject(error); // Rejecting causes the entity not to be created.
+        throw (error);
       }
 
       return bcrypt.hash(this.password, 15)
@@ -111,7 +109,4 @@ module.exports = class User extends Entity {
   }
 
 };
-
 ```
-
-
