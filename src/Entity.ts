@@ -18,11 +18,15 @@ export class Entity {
       return asObject;
     }, {}) as Object;
 
-    Reflect.ownKeys(mapping.getRelations()).forEach(fieldName => {
-      if (typeof source[fieldName] !== 'undefined') {
-        object[fieldName] = source[fieldName];
-      }
-    });
+    let relations = mapping.getRelations();
+
+    if (relations) {
+      Reflect.ownKeys(relations).forEach(fieldName => {
+        if (typeof source[fieldName] !== 'undefined') {
+          object[fieldName] = source[fieldName];
+        }
+      });
+    }
 
     return object;
   }
