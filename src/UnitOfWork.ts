@@ -1,3 +1,4 @@
+import * as knex from 'knex';
 import {ArrayCollection} from './ArrayCollection';
 import {Store} from './Store';
 import {EntityInterface, ProxyInterface} from './EntityInterface';
@@ -442,7 +443,7 @@ export class UnitOfWork {
     // There are relations, let's check if there's anything that could and should be cascaded.
     Object.getOwnPropertyNames(relations).forEach(property => {
       // Not even an object? No need to perform _any_ checks.
-      if (typeof entity[property] !== 'object') {
+      if (typeof entity[property] !== 'object' || entity[property] === null) {
         return;
       }
 
@@ -927,10 +928,18 @@ export class UnitOfWork {
             });
 
             if (action === UnitOfWork.RELATIONSHIP_ADDED) {
-              return queryBuilder.insert(values).transacting(transaction.transaction).then();
+              let query = queryBuilder.insert(values).transacting(transaction.transaction);
+
+              UnitOfWork.logQuery(query);
+
+              return query.then();
             }
 
-            return queryBuilder.where(values).del().transacting(transaction.transaction).then();
+            let query = queryBuilder.where(values).del().transacting(transaction.transaction).then();
+
+            UnitOfWork.logQuery(query);
+
+            return query;
           });
       };
 
@@ -939,6 +948,17 @@ export class UnitOfWork {
     });
 
     return Promise.all(relationshipUpdates);
+  }
+
+  /**
+   * Log a query.
+   *
+   * @param {knex.QueryBuilder} query
+   */
+  static logQuery(query: knex.QueryBuilder): void {
+    if (process.env.LOG_QUERIES) {
+      console.log('Executing query:', query.toString());
+    }
   }
 
   /**
