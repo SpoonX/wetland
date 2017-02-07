@@ -107,7 +107,7 @@ export class Populate {
         return this.entityManager.getReference(Entity, data, false) as T;
       }
 
-      if (data[primary]) {
+      if (data && data[primary]) {
         // Get the reference (from identity map or mocked)
         base = this.entityManager.getReference(Entity, data[primary]) as T;
 
@@ -130,19 +130,28 @@ export class Populate {
 
       // Only relationships require special treatment. This isn't one, so just assign and move on.
       if (!field.relationship) {
+        if (['date', 'dateTime', 'datetime', 'time'].indexOf(field.type) > -1 && !(data[property] instanceof Date)) {
+          data[property] = new Date(data[property]);
+        }
+
         base[property] = data[property];
 
         return;
       }
 
-      // Should we remove a relationship?
       if (!data[property]) {
-        delete base[property];
+        if (base[property]) {
+          delete base[property];
+        }
 
         return;
       }
 
       if (!recursive) {
+        return;
+      }
+
+      if (Array.isArray(data[property]) && !data[property].length && (!base[property] || !base[property].length)) {
         return;
       }
 
@@ -156,7 +165,7 @@ export class Populate {
 
       if (Array.isArray(data[property])) {
         base[property] = this.assignCollection(targetConstructor, data[property], base[property], level);
-      } else {
+      } else if (data[property]) {
         base[property] = this.assign(targetConstructor, data[property], base[property], level);
       }
     });
