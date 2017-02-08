@@ -4,8 +4,13 @@
 * [Installation](installation.md)
 * [Configuration](configuration.md)
 * [Quick Start](quick-start.md)
+
+## Migrations
+
+* [Snapshots](snapshots.md)
+* [Limitations](limitations.md)
+
 * [Edge cases](edge-cases.md)
-* [Migrations](migrations.md)
 
 ### API documentation
 
