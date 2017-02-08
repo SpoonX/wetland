@@ -2,6 +2,15 @@
 When straying away from best-practises you might find yourself struggling to understand what's happening.
 This document is an attempt to help you catch these edge-cases.
 
+## Dev migrations
+Wetland migrations are pretty powerful, but have some minor limitations.
+
+Dev migrations can't always do what should be done. This includes renaming columns and changing column definitions.
+
+When you change the definition of a column, it gets dropped and created again.
+When you change the name of a column, it gets dropped and created again.
+When you change the name of a table, any relationships, unique constraints and indexes it has get dropped and recreated.
+
 ## .toObject() and references
 > **Best-practise:**
 > When manipulating the contents returned for JSON stringified entities, always place the toJSON
