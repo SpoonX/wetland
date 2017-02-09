@@ -2,6 +2,20 @@
 When straying away from best-practises you might find yourself struggling to understand what's happening.
 This document is an attempt to help you catch these edge-cases.
 
+## Store and database changes
+
+Wetland can be a bit picky if you don't know its inner-working.
+One error you can rapidly encounter is this one :
+
+```bash
+ER_BAD_TABLE_ERROR: Unknown table 'my_database.table-name'
+```
+
+The source of this error is most probably a change in your store settings (e.g: changing database adapter, changing database name...) or database (e.g: recreating your database).
+Technically what's happening is that wetland doesn't know that it needs to update the database schema because the way migrations work is by looking at your [snapshots](https://wetland.spoonx.org/snapshots.html) in your `.data` directory, and the last snapshot wetland knows about was before your change.
+
+Solution is simple type clear your `.data` directory : `rm -r .data`.
+
 ## Dev migrations
 Wetland migrations are pretty powerful, but have some minor limitations.
 
