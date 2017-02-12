@@ -62,7 +62,7 @@ class AnyEntity extends Entity {
 ### An example with validation and encryption
 
 In this example we create a validation schema with [Joi](https://github.com/hapijs/joi) and apply it before any CREATE action.
-If given data is validated the given password encrypted using (bcrypt)[https://en.wikipedia.org/wiki/Bcrypt].
+If given data is validated the given password encrypted using [bcrypt](https://en.wikipedia.org/wiki/Bcrypt).
 
 ```js
 const bcrypt   = require('bcrypt');
