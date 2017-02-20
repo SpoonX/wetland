@@ -660,6 +660,17 @@ export class Mapping<T> {
   }
 
   /**
+   * Get the type for a property.
+   *
+   * @param {string}property
+   *
+   * @returns {string}
+   */
+  public getType(property: string): string {
+    return this.mapping.fetch(`fields.${property}.type`, 'string');
+  }
+
+  /**
    * Get the relations for mapped entity.
    *
    * @returns {{}}
