@@ -47,8 +47,7 @@ describe('QueryBuilder', () => {
 
     it('should throw an error on invalid join property', () => {
       let queryBuilder  = getQueryBuilder();
-      let expectedError = 'Invalid relation supplied for join. Property not found on entity, or relation not defined. '
-        + 'Are you registering the joins in the wrong order?';
+      let expectedError = 'Invalid relation supplied for join. Property \'death\' not found on entity, or relation not defined.\n        Are you registering the joins in the wrong order?';
 
       assert.throws(() => {
         queryBuilder
