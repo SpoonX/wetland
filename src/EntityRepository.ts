@@ -37,6 +37,15 @@ export class EntityRepository<T> {
   }
 
   /**
+   * Get mapping for the entity this repository is responsible for.
+   *
+   * @returns {Mapping}
+   */
+  public getMapping(): Mapping<T> {
+    return this.mapping;
+  }
+
+  /**
    * Get a reference to the entity manager.
    *
    * @returns {Scope}
