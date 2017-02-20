@@ -465,8 +465,8 @@ export class QueryBuilder<T> {
 
     if (!field || !field.relationship) {
       throw new Error(
-        'Invalid relation supplied for join. Property not found on entity, or relation not defined. ' +
-        'Are you registering the joins in the wrong order?'
+        `Invalid relation supplied for join. Property '${property}' not found on entity, or relation not defined.
+        Are you registering the joins in the wrong order?`
       );
     }
 
@@ -616,16 +616,18 @@ export class QueryBuilder<T> {
     }
 
     // Support select functions. Don't add to hydrator, as they aren't part of the entities.
-    let select    = Object.getOwnPropertyNames(propertyAlias);
-    let fieldName = this.whereCriteria.mapToColumn(propertyAlias[select[0]]);
+    let select       = Object.getOwnPropertyNames(propertyAlias);
+    let functionName = select[0] === 'alias' ? select[1] : select[0];
+    let alias        = select[0] === 'alias' ? select[0] : select[1];
+    let fieldName    = this.whereCriteria.mapToColumn(propertyAlias[functionName]);
 
-    if (this.functions.indexOf(select[0]) === -1) {
+    if (this.functions.indexOf(functionName) === -1) {
       throw new Error(`Unknown function "${select[0]}" specified.`);
     }
 
     select.length > 1
-      ? this.statement[select[0]](`${fieldName} as ${propertyAlias['alias']}`)
-      : this.statement[select[0]](fieldName);
+      ? this.statement[functionName](`${fieldName} as ${alias}`)
+      : this.statement[functionName](fieldName);
 
     return this;
   }
@@ -946,7 +948,7 @@ export class QueryBuilder<T> {
 
     Object.getOwnPropertyNames(values).forEach(property => {
       let value = values[property];
-      let fieldName;
+      let fieldName, type;
 
       if (property.indexOf('.') > -1) {
         let parts = property.split('.');
@@ -955,8 +957,8 @@ export class QueryBuilder<T> {
           return;
         }
 
-        parts[1] = this.mappings[parts[0]].getFieldName(parts[1], parts[1]);
-
+        parts[1]  = this.mappings[parts[0]].getFieldName(parts[1], parts[1]);
+        type      = this.mappings[parts[0]].getType(parts[1]);
         fieldName = parts.join('.');
       } else {
         if (this.mappings[this.alias].isRelation(property) && typeof value === 'object') {
@@ -964,10 +966,15 @@ export class QueryBuilder<T> {
         }
 
         fieldName = this.mappings[this.alias].getFieldName(property, property);
+        type      = this.mappings[this.alias].getType(property);
       }
 
       if (!fieldName) {
         throw new Error(`No field name found in mapping for ${this.mappings[this.alias].getEntityName()}::${property}.`);
+      }
+
+      if (type === 'json') {
+        value = JSON.stringify(value);
       }
 
       mappedValues[fieldName] = value;
