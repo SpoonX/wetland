@@ -618,7 +618,7 @@ export class QueryBuilder<T> {
     // Support select functions. Don't add to hydrator, as they aren't part of the entities.
     let select       = Object.getOwnPropertyNames(propertyAlias);
     let functionName = select[0] === 'alias' ? select[1] : select[0];
-    let alias        = select[0] === 'alias' ? select[0] : select[1];
+    let alias        = propertyAlias[select[0] === 'alias' ? select[0] : select[1]];
     let fieldName    = this.whereCriteria.mapToColumn(propertyAlias[functionName]);
 
     if (this.functions.indexOf(functionName) === -1) {
