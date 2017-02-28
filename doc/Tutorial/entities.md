@@ -137,3 +137,5 @@ Simply put, dev migrations make use of the [snapshot system](../snapshots.md). T
 You can read more about snapshots and dev migrations [in the docs for snapshots](../snapshots.md).
 
 In the next step of this tutorial, we'll implement automated dev migrations into our application and it should start to make more sense.
+
+[Go to the next part](dev-migrations.md).
