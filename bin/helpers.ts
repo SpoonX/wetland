@@ -138,7 +138,7 @@ export function migrate(options, method) {
       if (!migrations) {
         showSuccess('Success: No migrations to run');
       } else {
-        showSuccess(`'${parseInt(migrations)}' migrations executed!`);
+        showSuccess(`'${parseInt(migrations)}' migrations executed`);
       }
 
       process.exit(0);

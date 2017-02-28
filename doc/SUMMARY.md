@@ -11,6 +11,8 @@
 
 * [Setting up](Tutorial/setting-up.md)
 * [Entities](Tutorial/entities.md)
+* [Dev migrations](Tutorial/dev-migrations.md)
+* [Migrations](Tutorial/migrations.md)
 
 ## Migrations
 
