@@ -135,6 +135,26 @@ const wetland = new Wetland({
 {% endmethod %}
 
 {% method %}
+## Default names to underscore
+By default, the name for your columns in the database is the name of your property.
+If you supply a `name` in your field definition, this will be used instead.
+
+However, it's also possible to tell Wetland to name your columns based on the property name,
+replacing camel casing by underscores.
+
+As an example, property `firstName` would create a column with the name `first_name`.
+
+{% common %}
+```js
+const wetland = new Wetland({
+  mapping: {
+    defaultNamesToUnderscore: true
+  }
+});
+```
+{% endmethod %}
+
+{% method %}
 ## Entity Paths
 If you have multiple entities in multiple directories, you can register all of them on `wetland.entityPaths`.
 It works the same way as `entityPath` but you pass all your paths inside of an array.
