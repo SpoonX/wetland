@@ -155,6 +155,20 @@ const wetland = new Wetland({
 {% endmethod %}
 
 {% method %}
+## Use foreign keys
+By default, wetland uses foreign keys for relations. It's possible to disable them.
+
+**Note:** foreign keys are disabled for SQLite due to alter restrictions.
+
+{% common %}
+```js
+const wetland = new Wetland({
+  useForeignKeys: false
+});
+```
+{% endmethod %}
+
+{% method %}
 ## Entity Paths
 If you have multiple entities in multiple directories, you can register all of them on `wetland.entityPaths`.
 It works the same way as `entityPath` but you pass all your paths inside of an array.
