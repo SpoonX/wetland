@@ -169,7 +169,8 @@ module.exports = Category;
 ### Inversed side
 Now let's open up `app/entity/Product.js` and add the inversed side:
 
-```jsclass Product {
+```js
+class Product {
   static setMapping(mapping) {
     mapping.forProperty('id').primary().increments();
 
