@@ -13,6 +13,7 @@
 * [Entities](Tutorial/entities.md)
 * [Dev migrations](Tutorial/dev-migrations.md)
 * [Migrations](Tutorial/migrations.md)
+* [Relations](Tutorial/relations.md)
 
 ## Migrations
 
