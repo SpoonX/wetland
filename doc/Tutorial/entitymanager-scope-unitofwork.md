@@ -3,11 +3,11 @@
 > To clone the finished code for this part of the tutorial, run the following command:
 >
 > `git clone git@github.com:SpoonX/wetland-tutorial.git -b 7-entitymanager-scope-unitofwork --single-branch`
-> 
+>
 > To clone the base code for this part of the tutorial, run the following command:
 >
 > `git clone git@github.com:SpoonX/wetland-tutorial.git -b 6-lifecycle-callbacks --single-branch`
-> 
+>
 > Find the full repository on github [here](https://github.com/SpoonX/wetland-tutorial).
 
 In this part of the tutorial we'll take a quick look at the entity manager.
@@ -48,7 +48,7 @@ Before I explain what the unit of work is, I want you to know that **you don't h
 So, what's a unit of work?
 
 > Maintains a list of objects affected by a business transaction and coordinates the writing out of changes and the resolution of concurrency problems.
-> 
+>
 > _**Source: [P of EAA](https://martinfowler.com/eaaCatalog/unitOfWork.html)**_
 
 In simpler terms, the unit of work maintains the state of your entities. So:
@@ -110,7 +110,7 @@ category.name = req.body.name;
 
 Nothing special here. It's just a normal class instance, and we're setting a property's value.
 
-Now lets look at these lines: 
+Now lets look at these lines:
 
 ```js
 let wetland  = req.wetland;
@@ -136,7 +136,11 @@ First, we tell the manager that there's a new category in town, by calling `.per
 The then and catch are simply there to respond to the request.
 
 ### Testing it
-Now, let's test our newly added code. Open up your terminal and run the following curl command:
+Now, let's test our newly added code. Open up your terminal start your server.
+
+`node app.js`
+
+Then run the following curl command in a new terminal tab / window:
 
 ```bash
 curl -XPOST -H 'Content-Type: application/json' -d '{
