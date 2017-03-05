@@ -16,6 +16,7 @@
 * [Relations](Tutorial/relations.md)
 * [Lifecycle callbacks](Tutorial/lifecycle-callbacks.md)
 * [EntityManager, Scope and UnitOfWork](Tutorial/entitymanager-scope-unitofwork.md)
+* [Repository](Tutorial/repository.md)
 
 ## Migrations
 
