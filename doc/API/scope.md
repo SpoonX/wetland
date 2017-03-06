@@ -79,7 +79,7 @@ scope.getEntity('name');
 
 {% method %}
 ## .getReference()
-Gets a reference to a persisted row without actually loading it.
+Gets a reference to a persisted row without actually loading it from the database, or returns a row found in the IdentityMap (if fetched earlier in the scope).
 Besides giving it the entity, you also need to specify the primary key value of the targeted row.
 
 {% common %}

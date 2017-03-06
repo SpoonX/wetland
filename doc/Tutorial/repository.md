@@ -8,7 +8,7 @@
 >
 > `git clone git@github.com:SpoonX/wetland-tutorial.git -b 7-entitymanager-scope-unitofwork --single-branch`
 >
-> Find the full repository on github [here](https://github.com/SpoonX/wetland-tutorial).
+> **Github:** [Diff for this part of the tutorial](https://github.com/SpoonX/wetland-tutorial/compare/7-entitymanager-scope-unitofwork...8-repository?diff=split) - [Full repository on github](https://github.com/SpoonX/wetland-tutorial)
 
 In this part of the tutorial we'll be exploring repositories.
 The concept of repositories isn't that complex to grasp if you've worked with any other ORM-like system before; or even if you've written any objects before.
@@ -359,31 +359,33 @@ router.get('/depleted', (req, res) => {
 
 Here we're simply calling the `.findDepleted()` method on our new repository, instead of using `.find()`.
 
+_**Note:** the reason we have to define this route before the `/:id` route is because that would otherwise match first._
+
 ### Testing the custom repository
 Start your server (or restart it, if it's still running): `node app.js`.
 
 To test the custom repository, let's add a couple of products. Here are some curl commands to help:
 
-```
+```bash
 curl -XPOST -H 'Content-Type: application/json' -d '{
  "name":"glasses",
  "stock": 10
- }' http://127.0.0.1:3000/product
+}' http://127.0.0.1:3000/product
 
 curl -XPOST -H 'Content-Type: application/json' -d '{
  "name":"umbrella",
  "stock": 0
- }' http://127.0.0.1:3000/product
+}' http://127.0.0.1:3000/product
 
 curl -XPOST -H 'Content-Type: application/json' -d '{
  "name":"lighter",
  "stock": 2
- }' http://127.0.0.1:3000/product
+}' http://127.0.0.1:3000/product
 
 curl -XPOST -H 'Content-Type: application/json' -d '{
  "name":"jeans",
  "stock": 0
- }' http://127.0.0.1:3000/product
+}' http://127.0.0.1:3000/product
 ```
 
 Now navigate to [http://127.0.0.1:3000/product/depleted](http://127.0.0.1:3000/product/depleted), and if you used the curl commands you should now see something like this:

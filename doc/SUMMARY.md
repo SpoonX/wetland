@@ -11,6 +11,7 @@
 
 * [Setting up](Tutorial/setting-up.md)
 * [Entities](Tutorial/entities.md)
+* [Snapshots](Tutorial/snapshots.md)
 * [Dev migrations](Tutorial/dev-migrations.md)
 * [Migrations](Tutorial/migrations.md)
 * [Relations](Tutorial/relations.md)
@@ -18,10 +19,9 @@
 * [EntityManager, Scope and UnitOfWork](Tutorial/entitymanager-scope-unitofwork.md)
 * [Repository](Tutorial/repository.md)
 * [QueryBuilder](Tutorial/querybuilder.md)
-
-## Migrations
-
-* [Snapshots](snapshots.md)
+* [Query](Tutorial/query.md)
+* [Joins](Tutorial/joins.md)
+* [Populator](Tutorial/populator.md)
 
 ## API documentation
 
