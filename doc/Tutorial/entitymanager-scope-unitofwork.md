@@ -8,7 +8,7 @@
 >
 > `git clone git@github.com:SpoonX/wetland-tutorial.git -b 6-lifecycle-callbacks --single-branch`
 >
-> Find the full repository on github [here](https://github.com/SpoonX/wetland-tutorial).
+> **Github:** [Diff for this part of the tutorial](https://github.com/SpoonX/wetland-tutorial/compare/6-lifecycle-callbacks...7-entitymanager-scope-unitofwork?diff=split) - [Full repository on github](https://github.com/SpoonX/wetland-tutorial)
 
 In this part of the tutorial we'll take a quick look at the entity manager.
 
@@ -135,17 +135,75 @@ First, we tell the manager that there's a new category in town, by calling `.per
 
 The then and catch are simply there to respond to the request.
 
+### Removing
+Now that we know that the UnitOfWork maintains state, let's look at some other methods we can use!
+
+Add the following route to `app/resource/category.js`:
+
+```js
+// Delete a category
+router.delete('/:id', (req, res) => {
+  let manager = req.getManager();
+
+  manager.getRepository('Category')
+    .findOne(req.params.id)
+    .then(result => {
+      if (!result) {
+        return res.status(404).json(null)
+      }
+
+      return manager.remove(result).flush()
+        .then(() => res.json(result));
+    })
+    .catch(error => res.status(500).json({error}));
+});
+```
+
+First, we find the record we want to delete. We _could_ just send a delete for the given ID, but we want to verify the record exists first.
+
+Then, we tell the manager we want to remove it. At this point, it will mark the entity as deleted with the unit of work. Then we proceed to apply the change by calling flush. It's the same as calling persist, except it marks the entity as removed instead of added.
+
+### Updating
+Let's also implement some code to allow updating the name of the category.
+
+Add the following route to `app/resource/category.js`:
+
+```js
+// Update a category
+router.patch('/:id', (req, res) => {
+  let manager = req.getManager();
+
+  manager.getRepository('Category')
+    .findOne(req.params.id)
+    .then(result => {
+      if (!result) {
+        return res.status(404).json(null)
+      }
+
+      result.name = req.body.name;
+
+      return manager.flush().then(() => res.json(result));
+    })
+    .catch(error => res.status(500).json({error}));
+});
+```
+
+Here you can see we just change the entity, and then tell the manager to flush. This will only update the dirty properties (name) for the dirty entities (a single one, in our case).
+
+It doesn't have to calculate anything, because the entity is proxied, and the proxy knows how to register changes and **mark entities as dirty**.
+
 ### Testing it
 Now, let's test our newly added code. Open up your terminal start your server.
 
 `node app.js`
 
+#### Creating
 Then run the following curl command in a new terminal tab / window:
 
 ```bash
 curl -XPOST -H 'Content-Type: application/json' -d '{
  "name":"generic"
- }' http://127.0.0.1:3000/category
+}' http://127.0.0.1:3000/category
 ```
 
 This will end up in the code we just wrote, and should return the following:
@@ -160,6 +218,67 @@ This will end up in the code we just wrote, and should return the following:
 ```
 
 _**Note:** The `created` value will be different, as this is a timestamp._
+
+#### Updating
+Now let's create a new record, just so we can update it, and then delete it.
+
+```bash
+curl -XPOST -H 'Content-Type: application/json' -d '{
+ "name":"generic"
+}' http://127.0.0.1:3000/category
+```
+
+Returns:
+
+```json
+{
+  "name": "generic",
+  "created": 1488787996991,
+  "id": 2,
+  "products": []
+}
+```
+
+Take the **id** value, for me that's `2`, and use it in the following request:
+
+```bash
+curl -XPATCH -H 'Content-Type: application/json' -d '{
+ "name":"changed name"
+}' http://127.0.0.1:3000/category/2
+```
+
+Which should return something like:
+
+```json
+{
+  "id": 2,
+  "name": "changed name",
+  "created": 1488787996991,
+  "products": []
+}
+```
+
+Sweet, it updated the name.
+
+#### Deleting
+Now that we're done playing with our second record, let's delete it.
+
+```bash
+curl -XDELETE http://127.0.0.1:3000/category/2
+```
+
+Which should return the record it deleted:
+
+```json
+{
+  "id": 2,
+  "name": "changed name",
+  "created": 1488787996991,
+  "products": []
+}
+```
+
+We can verify it's gone by running the same delete again, which will return `null`.
 
 ## Next step
 This was a lot to process, but we now know what we mean by state, scope and entity manager.

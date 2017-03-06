@@ -89,12 +89,12 @@ queryBuilder.insert({name: 'Wesley'});
 {% endmethod %}
 
 {% method %}
-## .join()
+## .makeJoin()
 Performs a join. This method is used by specific join methods in this class and we recommend you to use them instead.
 
 {% common %}
 ```js
-queryBuilder.join('innerJoin', 'columnName', 'a');
+queryBuilder.makeJoin('innerJoin', 'columnName', 'a');
 ```
 {% endmethod %}
 

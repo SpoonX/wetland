@@ -6,8 +6,8 @@
 > To clone the base code for this part of the tutorial, run the following command:
 >
 > `git clone git@github.com:SpoonX/wetland-tutorial.git -b 1-setting-up --single-branch`
-> 
-> Find the full repository on github [here](https://github.com/SpoonX/wetland-tutorial).
+>
+> **Github:** [Diff for this part of the tutorial](https://github.com/SpoonX/wetland-tutorial/compare/1-setting-up...2-entities?diff=split) - [Full repository on github](https://github.com/SpoonX/wetland-tutorial)
 
 In this part of the tutorial, we'll be looking at actual code. We'll create an entity, create a schema and set up a relation.
 
@@ -136,6 +136,10 @@ Simply put, dev migrations make use of the [snapshot system](../snapshots.md). T
 
 You can read more about snapshots and dev migrations [in the docs for snapshots](../snapshots.md).
 
-In the next step of this tutorial, we'll implement automated dev migrations into our application and it should start to make more sense.
+## Next step
+Now that we've taken a quick look at entities, it's time to move on.
 
-[Go to the next part](dev-migrations.md).
+In the next step of this tutorial, we'll briefly look at snapshots, and what they are. 
+Then, we'll implement automated dev migrations into our application and it should start to make more sense.
+
+[Go to the next part](snapshots.md).

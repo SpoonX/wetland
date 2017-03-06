@@ -8,7 +8,7 @@
 >
 > `git clone git@github.com:SpoonX/wetland-tutorial.git -b 8-repository --single-branch`
 >
-> Find the full repository on github [here](https://github.com/SpoonX/wetland-tutorial).
+> **Github:** [Diff for this part of the tutorial](https://github.com/SpoonX/wetland-tutorial/compare/8-repository...9-querybuilder?diff=split) - [Full repository on github](https://github.com/SpoonX/wetland-tutorial)
 
 We've touched the subject of the QueryBuilder in the previous part, without explaining what it is or does.
 
@@ -268,10 +268,13 @@ queryBuilder.innerJoin('u.groups', 'g');
 
 // Nested, and mixed, joins. (there's no limit to the nesting)
 queryBuilder
+  .select('u', 'f', 'p', 's')
   .innerJoin('u.friends', 'f')
   .leftJoin('f.playlists', 'p')
   .leftOuterJoin('p.songs', 's');
 ```
+
+_**Note:** the use of the join methods can be used in a nested way, giving you a deeper nested result. No matter how deep you nest, .select() always expects the alias of the relation._
 
 Available join methods holding this signature are:
 
@@ -437,6 +440,8 @@ router.get('/abundant', (req, res) => {
 This code is very similar to that of [find depleted](./repository.md#using-our-new-repository), we simply call our new method on the repository.
 
 ### Testing our new method
+Start your server (or restart it, if it's still running): `node app`.
+
 Open up [http://127.0.0.1:3000/product/abundant](http://127.0.0.1:3000/product/abundant). You should now see something like this:
 
 ```json
@@ -452,6 +457,6 @@ Open up [http://127.0.0.1:3000/product/abundant](http://127.0.0.1:3000/product/a
 ```
 
 ## Next step
-Alright, we can now build our own queries and set up joins. Let's start using joins.
+Alright, we can now build our own queries and set up joins. Let's take a quick look at what our Query object can do.
 
-[Go to the next part](joins.md).
+[Go to the next part](query.md).

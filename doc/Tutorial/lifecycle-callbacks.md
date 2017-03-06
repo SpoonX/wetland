@@ -7,7 +7,7 @@
 >
 > `git clone git@github.com:SpoonX/wetland-tutorial.git -b 5-relations --single-branch`
 > 
-> Find the full repository on github [here](https://github.com/SpoonX/wetland-tutorial).
+> **Github:** [Diff for this part of the tutorial](https://github.com/SpoonX/wetland-tutorial/compare/5-relations...6-lifecycle-callbacks?diff=split) - [Full repository on github](https://github.com/SpoonX/wetland-tutorial)
 
 In this part of the tutorial we'll take a look at lifecycle callbacks on entities.
 

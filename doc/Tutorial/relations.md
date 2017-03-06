@@ -7,7 +7,7 @@
 >
 > `git clone git@github.com:SpoonX/wetland-tutorial.git -b 4-migrations --single-branch`
 > 
-> Find the full repository on github [here](https://github.com/SpoonX/wetland-tutorial).
+> **Github:** [Diff for this part of the tutorial](https://github.com/SpoonX/wetland-tutorial/compare/4-migrations...5-relations?diff=split) - [Full repository on github](https://github.com/SpoonX/wetland-tutorial)
 
 In this part of the tutorial we'll take a look at relations as we move towards running queries.
 
