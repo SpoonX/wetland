@@ -22,6 +22,7 @@
 * [Query](Tutorial/query.md)
 * [Joins](Tutorial/joins.md)
 * [Populator](Tutorial/populator.md)
+* [Bonus: stores](Tutorial/bonus-stores.md)
 
 ## API documentation
 
