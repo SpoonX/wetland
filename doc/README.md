@@ -2,6 +2,10 @@
 
 Wetland is an enterprise grade object-relational mapper (ORM) for node.js.
 
+- [View on github](https://github.com/SpoonX/wetland)
+- [View the quick start](https://wetland.spoonx.org/quick-start.html)
+- [View the tutorial](https://github.com/SpoonX/swetland)
+
 ## Features
 The major features this ORM provides are listed below.
 Looking at the tests will provide more detailed information, pending full documentation.
@@ -67,4 +71,3 @@ repository.find({name: 'cake'}, {populate: ['candles', 'baker', 'baker.address']
   });
 ```
 
-Additional documentation is in progress.
