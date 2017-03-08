@@ -8,6 +8,8 @@
 Wetland is a modern, and enterprise grade object-relational mapper (ORM) for node.js.
 It allows you to get started quickly, without losing flexibility or features.
 
+**New!** Take a look at our [wetland tutorial](https://wetland.spoonx.org/Tutorial/setting-up.html).
+
 ## Features
 Some of the major features provided include:
 
