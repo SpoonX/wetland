@@ -233,5 +233,10 @@ To verify the changes have been applied, you can check the single-product route:
 ## Next step
 Alright, we're all done with the populator, and this tutorial! You can now wield this powerful ORM and start making working with the database fun and reliable.
 
+For the finished version of this tutorial, I have added some extra stuff. This includes two stock methods, and the final migration.
+You can see the final product including the finishing touches [on the wetland-tutorial master branch](https://github.com/SpoonX/wetland-tutorial).
+
+Creating the migration was as simple as running `wetland migrator create relations` as we already created a snapshot earlier in the tutorial.
+
 ### What's next
 If you really want to learn more about wetland at this point, you can check out the bonus topics or the API documentation.
