@@ -6,6 +6,7 @@
 * [Quick Start](quick-start.md)
 * [Edge cases](edge-cases.md)
 * [Entity](entity.md)
+* [License](LICENSE.md)
 
 ## Tutorial
 

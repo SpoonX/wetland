@@ -71,3 +71,5 @@ repository.find({name: 'cake'}, {populate: ['candles', 'baker', 'baker.address']
   });
 ```
 
+## License
+MIT
