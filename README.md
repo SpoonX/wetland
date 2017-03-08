@@ -80,3 +80,6 @@ repository.find({name: 'cake'}, {joins: ['candles', 'baker', 'baker.address']})
     // ...
   });
 ```
+
+## License
+MIT
