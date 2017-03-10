@@ -1,6 +1,6 @@
 # ![Wetland](https://cdn.rawgit.com/SpoonX/wetland/391040eba795183550bfff01d7c0ca56d01b5530/wetland.svg)
 
-Wetland is an enterprise grade object-relational mapper (ORM) for node.js.
+Wetland is a modern object-relational mapper (ORM) for node.js.
 
 - [View on github](https://github.com/SpoonX/wetland)
 - [View the quick start](https://wetland.spoonx.org/quick-start.html)
