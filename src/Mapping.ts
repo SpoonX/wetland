@@ -352,7 +352,7 @@ export class Mapping<T> {
    */
   public getColumnNames(properties: Array<string>): Array<string> {
     if (!Array.isArray(properties)) {
-      properties = [properties];
+      properties = [(properties as string)];
     }
 
     return properties.map(column => this.getColumnName(column));
@@ -1004,7 +1004,7 @@ export class Field {
    *
    * @return {Field}
    */
-  public primary() {
+  public primary(): this {
     this.mapping.primary(this.property);
 
     return this;
