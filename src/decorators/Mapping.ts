@@ -1,26 +1,5 @@
-import {Mapping} from "../Mapping";
-import {EntityRepository} from "../EntityRepository";
-
-/**
- * Decorate a property as a field. Examples:
- *
- *  - Default (property) name
- *    @field('username', {type: 'string', length: 255})
- *    username: string;
- *
- *  - Custom name
- *    @field('password', {type: 'string', name: 'passwd'})
- *    password: string;
- *
- * @param {{}} options
- *
- * @return {Mapping}
- */
-export function field(options: {type: string, size?: number, [key: string]: any}) {
-  return (target: Object, property: string) => {
-    Mapping.forEntity(target).field(property, options);
-  };
-}
+import {Mapping, JoinColumn, Relationship, JoinTable, FieldOptions} from '../Mapping';
+import {EntityRepository} from '../EntityRepository';
 
 /**
  * Decorate an entity. Examples:
@@ -69,36 +48,6 @@ export function index(indexName: string | Array<string>, fields?: string | Array
 }
 
 /**
- * Decorate a property to be the primary key. Example:
- *
- *  @primary('id')
- *  public id: number;
- *
- * @return {Mapping}
- */
-export function primary() {
-  return (target: Object, property: string) => {
-    Mapping.forEntity(target).primary(property);
-  };
-}
-
-/**
- * Decorate your property with generatedValues. Example:
- *
- *  @generatedValue('autoIncrement')
- *  public id: number;
- *
- * @param {string} type
- *
- * @return {Mapping}
- */
-export function generatedValue(type: string) {
-  return (target: Object, property: string) => {
-    Mapping.forEntity(target).generatedValue(property, type);
-  };
-}
-
-/**
  * Decorate your entity with a uniqueConstraint
  *
  *  - Compound:
@@ -120,5 +69,155 @@ export function generatedValue(type: string) {
 export function uniqueConstraint(constraintName: string | Array<string>, fields?: string | Array<string>) {
   return (target: Object) => {
     Mapping.forEntity(target).uniqueConstraint(constraintName, fields);
+  };
+}
+
+/**
+ * Decorate a property as a field. Examples:
+ *
+ *  - Default (property) name
+ *    @field('username', {type: 'string', length: 255})
+ *    username: string;
+ *
+ *  - Custom name
+ *    @field('password', {type: 'string', name: 'passwd'})
+ *    password: string;
+ *
+ * @param {{}} options
+ *
+ * @return {Mapping}
+ */
+export function field(options: FieldOptions) {
+  return (target: Object, property: string) => {
+    Mapping.forEntity(target).field(property, options);
+  };
+}
+
+/**
+ * Map to be the primary key.
+ *
+ * @return {Field}
+ */
+export function primary() {
+  return (target: Object, property: string) => {
+    Mapping.forEntity(target).primary(property);
+  };
+}
+
+/**
+ * Map generatedValues. Examples:
+ *
+ *  // Auto increment
+ *  mapping.generatedValue('autoIncrement');
+ *
+ * @param {string} type
+ *
+ * @return {Field}
+ */
+export function generatedValue(type: string) {
+  return (target: Object, property: string) => {
+    Mapping.forEntity(target).generatedValue(property, type);
+  };
+}
+
+/**
+ * Set cascade values.
+ *
+ * @param {string[]}  cascades
+ *
+ * @returns {Field}
+ */
+export function cascade(cascades: Array<string>) {
+  return (target: Object, property: string) => {
+    Mapping.forEntity(target).cascade(property, cascades);
+  };
+}
+
+/**
+ * Convenience method for auto incrementing values.
+ *
+ * @returns {Field}
+ */
+export function increments() {
+  return (target: Object, property: string) => {
+    Mapping.forEntity(target).increments(property);
+  };
+}
+
+/**
+ * Map a relationship.
+ *
+ * @param {Relationship} options
+ *
+ * @returns {Field}
+ */
+export function oneToOne(options: Relationship) {
+  return (target: Object, property: string) => {
+    Mapping.forEntity(target).oneToOne(property, options);
+  };
+}
+
+/**
+ * Map a relationship.
+ *
+ * @param {Relationship} options
+ *
+ * @returns {Field}
+ */
+export function oneToMany(options: Relationship) {
+  return (target: Object, property: string) => {
+    Mapping.forEntity(target).oneToMany(property, options);
+  };
+}
+
+/**
+ * Map a relationship.
+ *
+ * @param {Relationship} options
+ *
+ * @returns {Field}
+ */
+export function manyToOne(options: Relationship) {
+  return (target: Object, property: string) => {
+    Mapping.forEntity(target).manyToOne(property, options);
+  };
+}
+
+/**
+ * Map a relationship.
+ *
+ * @param {Relationship} options
+ *
+ * @returns {Field}
+ */
+export function manyToMany(options: Relationship) {
+  return (target: Object, property: string) => {
+    Mapping.forEntity(target).manyToMany(property, options);
+  };
+}
+
+/**
+ * Register a join table.
+ *
+ * @param {JoinTable} options
+ *
+ * @returns {Field}
+ */
+export function joinTable(options: JoinTable) {
+  return (target: Object, property: string) => {
+    Mapping.forEntity(target).joinTable(property, options);
+  };
+}
+
+/**
+ * Register a join column.
+ *
+ * @param {JoinTable} options
+ *
+ * @returns {Field}
+ */
+export function joinColumn(options: JoinColumn) {
+  return (target: Object, property: string) => {
+    Mapping.forEntity(target).joinColumn(property, options);
   };
 }
