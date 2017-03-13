@@ -58,6 +58,10 @@ let createdUsersWithTrackers = [{
 }];
 
 describe('EntityRepository', () => {
+  before(done => {
+    wetland().getSchemaManager().create().then(done);
+  });
+
   describe('.constructor()', () => {
     it('should construct a new repository', () => {
       let repo = getRepository();
