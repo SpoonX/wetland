@@ -77,12 +77,12 @@ export class EntityRepository<T> {
   /**
    * Find entities based on provided criteria.
    *
-   * @param {{}}          criteria
+   * @param {{}}          [criteria]
    * @param {FindOptions} [options]
    *
    * @returns {Promise<Array>}
    */
-  public find(criteria: Object|null, options: FindOptions = {}): Promise<Array<T>> {
+  public find(criteria?: {} | number | string, options: FindOptions = {}): Promise<Array<T>> {
     options.alias    = options.alias || this.mapping.getTableName();
     let queryBuilder = this.getQueryBuilder(options.alias);
 
@@ -145,12 +145,12 @@ export class EntityRepository<T> {
   /**
    * Find a single entity.
    *
-   * @param {{}|number|string}  criteria
+   * @param {{}|number|string}  [criteria]
    * @param {FindOptions}       [options]
    *
    * @returns {Promise<Object>}
    */
-  public findOne(criteria: {} | number | string = {}, options: FindOptions = {}): Promise<T> {
+  public findOne(criteria?: {} | number | string, options: FindOptions = {}): Promise<T> {
     options.alias = options.alias || this.mapping.getTableName();
 
     if (typeof criteria === 'number' || typeof criteria === 'string') {
@@ -162,6 +162,14 @@ export class EntityRepository<T> {
     return this.find(criteria, options).then(result => result ? result[0] : result);
   }
 
+  /**
+   * Apply options to queryBuilder
+   *
+   * @param {QueryBuilder<T>} queryBuilder
+   * @param {FindOptions}     options
+   *
+   * @returns {QueryBuilder}
+   */
   public applyOptions(queryBuilder: QueryBuilder<T>, options) {
     this.queryOptions.forEach(clause => {
       if (options[clause]) {
