@@ -732,14 +732,14 @@ export class UnitOfWork {
     let storeName = store.getName();
 
     if (!this.transactions[storeName]) {
-      this.transactions[storeName] = new Promise(resolve => {
+      this.transactions[storeName] = new Promise((resolve, reject) => {
         let connection = store.getConnection(Store.ROLE_MASTER);
 
         connection.transaction(transaction => {
           this.transactions[storeName] = {connection: connection, transaction: transaction};
 
           resolve(this.transactions[storeName]);
-        });
+        }).catch(error => reject(error));
       });
     }
 
