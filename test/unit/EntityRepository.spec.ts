@@ -4,20 +4,22 @@ import {Scope} from '../../src/Scope';
 import {User} from '../resource/entity/postal/User';
 import {Tracker} from '../resource/entity/postal/Tracker';
 import {assert} from 'chai';
+import * as path from 'path';
+
+let tmpTestDir = path.join(__dirname, '../.tmp');
 
 function wetland(): Wetland {
   return new Wetland({
-    entities: [User],
     stores  : {
       defaultStore: {
-        client    : 'mysql',
-        connection: {
-          user    : 'root',
-          host    : '127.0.0.1',
-          database: 'wetland_test'
+        client          : 'sqlite3',
+        useNullAsDefault: true,
+        connection      : {
+          filename: `${tmpTestDir}/entity-repository.sqlite`
         }
       }
-    }
+    },
+    entities: [User, Tracker]
   });
 }
 
@@ -58,8 +60,8 @@ let createdUsersWithTrackers = [{
 }];
 
 describe('EntityRepository', () => {
-  before(done => {
-    wetland().getSchemaManager().create().then(done);
+  before(() => {
+    return wetland().getSchemaManager().create();
   });
 
   describe('.constructor()', () => {
@@ -129,8 +131,9 @@ describe('EntityRepository', () => {
     it('should find entities with deep populate option', () => {
       return getRepository().find(null, {populate: ['trackers', 'trackers.observers']})
         .then(users => {
-          assert.propertyVal(users[0].trackers[0].observers[0], 'id', 1);
-          assert.propertyVal(users[0].trackers[0].observers[0], 'name', 'foo');
+          assert.typeOf(users[0].trackers[0].observers[0].id, 'number');
+          assert.oneOf(users[0].trackers[0].observers[0].id, [1,2]);
+          assert.oneOf(users[0].trackers[0].observers[0].name, ['foo', 'bar']);
           assert.property(users[0].trackers[0].observers[0], 'trackers');
         });
     });
