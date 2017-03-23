@@ -1,3 +1,4 @@
+export {SnapshotManager} from './SnapshotManager';
 export {SchemaBuilder} from './SchemaBuilder';
 export {Migrator} from './Migrator/Migrator';
 export {Run} from './Migrator/Run';
