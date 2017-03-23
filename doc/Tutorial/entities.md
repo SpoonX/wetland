@@ -2,7 +2,7 @@
 > To clone the finished code for this part of the tutorial, run the following command:
 >
 > `git clone git@github.com:SpoonX/wetland-tutorial.git -b 2-entities --single-branch`
-> 
+>
 > To clone the base code for this part of the tutorial, run the following command:
 >
 > `git clone git@github.com:SpoonX/wetland-tutorial.git -b 1-setting-up --single-branch`
@@ -10,6 +10,21 @@
 > **Github:** [Diff for this part of the tutorial](https://github.com/SpoonX/wetland-tutorial/compare/1-setting-up...2-entities?diff=split) - [Full repository on github](https://github.com/SpoonX/wetland-tutorial)
 
 In this part of the tutorial, we'll be looking at actual code. We'll create an entity, create a schema and set up a relation.
+
+## Preparing
+Before we get started, we'll install the [wetland-cli](https://github.com/SpoonX/wetland-cli).
+The cli allows us to perform tasks such as migrations, snapshots and more, in projects that use wetland.
+
+This step is really simple, run:
+
+`npm i -g wetland-cli`.
+
+Verify the installation by running wetland --version:
+
+```bash
+$ wetland --version
+1.0.0
+```
 
 ## Product entity
 First off, we're going to create a product entity. We'll start of with the basics.
@@ -20,7 +35,7 @@ Create a file in `app/entity/Product.js`.
 class Product {
   static setMapping(mapping) {
     mapping.forProperty('id').primary().increments();
-    
+
     mapping.field('name', {type: 'string'});
   }
 }
@@ -52,7 +67,7 @@ class Product {
   static setMapping(mapping) {
     // Using forProperty
     mapping.forProperty('id').primary().increments();
-    
+
     // Using defined property names
     mapping.primary('id').increments('id');
   }
@@ -71,7 +86,7 @@ Here's a more advanced example _(don't change your file, this is just an example
 class Product {
   static setMapping(mapping) {
     mapping.forProperty('id').primary().increments();
-    
+
     mapping.field('name', {
       type: 'enumeration',
       name: 'custom_name',
@@ -139,7 +154,7 @@ You can read more about snapshots and dev migrations [in the docs for snapshots]
 ## Next step
 Now that we've taken a quick look at entities, it's time to move on.
 
-In the next step of this tutorial, we'll briefly look at snapshots, and what they are. 
+In the next step of this tutorial, we'll briefly look at snapshots, and what they are.
 Then, we'll implement automated dev migrations into our application and it should start to make more sense.
 
 [Go to the next part](snapshots.md).

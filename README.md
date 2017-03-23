@@ -10,6 +10,8 @@ It allows you to get started quickly, without losing flexibility or features.
 
 **New!** Take a look at our [wetland tutorial](https://wetland.spoonx.org/Tutorial/setting-up.html).
 
+**New!** Wetland CLI now has it's [own repository](https://github.com/SpoonX/wetland-cli). `npm i -g wetland-cli`.
+
 ## Features
 Some of the major features provided include:
 
