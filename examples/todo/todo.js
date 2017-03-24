@@ -63,12 +63,14 @@ function todo (parameters) {
   }
 
   if (action === 'done') {
-    return manager.getRepository(Todo)
-      .find({'t.task': todo}, {alias: 't', populate: 't.list'})
-      .then(all => {
-        let rowToUpdate = all.filter(row => row.list.name === list)[0];
-
-        rowToUpdate.done = true;
+    return manager.getRepository(Todo).getQueryBuilder('t')
+      .select('t')
+      .innerJoin('t.list', 'l')
+      .where({'t.task': todo, 'l.name': list})
+      .getQuery()
+      .getResult()
+      .then(row => {
+        row[0].done = true;
 
         return manager.flush();
       })
