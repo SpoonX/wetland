@@ -86,7 +86,7 @@ describe('EntityRepository', () => {
     });
 
     it('should not find entities based on criteria', () => {
-      return getRepository().find({id: 'foobar'})
+      return getRepository().find({name: 'foobar'})
         .then(users => assert.isNull(users));
     });
 
