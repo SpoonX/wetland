@@ -24,39 +24,17 @@ function wetland(): Wetland {
 }
 
 function getManager(): Scope {
- return wetland().getManager();
+  return wetland().getManager();
 }
 
 function getRepository(): EntityRepository<User> {
   return getManager().getRepository(User);
 }
 
-let createdUsers = [{
-  id      : 1,
-  name    : 'foo',
-  trackers: []
-}, {
-  id      : 2,
-  name    : 'bar',
-  trackers: []
-}];
-
-let createdUsersWithTrackers = [{
-  id      : 1,
-  name    : 'foo',
-  trackers: [{
-    id       : 1,
-    observers: [],
-    status   : 2
-  }]
-}, {
-  id      : 2,
-  name    : 'bar',
-  trackers: [{
-    id       : 1,
-    observers: [],
-    status   : 2
-  }]
+let trackers = [{
+  id       : 1,
+  observers: [],
+  status   : 2
 }];
 
 describe('EntityRepository', () => {
@@ -79,7 +57,7 @@ describe('EntityRepository', () => {
       let entityAlias = getRepository().getQueryBuilder();
       assert.propertyVal(entityAlias, 'alias', 'user');
 
-      let fooAlias = getRepository().getQueryBuilder('foo')
+      let fooAlias = getRepository().getQueryBuilder('foo');
       assert.propertyVal(fooAlias, 'alias', 'foo');
     });
   });
@@ -100,39 +78,54 @@ describe('EntityRepository', () => {
 
       return getManager().persist(newUser).flush()
         .then(() => getRepository().find())
-        .then(users => assert.deepEqual(users, createdUsers));
+        .then(users => {
+          assert.lengthOf(users, 2);
+          assert.oneOf(users[0].name, ['foo', 'bar']);
+          assert.oneOf(users[1].name, ['foo', 'bar']);
+        });
     });
 
     it('should not find entities based on criteria', () => {
-      return getRepository().find({name: 'foobar'})
+      return getRepository().find({id: 'foobar'})
         .then(users => assert.isNull(users));
     });
 
     it('should find entities based on criteria', () => {
       return getRepository().find({name: 'foo'})
-        .then(users => assert.deepEqual(users, [createdUsers[0]]));
+        .then(users => {
+          assert.propertyVal(users[0], 'name', 'foo');
+          assert.oneOf(users[0].id, [1, 2]);
+        });
     });
 
     it('should find entities with alias option', () => {
       return getRepository().find(null, {alias: 'foo'})
-        .then(users => assert.deepEqual(users, createdUsers));
+        .then(users => {
+          assert.lengthOf(users, 2)
+        });
     });
 
     it('should find entities with populateAll option', () => {
       return getRepository().find(null, {populate: true})
-        .then(users => assert.deepEqual(users, createdUsersWithTrackers));
+        .then(users => users.forEach(user => {
+          assert.lengthOf(user.trackers, 1);
+          assert.deepEqual(user.trackers, trackers);
+        }));
     });
 
     it('should find entities with specific populate option', () => {
       return getRepository().find(null, {populate: 'trackers'})
-        .then(users => assert.deepEqual(users, createdUsersWithTrackers));
+        .then(users => users.forEach(user => {
+          assert.lengthOf(user.trackers, 1);
+          assert.deepEqual(user.trackers, trackers);
+        }));
     });
 
     it('should find entities with deep populate option', () => {
       return getRepository().find(null, {populate: ['trackers', 'trackers.observers']})
         .then(users => {
           assert.typeOf(users[0].trackers[0].observers[0].id, 'number');
-          assert.oneOf(users[0].trackers[0].observers[0].id, [1,2]);
+          assert.oneOf(users[0].trackers[0].observers[0].id, [1, 2]);
           assert.oneOf(users[0].trackers[0].observers[0].name, ['foo', 'bar']);
           assert.property(users[0].trackers[0].observers[0], 'trackers');
         });
@@ -142,17 +135,26 @@ describe('EntityRepository', () => {
   describe('.findOne()', () => {
     it('should find one entity', () => {
       return getRepository().findOne()
-        .then(user => assert.deepEqual(user, createdUsers[0]));
+        .then(user => {
+          assert.propertyVal(user, 'id', 1);
+          assert.oneOf(user.name, ['foo', 'bar']);
+        });
     });
 
     it('should find a entity with alias option', () => {
       return getRepository().findOne(null, {alias: 'foo'})
-        .then(user => assert.deepEqual(user, createdUsers[0]));
+        .then(user => {
+          assert.propertyVal(user, 'id', 1);
+          assert.oneOf(user.name, ['foo', 'bar']);
+        });
     });
 
     it('should find a entity with on primary key as criteria', () => {
       return getRepository().findOne(2)
-        .then(user => assert.deepEqual(user, createdUsers[1]));
+        .then(user => {
+          assert.propertyVal(user, 'id', 2);
+          assert.oneOf(user.name, ['foo', 'bar']);
+        });
     });
 
     it('should not find a entity with on primary key as criteria', () => {
@@ -162,7 +164,18 @@ describe('EntityRepository', () => {
 
     it('should find a entity with string as criteria', () => {
       return getRepository().findOne('1')
-        .then(user => assert.deepEqual(user, createdUsers[0]));
+        .then(user => {
+          assert.propertyVal(user, 'id', 1);
+          assert.oneOf(user.name, ['foo', 'bar']);
+        });
+    });
+
+    it('should find a entity with an object as criteria', () => {
+      return getRepository().findOne({name: 'foo'})
+        .then(user => {
+          assert.propertyVal(user, 'name', 'foo');
+          assert.oneOf(user.id, [1, 2]);
+        });
     });
   });
 
