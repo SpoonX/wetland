@@ -1,21 +1,12 @@
-"use strict";
+'use strict';
 
 const util    = require('util');
 const Wetland = require('wetland').Wetland;
 const List    = require('./entity/List');
 const Todo    = require('./entity/Todo');
-const wetland = new Wetland({
-  entityPath: __dirname + '/entity',
-  stores    : {
-    defaultStore: {
-      client          : 'sqlite3',
-      useNullAsDefault: true,
-      connection      : {filename: `./todo.sqlite`}
-    }
-  }
-});
+const wetland = new Wetland(require('./wetland.js'));
 
-function todo(parameters) {
+function todo (parameters) {
   let action = parameters[2];
   let list   = parameters[3];
   let todo   = parameters[4];
@@ -23,7 +14,7 @@ function todo(parameters) {
   let manager = wetland.getManager();
 
   if (action === 'setup') {
-    return wetland.getMigrator().create().apply()
+    return wetland.getMigrator().devMigrations()
       .then(() => console.log('Tables created.'));
   }
 
@@ -55,7 +46,7 @@ function todo(parameters) {
 
   if (action === 'show-all') {
     return manager.getRepository(List).find(null, {join: ['todos']})
-      .then(all => console.log(util.inspect(all, { depth: 8 })));
+      .then(all => console.log(util.inspect(all, {depth: 8})));
   }
 
   if (action === 'add-todo') {
@@ -73,12 +64,17 @@ function todo(parameters) {
 
   if (action === 'done') {
     return manager.getRepository(Todo).getQueryBuilder('t')
-      .update({done: true})
+      .select('t')
       .innerJoin('t.list', 'l')
       .where({'t.task': todo, 'l.name': list})
       .getQuery()
-      .execute()
-      .then(() => console.log(`Todo '${todo}' done is done.`));
+      .getResult()
+      .then(row => {
+        row[0].done = true;
+
+        return manager.flush();
+      })
+      .then(() => console.log(`Todo '${todo}' from list '${list}' was set as done.`));
   }
 
   if (action === 'remove-todo') {
