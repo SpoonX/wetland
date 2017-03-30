@@ -354,7 +354,8 @@ export class SnapshotManager {
 
         if (newMapping[relation.targetEntity] === undefined) {
           throw new Error(
-            `Unable to find "${relation.targetEntity}" on "${entity}". Check the targetEntity name, and class name for typos.`
+            `Unable to find "${relation.targetEntity}" on "${entity}". ` +
+            `Check the targetEntity name, and class name for typos and make sure you don't have a circular dependency.`
           );
         }
 
