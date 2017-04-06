@@ -54,8 +54,8 @@ Run using `node todo setup`.
 This sets up the schema based on your entity mappings.
 
 ```js
- return wetland.getMigrator().create().apply()
-    .then(() => console.log('Tables created'));
+return wetland.getMigrator().devMigrations()
+  .then(() => console.log('Tables created'));
 ```
 
 ### create-list
@@ -81,10 +81,10 @@ let newList  = new List;
 let newTodos = [];
 
 todos.forEach(todo => {
-    let newTodo  = new Todo;
-    newTodo.task = todo;
+  let newTodo  = new Todo;
+  newTodo.task = todo;
 
-    newTodos.push(newTodo);
+  newTodos.push(newTodo);
 });
 
 newList.name  = list;
@@ -99,8 +99,8 @@ Run using `node todo show-all`.
 This will fetch all lists and its respective todos.
 
 ```js
-return manager.getRepository(List).find(null, {join: ['todos']})1
-.then(all => console.log(util.inspect(all, { depth: 8 })));
+return manager.getRepository(List).find(null, {join: ['todos']})
+  .then(all => console.log(util.inspect(all, { depth: 8 })));
 ```
 
 ### add-todo
@@ -110,12 +110,12 @@ This will add a todo on the referred list.
 
 ```js
 manager.getRepository(List).findOne({name: list}).then(list => {
-    let newTodo  = new Todo;
-    newTodo.task = todo;
+  let newTodo  = new Todo;
+  newTodo.task = todo;
 
-    list.todos.add(newTodo);
+  list.todos.add(newTodo);
 
-    return manager.flush();
+  return manager.flush();
 });
 ```
 
@@ -125,12 +125,16 @@ Run using `node todo done <list_name> <todo>`.
 This will update the referred todo setting its property `done` to `true`.
 
 ```js
-return manager.getRepository(Todo).getQueryBuilder('t')
-    .update({done: true})
-    .innerJoin('t.list', 'l')
-    .where({'t.task': todo, 'l.name': list})
-    .getQuery()
-    .execute();
+return manager.getRepository(Todo)
+  .find({'t.task': todo}, {alias: 't', populate: 't.list'})
+  .then(all => {
+    let rowToUpdate = all.filter(row => row.list.name === list)[0];
+
+    rowToUpdate.done = true;
+
+    return manager.flush();
+  })
+  .then(console.log(`Todo '${todo}' from list '${list}' was set as done.`));
 ```
 
 ### remove-todo
@@ -139,8 +143,9 @@ Run using `node todo remove-todo <list_name> <todo>`.
 This will remove the todo from the referred list.
 
 ```js
-return manager.getRepository(Todo).findOne({'t.task': todo, 'list.name': list}, {alias: 't', join: ['t.list']})
-    .then(todo => manager.remove(todo).flush());
+return manager.getRepository(Todo)
+  .findOne({'t.task': todo, 'list.name': list}, {alias: 't', join: ['t.list']})
+  .then(todo => manager.remove(todo).flush());
 ```
 
 ### delete-list
@@ -150,5 +155,5 @@ This will delete the list and all its todos.
 
 ```js
 return manager.getRepository(List).findOne({name: list})
-      .then(list => manager.remove(list).flush());
+  .then(list => manager.remove(list).flush());
 ```

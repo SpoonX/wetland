@@ -354,7 +354,8 @@ export class SnapshotManager {
 
         if (newMapping[relation.targetEntity] === undefined) {
           throw new Error(
-            `Unable to find "${relation.targetEntity}" on "${entity}". Check the targetEntity name, and class name for typos.`
+            `Unable to find "${relation.targetEntity}" on "${entity}". ` +
+            `Check the targetEntity name, and class name for typos and make sure you don't have a circular dependency.`
           );
         }
 
@@ -408,7 +409,7 @@ export class SnapshotManager {
           let sourceEntity  = oldMapping[relation.targetEntity];
           let dropTableName = sourceEntity.entity.tableName;
           let joinColumn    = sourceEntity.fields[relation.mappedBy].joinColumn.name;
-          let willDrop      = instructions.alter[dropTableName].dropForeign.indexOf(joinColumn) > -1;
+          let willDrop      = instructions.alter[dropTableName] && instructions.alter[dropTableName].dropForeign.indexOf(joinColumn) > -1;
 
           if (instructions.drop.indexOf(dropTableName) === -1 && !willDrop) {
             throw new Error(`Dropping ${entity} would not be possible, a foreign key constraint fails (${relation.targetEntity}).`);
