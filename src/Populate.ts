@@ -49,7 +49,7 @@ export class Populate {
         return options.populate.add({[property]: property});
       }
 
-      if (typeof data[property] !== 'object') {
+      if (typeof data[property] !== 'object' || data[property] === null) {
         return;
       }
 
