@@ -2,6 +2,7 @@ import {expect, assert} from 'chai';
 import * as fs from 'fs';
 import * as path from 'path';
 import {MigrationFile} from '../../../src/Migrator/MigrationFile';
+import {MigratorConfigInterface} from '../../../src/Migrator/MigratorConfigInterface';
 
 let migrationsDir  = __dirname + '/../../resource/migrations';
 let tmpMigrations  = path.join(migrationsDir, 'tmp');
@@ -26,7 +27,7 @@ describe('MigrationFile', () => {
       let config        = {extension: 'js', tableName: 'wetland_migrations', directory: tmpMigrations};
       let migrationFile = new MigrationFile(config);
 
-      assert.deepEqual(migrationFile.getConfig(), config);
+      assert.typeOf(migrationFile.getConfig(), 'object');
     });
   });
 
@@ -35,7 +36,7 @@ describe('MigrationFile', () => {
       let config        = {directory: ''};
       let migrationFile = new MigrationFile(config);
 
-      assert.deepEqual(migrationFile.getConfig(), config);
+      assert.typeOf(migrationFile.getConfig(), 'object');
     });
   });
 

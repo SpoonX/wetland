@@ -7,6 +7,7 @@ import {Parent} from '../resource/entity/Parent';
 import {SimpleDifferent} from '../resource/entity/SimpleDifferent';
 import {ArrayCollection} from '../../src/ArrayCollection';
 import {MetaData} from '../../src/MetaData';
+import {EntityInterface} from '../../src/EntityInterface';
 
 function getUnitOfWork(entities?): UnitOfWork {
   let wetland = new Wetland({});
@@ -85,12 +86,16 @@ describe('EntityProxy', () => {
       unitOfWork.registerClean(parent);
       patched.activateProxying();
 
-      assert.deepEqual(unitOfWork.getRelationshipsChangedObjects(), []);
+      assert.deepEqual(unitOfWork.getRelationshipsChangedObjects(), new ArrayCollection);
 
       patched.simples.add(simple);
       patched.simples.add(simpleTwo);
 
-      assert.deepEqual(unitOfWork.getRelationshipsChangedObjects(), [patched]);
+      let patchedCollection = new ArrayCollection();
+
+      patchedCollection.push(patched);
+
+      assert.deepEqual(unitOfWork.getRelationshipsChangedObjects(), patchedCollection);
     });
 
     it('should register collection changes when adding an entity to a collection extended', () => {
@@ -114,10 +119,14 @@ describe('EntityProxy', () => {
       patched.activateProxying();
       simpleTwo.activateProxying();
 
-      assert.deepEqual(unitOfWork.getRelationshipsChangedObjects(), []);
-      assert.deepEqual(unitOfWork.getNewObjects(), []);
-      assert.deepEqual(unitOfWork.getDirtyObjects(), []);
-      assert.deepEqual(unitOfWork.getCleanObjects(), [parent, simpleTwo.getTarget()]);
+      let compareCollection = new ArrayCollection();
+
+      compareCollection.push(parent, simpleTwo.getTarget());
+
+      assert.deepEqual(unitOfWork.getRelationshipsChangedObjects(), new ArrayCollection);
+      assert.deepEqual(unitOfWork.getNewObjects(), new ArrayCollection);
+      assert.deepEqual(unitOfWork.getDirtyObjects(), new ArrayCollection);
+      assert.deepEqual(unitOfWork.getCleanObjects(), compareCollection);
 
       let meta = MetaData.forInstance(patched);
 
@@ -133,11 +142,17 @@ describe('EntityProxy', () => {
 
       let metaSimple = MetaData.forInstance(simpleTwo);
 
+      let simpleTwoCollection = new ArrayCollection;
+      let patchedCollection   = new ArrayCollection;
+
+      patchedCollection.push(patched);
+      simpleTwoCollection.push(simpleTwo);
+
       assert.strictEqual(meta.fetch('entityState.relations.added.simples')[0], simpleThree);
       assert.deepEqual(meta.fetch('entityState.relations.removed'), {}); // broken
-      assert.deepEqual(unitOfWork.getDirtyObjects(), [simpleTwo]);
+      assert.deepEqual(unitOfWork.getDirtyObjects(), simpleTwoCollection);
       assert.deepEqual(metaSimple.fetch('entityState.dirty'), ['name']);
-      assert.deepEqual(unitOfWork.getRelationshipsChangedObjects(), [patched]);
+      assert.deepEqual(unitOfWork.getRelationshipsChangedObjects(), patchedCollection);
     });
 
     it('should not register collection changes when re-adding an entity to a collection', () => {

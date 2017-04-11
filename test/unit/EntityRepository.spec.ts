@@ -5,6 +5,7 @@ import {User} from '../resource/entity/postal/User';
 import {Tracker} from '../resource/entity/postal/Tracker';
 import {assert} from 'chai';
 import * as path from 'path';
+import {ArrayCollection} from '../../src/ArrayCollection';
 
 let tmpTestDir = path.join(__dirname, '../.tmp');
 
@@ -31,11 +32,13 @@ function getRepository(): EntityRepository<User> {
   return getManager().getRepository(User);
 }
 
-let trackers = [{
+let trackers = new ArrayCollection;
+
+trackers.push({
   id       : 1,
   observers: [],
   status   : 2
-}];
+});
 
 describe('EntityRepository', () => {
   before(() => {
