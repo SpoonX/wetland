@@ -2,7 +2,6 @@ import {expect, assert} from 'chai';
 import * as fs from 'fs';
 import * as path from 'path';
 import {MigrationFile} from '../../../src/Migrator/MigrationFile';
-import {MigratorConfigInterface} from '../../../src/Migrator/MigratorConfigInterface';
 
 let migrationsDir  = __dirname + '/../../resource/migrations';
 let tmpMigrations  = path.join(migrationsDir, 'tmp');
