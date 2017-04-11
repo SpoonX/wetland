@@ -571,7 +571,7 @@ export class UnitOfWork {
     let methods = [];
 
     this.afterCommit.forEach(action => {
-      methods.push(action.target[action.method]);
+      methods.push(action.target[action.method]());
     });
 
     return Promise.all(methods);
