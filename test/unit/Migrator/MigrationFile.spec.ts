@@ -26,7 +26,7 @@ describe('MigrationFile', () => {
       let config        = {extension: 'js', tableName: 'wetland_migrations', directory: tmpMigrations};
       let migrationFile = new MigrationFile(config);
 
-      assert.deepEqual(migrationFile.getConfig(), config);
+      assert.typeOf(migrationFile.getConfig(), 'object');
     });
   });
 
@@ -35,7 +35,7 @@ describe('MigrationFile', () => {
       let config        = {directory: ''};
       let migrationFile = new MigrationFile(config);
 
-      assert.deepEqual(migrationFile.getConfig(), config);
+      assert.typeOf(migrationFile.getConfig(), 'object');
     });
   });
 

@@ -6,6 +6,7 @@ import {Order} from '../resource/entity/postal/Order';
 import {EntityProxy} from '../../src/EntityProxy';
 import {MetaData} from '../../src/MetaData';
 import {UnitOfWork} from '../../src/UnitOfWork';
+import {ArrayCollection} from '../../src/ArrayCollection';
 
 describe('Populator', () => {
   describe('.assign()', () => {
@@ -50,6 +51,10 @@ describe('Populator', () => {
 
       let populatedAddress = populator.assign(Address, dataToPopulate, null, true) as Address;
 
+      let changedCollection = new ArrayCollection;
+
+      changedCollection.push({id: 10, name: 'changed'});
+
       unitOfWork.prepareCascades();
 
       assert.deepEqual(populatedAddress, dataToPopulate);
@@ -57,7 +62,7 @@ describe('Populator', () => {
       assert.instanceOf(populatedAddress, Address);
       assert.strictEqual(unitOfWork.getNewObjects()[0], populatedAddress);
       assert.strictEqual(unitOfWork.getNewObjects().length, 3);
-      assert.deepEqual(unitOfWork.getDirtyObjects(), [{id: 10, name: 'changed'}]);
+      assert.deepEqual(unitOfWork.getDirtyObjects(), changedCollection);
       assert.strictEqual(unitOfWork.getDirtyObjects().length, 1);
       assert.strictEqual(unitOfWork.getRelationshipsChangedObjects().length, 3);
     });
@@ -113,6 +118,9 @@ describe('Populator', () => {
       manager.getIdentityMap().register(cleanAddress, addressProxy);
 
       let populatedAddress = populator.assign(Address, dataToPopulate, null, true) as Address;
+      let dataToPopulateCollection = new ArrayCollection;
+
+      dataToPopulateCollection.push(dataToPopulate);
 
       unitOfWork.prepareCascades();
 
@@ -125,7 +133,7 @@ describe('Populator', () => {
       assert.deepEqual(addressEntityState.dirty, ['country']);
       assert.strictEqual(populatedAddress, addressProxy);
       assert.strictEqual(unitOfWork.getNewObjects().length, 2);
-      assert.deepEqual(unitOfWork.getDirtyObjects(), [dataToPopulate]);
+      assert.deepEqual(unitOfWork.getDirtyObjects(), dataToPopulateCollection);
       assert.strictEqual(unitOfWork.getDirtyObjects().length, 1);
       assert.strictEqual(unitOfWork.getRelationshipsChangedObjects().length, 3);
     });
