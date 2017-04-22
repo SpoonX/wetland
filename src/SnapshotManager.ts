@@ -503,13 +503,7 @@ export class SnapshotManager {
         let joinColumn = mapping.fields[property].joinColumn;
         let changes    = {
           field  : {name: joinColumn.name, type: 'integer', unsigned: true, nullable: true},
-          foreign: {
-            inTable   : targetMapping.entity.tableName,
-            references: joinColumn.referencedColumnName,
-            columns   : joinColumn.name,
-            onDelete  : joinColumn.onDelete,
-            onUpdate  : joinColumn.onUpdate
-          }
+          foreign: createForeign(mapping, property, targetMapping)
         };
 
         if (!targetMapping.columns[joinColumn.referencedColumnName]) {
