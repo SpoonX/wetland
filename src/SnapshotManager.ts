@@ -19,7 +19,7 @@ export class SnapshotManager {
   /**
    * @type {{}}
    */
-  private config: { snapshotDirectory: string, devSnapshotDirectory: string };
+  private config: {snapshotDirectory: string, devSnapshotDirectory: string};
 
   /**
    * Construct a new SnapshotManager manager.
@@ -224,6 +224,7 @@ export class SnapshotManager {
           if (fieldChanged(previousJoinColumn, joinColumn)) {
             let relation = newMapping[entity].relations[field.name];
             let alter    = getAlterInstructions(instructions.alter, tableName);
+
             alter.dropForeign.push(previousJoinColumn.name);
             alter.foreign.push(createForeign(newMapping[entity], field.name, newMapping[relation.targetEntity]));
           }
