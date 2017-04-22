@@ -85,7 +85,7 @@ class User {
    *
    * @returns {Promise}
    */
-  beforeUpdate() {
+  beforeUpdate(values) {
     if (!values.password) {
       return;
     }
@@ -94,8 +94,8 @@ class User {
       // check if the password is already hashed
       bcrypt.getRounds(values.password);
     } catch(e) {
-      return bcrypt.hash(this.password, 10).then(hash => {
-        this.password = hash;
+      return bcrypt.hash(values.password, 10).then(hash => {
+        values.password = hash;
       });
     }
   }
