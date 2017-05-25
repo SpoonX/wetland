@@ -809,6 +809,9 @@ export class UnitOfWork {
           } else {
             target[primaryKey] = result[0];
           }
+        }).catch(error => {
+          this.transactions = {};
+          throw error;
         });
     });
   }
@@ -832,7 +835,11 @@ export class UnitOfWork {
       }
 
       return this.lifecycleCallback('update', target, newValues)
-        .then(() => queryBuilder.update(newValues).where({[primaryKey]: target[primaryKey]}).getQuery().execute());
+        .then(() => queryBuilder.update(newValues).where({[primaryKey]: target[primaryKey]}).getQuery().execute())
+        .catch(error => {
+          this.transactions = {};
+          throw error;
+        })
     });
   }
 
@@ -848,7 +855,11 @@ export class UnitOfWork {
       // @todo Use target's mapping to delete relations for non-cascaded properties.
 
       return this.lifecycleCallback('remove', target, this.deletedObjects)
-        .then(() => queryBuilder.remove().where({[primaryKey]: target[primaryKey]}).getQuery().execute());
+        .then(() => queryBuilder.remove().where({[primaryKey]: target[primaryKey]}).getQuery().execute())
+        .catch(error => {
+          this.transactions = {};
+          throw error;
+        });
     });
   }
 
