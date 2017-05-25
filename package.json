@@ -39,7 +39,6 @@
   },
   "devDependencies": {
     "@types/chai": "^3.4.30",
-    "@types/gulp": "^3.8.32",
     "@types/knex": "0.0.35",
     "@types/mkdirp": "^0.3.29",
     "@types/mocha": "^2.2.29",
