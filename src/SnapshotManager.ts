@@ -218,6 +218,17 @@ export class SnapshotManager {
         let field         = newMapping[entity].fields[property];
 
         if (field.relationship) {
+          let previousJoinColumn = previousField.joinColumn;
+          let joinColumn         = field.joinColumn;
+
+          if (fieldChanged(previousJoinColumn, joinColumn)) {
+            let relation = newMapping[entity].relations[field.name];
+            let alter    = getAlterInstructions(instructions.alter, tableName);
+
+            alter.dropForeign.push(previousJoinColumn.name);
+            alter.foreign.push(createForeign(newMapping[entity], field.name, newMapping[relation.targetEntity]));
+          }
+
           return;
         }
 
@@ -471,6 +482,17 @@ export class SnapshotManager {
       instructions.drop.push(mapping.fields[property].joinTable.name);
     }
 
+    function createForeign(mapping, property, targetMapping) {
+      let joinColumn = mapping.fields[property].joinColumn;
+      return {
+        inTable   : targetMapping.entity.tableName,
+        references: joinColumn.referencedColumnName,
+        columns   : joinColumn.name,
+        onDelete  : joinColumn.onDelete,
+        onUpdate  : joinColumn.onUpdate
+      };
+    }
+
     function createRelation(mapping, property, targetMapping, create?) {
       let relation     = mapping.relations[property];
       let tableName    = mapping.entity.tableName;
@@ -481,13 +503,7 @@ export class SnapshotManager {
         let joinColumn = mapping.fields[property].joinColumn;
         let changes    = {
           field  : {name: joinColumn.name, type: 'integer', unsigned: true, nullable: true},
-          foreign: {
-            inTable   : targetMapping.entity.tableName,
-            references: joinColumn.referencedColumnName,
-            columns   : joinColumn.name,
-            onDelete  : joinColumn.onDelete,
-            onUpdate  : joinColumn.onUpdate
-          }
+          foreign: createForeign(mapping, property, targetMapping)
         };
 
         if (!targetMapping.columns[joinColumn.referencedColumnName]) {
