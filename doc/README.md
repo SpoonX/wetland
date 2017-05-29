@@ -7,6 +7,14 @@ Wetland is a modern object-relational mapper (ORM) for node.js.
 - [View the tutorial](https://github.com/SpoonX/swetland)
 
 ## Features
+
+**New!** Take a look at our [wetland tutorial](https://wetland.spoonx.org/Tutorial/setting-up.html).
+
+**New!** Wetland CLI now has its [own repository](https://github.com/SpoonX/wetland-cli). `npm i -g wetland-cli`.
+
+**New!** Wetland has a nice entity generator. Let us do the heavy lifting. [Repository can be found here](https://github.com/SpoonX/wetland-generator-entity).
+
+
 The major features this ORM provides are listed below.
 Looking at the tests will provide more detailed information, pending full documentation.
 
@@ -26,11 +34,20 @@ Looking at the tests will provide more detailed information, pending full docume
 * More...
 
 ## Installation
+
 To install wetland run the following command:
 
 `npm i --save wetland`
 
 Typings are provided by default for TypeScript users. No additional typings need installing.
+
+## Plugins
+
+- [Express middleware](https://github.com/SpoonX/express-wetland)
+- [Sails.js hook](https://github.com/SpoonX/sails-hook-wetland)
+- [Trailpack](https://github.com/SpoonX/trailpack-wetland)
+- [Entity generator](https://github.com/SpoonX/wetland-generator-entity)
+
 
 ## Usage
 
@@ -72,4 +89,5 @@ repository.find({name: 'cake'}, {populate: ['candles', 'baker', 'baker.address']
 ```
 
 ## License
+
 MIT
