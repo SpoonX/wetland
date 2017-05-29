@@ -14,6 +14,7 @@ It allows you to get started quickly, without losing flexibility or features.
 **New!** Wetland has a nice entity generator. Let us do the heavy lifting. [Repository can be found here](https://github.com/SpoonX/wetland-generator-entity).
 
 ## Features
+
 Some of the major features provided include:
 
 * Unit of work
@@ -30,11 +31,19 @@ Some of the major features provided include:
 * [More...](https://wetland.spoonx.org)
 
 ## Installation
+
 To install wetland run the following command:
 
 `npm i --save wetland`
 
 Typings are provided by default for TypeScript users. No additional typings need installing.
+
+## Plugins
+
+- [Express middleware](https://github.com/SpoonX/express-wetland)
+- [Sails.js hook](https://github.com/SpoonX/sails-hook-wetland)
+- [Trailpack](https://github.com/SpoonX/trailpack-wetland)
+- [Entity generator](https://github.com/SpoonX/wetland-generator-entity)
 
 ## Compatibility
 
@@ -42,6 +51,7 @@ Typings are provided by default for TypeScript users. No additional typings need
 * Node.js 6.0+
 
 ## Gotchas
+
 - When using sqlite3, foreign keys are disabled (this is due to alter table not working for foreign keys with sqlite).
 
 ## Usage
@@ -85,4 +95,5 @@ repository.find({name: 'cake'}, {joins: ['candles', 'baker', 'baker.address']})
 ```
 
 ## License
+
 MIT
