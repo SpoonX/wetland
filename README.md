@@ -11,6 +11,8 @@ It allows you to get started quickly, without losing flexibility or features.
 
 **New!** Wetland CLI now has its [own repository](https://github.com/SpoonX/wetland-cli). `npm i -g wetland-cli`.
 
+**New!** Wetland has a nice entity generator. Let us do the heavy lifting. [Repository can be found here](https://github.com/SpoonX/wetland-generator-entity).
+
 ## Features
 Some of the major features provided include:
 
