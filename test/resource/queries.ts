@@ -48,6 +48,7 @@ export let queries = {
     defaultsIsNotNull       : 'select * from `address` as `a` where `street` is not null',
     defaultsIn              : 'select * from `address` as `a` where `house_number` in (1, 2, 3, 7)',
     defaultsNotIn           : 'select * from `address` as `a` where `house_number` not in (1, 2, 3, 7)',
+    defaultsNotInWithAlias  : 'select * from `address` as `a` where `a`.`house_number` not in (1, 2, 3, 7)',
     mental                  : "select * from `delivery` as `d` where `id` = 1337 and `a`.`country` = 'Netherlands' and `a`.`street` like '%street' and (`id` between 1 and 100 or `a`.`house_number` > 12 or (`id` between 100 and 500 and `role` not in ('guest', 'spectator') and (`role` = 'no idea' or (`id` not between 6 and 9 and `t`.`status` = 2 and `u`.`name` = 'Frank' and (`id` not in (5, 6, 7, 8) or `role` > 666)))))",
     sensible                : "select * from `delivery` as `d` where `id` = 1337 and `a`.`country` = 'Netherlands' and `a`.`street` like '%street' and (`t`.`status` = 1 or (`t`.`status` = 2 and `u`.`name` = 'Frank'))",
   }
