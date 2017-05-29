@@ -8,6 +8,7 @@
     "test": "mocha dist/test/helper dist/test/unit/**",
     "dtest": "npm run build && npm run test",
     "build": "rm -rf ./dist && tsc && gulp build",
+    "version": "conventional-changelog -p angular -i doc/CHANGELOG.md -s && git add -A dist doc/CHANGELOG.md",
     "prepublish": "npm run build",
     "postpublish": "git push upstream master && git push upstream --tags"
   },
@@ -45,6 +46,7 @@
     "@types/node": "^6.0.41",
     "chai": "^3.5.0",
     "gulp": "^3.9.1",
+    "gulp-conventional-changelog": "^1.1.3",
     "mocha": "^3.0.1",
     "mysql": "^2.11.1",
     "reflect-metadata": "^0.1.3",
