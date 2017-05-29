@@ -106,6 +106,18 @@ export class Criteria {
   }
 
   /**
+   * Set the host alias.
+   *
+   * @param {string} hostAlias
+   * @returns {Criteria}
+   */
+  public setHostAlias(hostAlias: string): Criteria {
+    this.hostAlias = hostAlias;
+
+    return this;
+  }
+
+  /**
    * Stage criteria to be applied later.
    *
    * @param {{}}           criteria

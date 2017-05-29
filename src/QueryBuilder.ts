@@ -717,6 +717,8 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public insert(values, returning?: string): this {
+    this.setCriteriaHostAlias();
+
     this.statement.insert(this.mapToColumns(values), returning);
 
     return this;
@@ -731,6 +733,8 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public update(values, returning?: any): this {
+    this.setCriteriaHostAlias();
+
     this.statement.from(this.mappings[this.alias].getTableName());
     this.statement.update(this.mapToColumns(values), returning);
 
@@ -869,11 +873,26 @@ export class QueryBuilder<T> {
   }
 
   /**
+   * Set the host alias on the criteria parsers.
+   *
+   * @param {string} [hostAlias]
+   */
+  private setCriteriaHostAlias(hostAlias: string = null): this {
+    this.whereCriteria.setHostAlias(hostAlias);
+    this.onCriteria.setHostAlias(hostAlias);
+    this.havingCriteria.setHostAlias(hostAlias);
+
+    return this;
+  }
+
+  /**
    * Signal a delete.
    *
    * @returns {QueryBuilder}
    */
   public remove(): this {
+    this.setCriteriaHostAlias();
+
     this.statement.from(this.mappings[this.alias].getTableName());
     this.statement.del();
 
