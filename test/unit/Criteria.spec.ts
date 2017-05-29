@@ -38,6 +38,34 @@ let wetland = new Wetland({
 });
 
 describe('Criteria', () => {
+  describe('.mapToColumn()', () => {
+    it('should apply provided columns to an alias, when set and found.', () => {
+      let withAlias = getStatement(wetland, 'delivery', 'd');
+      let criteria  = new Criteria(withAlias, Mapping.forEntity(Delivery), getMappings(), 'd');
+
+      let mappedId       = criteria.mapToColumn('id');
+      let mappedCreated  = criteria.mapToColumn('created');
+      let mappedNonsense = criteria.mapToColumn('nonsense');
+
+      assert.strictEqual(mappedId, 'd.id');
+      assert.strictEqual(mappedCreated, 'd.created');
+      assert.strictEqual(mappedNonsense, 'nonsense');
+    });
+
+    it('should not apply provided columns to an alias, when not set.', () => {
+      let withAlias = getStatement(wetland, 'delivery', 'd');
+      let criteria  = new Criteria(withAlias, Mapping.forEntity(Delivery), getMappings());
+
+      let mappedId       = criteria.mapToColumn('id');
+      let mappedCreated  = criteria.mapToColumn('created');
+      let mappedNonsense = criteria.mapToColumn('nonsense');
+
+      assert.strictEqual(mappedId, 'id');
+      assert.strictEqual(mappedCreated, 'created');
+      assert.strictEqual(mappedNonsense, 'nonsense');
+    });
+  });
+
   describe('.apply()', () => {
     it('should compose a simple where query', () => {
       let withAlias     = getStatement(wetland, 'delivery', 'd');
