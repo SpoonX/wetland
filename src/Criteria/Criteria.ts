@@ -62,6 +62,13 @@ export class Criteria {
   private hostMapping: Mapping<any>;
 
   /**
+   * Alias for the host entity.
+   *
+   * @type {string}
+   */
+  private hostAlias: string;
+
+  /**
    * Mappings for entities (joins).
    *
    * @type {{}}
@@ -87,13 +94,15 @@ export class Criteria {
    * @constructor
    *
    * @param {QueryBuilder} statement
-   * @param {Mapping}           hostMapping
-   * @param {{}}                [mappings]
+   * @param {Mapping}      hostMapping
+   * @param {{}}           [mappings]
+   * @param {string}       [hostAlias]
    */
-  public constructor(statement: QueryBuilder, hostMapping: Mapping<any>, mappings?: {[key: string]: Mapping<any>}) {
+  public constructor(statement: QueryBuilder, hostMapping: Mapping<any>, mappings?: {[key: string]: Mapping<any>}, hostAlias?: string) {
     this.statement   = statement;
     this.mappings    = mappings || {};
     this.hostMapping = hostMapping;
+    this.hostAlias   = hostAlias;
   }
 
   /**
@@ -236,6 +245,12 @@ export class Criteria {
       return parts.join('.');
     }
 
-    return this.hostMapping.getFieldName(property, property);
+    let columnName = this.hostMapping.getFieldName(property, property);
+
+    if (this.hostAlias && this.hostMapping.getField(property, true)) {
+      columnName = this.hostAlias + '.' + columnName;
+    }
+
+    return columnName;
   }
 }

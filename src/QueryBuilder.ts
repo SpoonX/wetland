@@ -110,9 +110,9 @@ export class QueryBuilder<T> {
     this.alias          = alias;
     this.mappings       = {[alias]: mapping};
     this.statement      = statement;
-    this.whereCriteria  = new Where(this.statement, mapping, this.mappings);
-    this.havingCriteria = new Having(this.statement, mapping, this.mappings);
-    this.onCriteria     = new On(this.statement, mapping, this.mappings);
+    this.whereCriteria  = new Where(this.statement, mapping, this.mappings, alias);
+    this.havingCriteria = new Having(this.statement, mapping, this.mappings, alias);
+    this.onCriteria     = new On(this.statement, mapping, this.mappings, alias);
     this.entityManager  = entityManager;
     this.hydrator       = new Hydrator(entityManager);
     this.query          = new Query(statement, this.hydrator, this.children);
