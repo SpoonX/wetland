@@ -8,7 +8,7 @@
     "test": "mocha dist/test/helper dist/test/unit/**",
     "dtest": "npm run build && npm run test",
     "build": "rm -rf ./dist && tsc && gulp build",
-    "version": "conventional-changelog -p angular -i doc/CHANGELOG.md -s && git add -A dist doc/CHANGELOG.md",
+    "version": "conventional-changelog -p angular -i doc/CHANGELOG.md -s && git add -A doc/CHANGELOG.md",
     "prepublish": "npm run build",
     "postpublish": "git push upstream master && git push upstream --tags"
   },
