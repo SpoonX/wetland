@@ -1,3 +1,14 @@
+<a name="2.1.0"></a>
+# [2.1.0](https://github.com/SpoonX/wetland/compare/v2.0.1...v2.1.0) (2017-06-03)
+
+
+### Features
+
+* **QueryBuilder:** add support for derived tables ([e3d4de2](https://github.com/SpoonX/wetland/commit/e3d4de2))
+* **QueryBuilder:** add support for distinct function ([2d4f2e3](https://github.com/SpoonX/wetland/commit/2d4f2e3))
+
+
+
 <a name="2.0.1"></a>
 ## [2.0.1](https://github.com/SpoonX/wetland/compare/v2.0.0...v2.0.1) (2017-05-29)
 
