@@ -56,7 +56,7 @@ describe('EntityRepository', () => {
   });
 
   describe('.getQueryBuilder()', () => {
-    it('should return retrieve a queryBuilder', () => {
+    it('should return a queryBuilder', () => {
       let entityAlias = getRepository().getQueryBuilder();
       assert.propertyVal(entityAlias, 'alias', 'user');
 

@@ -25,6 +25,26 @@ function getQueryBuilder() {
 }
 
 describe('QueryBuilder', () => {
+  describe('.from()', () => {
+    it('should create the alias when none was supplied', () => {
+      let repository = wetland.getManager().getRepository(Todo);
+      let derived    = repository.getQueryBuilder('t');
+      let qb         = repository.getDerivedQueryBuilder(derived).select({distinct: '*'});
+
+      assert.strictEqual(qb.getQuery().getSQL(), queries.queryBuilder.derivedCreatesAlias);
+    });
+
+    it('should correctly render and wrap the derived table (origin should not matter)', () => {
+      let manager        = wetland.getManager();
+      let todoRepository = manager.getRepository(Todo);
+      let listRepository = manager.getRepository(List);
+      let derived        = todoRepository.getQueryBuilder('t');
+      let qb             = listRepository.getDerivedQueryBuilder(derived).select({distinct: '*'});
+
+      assert.strictEqual(qb.getQuery().getSQL(), queries.queryBuilder.derivedRegular);
+    });
+  });
+
   describe('.createAlias()', () => {
     it('should create an alias', () => {
       let alias = getQueryBuilder().createAlias('t');
