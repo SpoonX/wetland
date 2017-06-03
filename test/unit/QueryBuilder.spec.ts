@@ -39,7 +39,7 @@ describe('QueryBuilder', () => {
       let todoRepository = manager.getRepository(Todo);
       let listRepository = manager.getRepository(List);
       let derived        = todoRepository.getQueryBuilder('t');
-      let qb             = listRepository.getDerivedQueryBuilder(derived).select({distinct: '*'});
+      let qb             = listRepository.getDerivedQueryBuilder(derived, 'alias_derived').select({distinct: '*'});
 
       assert.strictEqual(qb.getQuery().getSQL(), queries.queryBuilder.derivedRegular);
     });
