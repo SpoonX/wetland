@@ -36,6 +36,16 @@ entityRepository.getQueryBuilder('u');
 ```
 {% endmethod %}
 
+{% method %}
+## .getDerivedQueryBuilder()
+Gets a new query builder which uses provided derived table. An optional second argument allows you to set the alias of the derived table.
+
+{% common %}
+```js
+entityRepository.getDerivedQueryBuilder(otherQueryBuilder, 'my_alias_derived');
+```
+{% endmethod %}
+
 #### Find options
 
 |  Options  |                Type                         |

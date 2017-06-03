@@ -193,6 +193,18 @@ queryBuilder.rightJoin('columnName', 'a');
 {% endmethod %}
 
 {% method %}
+## .from()
+Provide a derived table to select from.
+
+{% common %}
+```js
+usersQueryBuilder.where(criteria).groupBy('foo');
+
+queryBuilder.from(usersQueryBuilder, 'a_derived').select({count: '*'});
+```
+{% endmethod %}
+
+{% method %}
 ## .rightOuterJoin()
 Performs a right outer join.
 

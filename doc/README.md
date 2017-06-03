@@ -14,11 +14,11 @@ Wetland is a modern object-relational mapper (ORM) for node.js.
 
 **New!** Wetland has a nice entity generator. Let us do the heavy lifting. [Repository can be found here](https://github.com/SpoonX/wetland-generator-entity).
 
-
 The major features this ORM provides are listed below.
 Looking at the tests will provide more detailed information, pending full documentation.
 
 * Unit of work
+* Derived tables
 * Transactions
 * Entity manager
 * Manager scopes
@@ -41,13 +41,13 @@ To install wetland run the following command:
 
 Typings are provided by default for TypeScript users. No additional typings need installing.
 
-## Plugins
+## Plugins / essentials
 
+- [Wetland CLI](https://github.com/SpoonX/wetland-cli) `npm i -g wetland-cli`
 - [Express middleware](https://github.com/SpoonX/express-wetland)
 - [Sails.js hook](https://github.com/SpoonX/sails-hook-wetland)
 - [Trailpack](https://github.com/SpoonX/trailpack-wetland)
 - [Entity generator](https://github.com/SpoonX/wetland-generator-entity)
-
 
 ## Usage
 

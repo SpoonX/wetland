@@ -13,15 +13,12 @@ It allows you to get started quickly, without losing flexibility or features.
 
 **New!** Wetland has a nice entity generator. Let us do the heavy lifting. [Repository can be found here](https://github.com/SpoonX/wetland-generator-entity).
 
-## Breaking changes
-
-Wetland v2 comes with breaking changes. Take a look at the changelog for more information.
-
 ## Features
 
 Some of the major features provided include:
 
 * Unit of work
+* Derived tables
 * Migrations
 * Transactions
 * Entity manager
@@ -42,8 +39,9 @@ To install wetland run the following command:
 
 Typings are provided by default for TypeScript users. No additional typings need installing.
 
-## Plugins
+## Plugins / essentials
 
+- [Wetland CLI](https://github.com/SpoonX/wetland-cli) `npm i -g wetland-cli`
 - [Express middleware](https://github.com/SpoonX/express-wetland)
 - [Sails.js hook](https://github.com/SpoonX/sails-hook-wetland)
 - [Trailpack](https://github.com/SpoonX/trailpack-wetland)
@@ -61,7 +59,7 @@ Typings are provided by default for TypeScript users. No additional typings need
 ## Usage
 
 The following is a snippet to give you an idea what it's like to work with wetland.
-For a much more detailed explanation, [head to the documention.](https://wetland.spoonx.org).
+For a much more detailed explanation, [head to the documentation.](https://wetland.spoonx.org).
 
 ```js
 const Wetland = require('wetland').Wetland;
