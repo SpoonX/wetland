@@ -1,8 +1,8 @@
 import * as knex from 'knex';
 import {Query} from './Query';
-import {Mapping, JoinColumn, Relationship} from './Mapping';
-import {Scope, Entity} from './Scope';
-import {Hydrator, Catalogue} from './Hydrator';
+import {JoinColumn, Mapping, Relationship} from './Mapping';
+import {Entity, Scope} from './Scope';
+import {Catalogue, Hydrator} from './Hydrator';
 import {Having} from './Criteria/Having';
 import {Where} from './Criteria/Where';
 import {On} from './Criteria/On';
@@ -354,9 +354,9 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public quickJoin(column: string, targetAlias?: string): QueryBuilder<{new ()}> {
-    let {join, alias, property}      = this.getRelationship(column);
-    let parentQueryBuilder           = this.getChild(alias) || this;
-    targetAlias                      = targetAlias || parentQueryBuilder.createAlias(property);
+    let {join, alias, property} = this.getRelationship(column);
+    let parentQueryBuilder      = this.getChild(alias) || this;
+    targetAlias                 = targetAlias || parentQueryBuilder.createAlias(property);
 
     if (join.type !== Mapping.RELATION_MANY_TO_MANY && join.type !== Mapping.RELATION_ONE_TO_MANY) {
       return parentQueryBuilder.leftJoin(column, targetAlias);
