@@ -595,7 +595,6 @@ export class QueryBuilder<T> {
     if (this.derivedFrom) {
       let {derived, alias} = this.derivedFrom;
 
-      // this.statement
       this.statement.from(this.statement['client'].raw(`(${this.derivedFrom.derived.getQuery().getSQL()}) as ${alias}`));
 
       this.derivedFrom = null;
