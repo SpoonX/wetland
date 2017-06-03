@@ -66,12 +66,37 @@ export class EntityRepository<T> {
     alias = alias || this.mapping.getTableName();
 
     if (!statement) {
-      let connection = this.entityManager.getStore(this.entity).getConnection(Store.ROLE_SLAVE);
+      let connection = this.getConnection();
 
       statement = connection(`${this.mapping.getTableName()} as ${alias}`);
     }
 
     return new QueryBuilder(this.entityManager, statement, this.mapping, alias);
+  }
+
+  /**
+   * Get a new query builder that will be applied on the derived table (query builder).
+   *
+   * e.g. `select count(*) from (select * from user) as user0;`
+   *
+   * @param {QueryBuilder} derivedFrom
+   * @param {string}       [alias]
+   *
+   * @returns {QueryBuilder}
+   */
+  public getDerivedQueryBuilder(derivedFrom: QueryBuilder<T>, alias?: string): QueryBuilder<T> {
+    return this.getQueryBuilder().from(derivedFrom, alias);
+  }
+
+  /**
+   * Get a raw knex connection
+   *
+   * @param {string} [role] Defaults to slave
+   *
+   * @returns {knex}
+   */
+  public getConnection(role: string = Store.ROLE_SLAVE): knex {
+    return this.entityManager.getStore(this.entity).getConnection(role);
   }
 
   /**

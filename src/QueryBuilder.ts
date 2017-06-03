@@ -49,6 +49,11 @@ export class QueryBuilder<T> {
   private groupBys: Array<{groupBy: string | Array<string>}> = [];
 
   /**
+   * @type {QueryBuilder}
+   */
+  private derivedFrom: {derived: QueryBuilder<T>, alias: string};
+
+  /**
    * @type {Array}
    */
   private orderBys: Array<{orderBy: string | Array<string> | Object, direction: string | null}> = [];
@@ -571,11 +576,30 @@ export class QueryBuilder<T> {
     this.whereCriteria.applyStaged();
     this.havingCriteria.applyStaged();
     this.onCriteria.applyStaged();
+    this.applyFrom();
     this.applySelects();
     this.applyOrderBys();
     this.applyGroupBys();
 
     this.prepared = true;
+
+    return this;
+  }
+
+  /**
+   * Apply the provided derived values.
+   *
+   * @returns {QueryBuilder}
+   */
+  private applyFrom(): this {
+    if (this.derivedFrom) {
+      let {derived, alias} = this.derivedFrom;
+
+      // this.statement
+      this.statement.from(this.statement['client'].raw(`(${this.derivedFrom.derived.getQuery().getSQL()}) as ${alias}`));
+
+      this.derivedFrom = null;
+    }
 
     return this;
   }
@@ -918,6 +942,27 @@ export class QueryBuilder<T> {
     this.whereCriteria.stage(criteria);
 
     this.prepared = false;
+
+    return this;
+  }
+
+  /**
+   * Select `.from()` a derived table (QueryBuilder).
+   *
+   *  .from(queryBuilder, 'foo');
+   *
+   * @param {QueryBuilder} derived
+   * @param {string}       [alias] alias
+   *
+   * @returns {QueryBuilder}
+   */
+  public from(derived: QueryBuilder<T>, alias?: string): this {
+    if (!alias) {
+      alias = this.createAlias(derived.getHostMapping().getTableName());
+    }
+
+    this.derivedFrom = {alias, derived};
+    this.prepared    = false;
 
     return this;
   }
