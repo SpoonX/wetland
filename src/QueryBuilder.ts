@@ -76,7 +76,7 @@ export class QueryBuilder<T> {
   /**
    * @type {string[]}
    */
-  private functions: Array<string> = ['sum', 'count', 'max', 'min', 'avg'];
+  private functions: Array<string> = ['sum', 'count', 'max', 'min', 'avg', 'distinct'];
 
   /**
    * @type {string[]}
