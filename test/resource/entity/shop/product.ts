@@ -13,6 +13,8 @@ export class Product {
   public author: User;
 
   static setMapping(mapping) {
+    mapping.entity({charset: 'utf8mb4', collate: 'utf8mb4_bin'});
+
     mapping.field('id', {type: 'integer'}).primary('id').generatedValue('id', 'autoIncrement');
     mapping.field('name', {type: 'string', size: 24});
 

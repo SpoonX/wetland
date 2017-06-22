@@ -246,6 +246,18 @@ export class SchemaBuilder {
         code.push(`\n${spacing()}builder.schema.${action}Table('${tableName}', table => {`);
         spacing(2);
 
+        if (action === 'create' && actionData.info.meta) {
+          let meta = actionData.info.meta;
+
+          if (meta.charset) {
+            code.push(`${spacing()}table.charset('${meta.charset}');`);
+          }
+
+          if (meta.collate) {
+            code.push(`${spacing()}table.collate('${meta.collate}');`);
+          }
+        }
+
         pushedBuilder = true;
       };
 

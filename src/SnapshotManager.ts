@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as mkdirp from 'mkdirp';
 import * as Bluebird from 'bluebird';
-import {Wetland, EntityManager, Mapping} from './index';
+import {EntityManager, Mapping, Wetland} from './index';
 import {FieldOptions} from './Mapping';
 
 export class SnapshotManager {
@@ -348,6 +348,7 @@ export class SnapshotManager {
       create.index     = toCreate.index;
       create.unique    = toCreate.unique;
       create.foreign   = toCreate.foreign || [];
+      create.meta      = {};
       create.fields    = Reflect.ownKeys(toCreate.fields)
         .filter(field => !toCreate.fields[field].relationship)
         .map(field => {
@@ -355,6 +356,14 @@ export class SnapshotManager {
 
           return toCreate.fields[field];
         });
+
+      if (toCreate.entity.charset) {
+        create.meta.charset = toCreate.entity.charset;
+      }
+
+      if (toCreate.entity.collate) {
+        create.meta.collate = toCreate.entity.collate;
+      }
 
       if (!toCreate.relations) {
         return;
@@ -455,6 +464,7 @@ export class SnapshotManager {
     function getCreateInstructions(create, table) {
       if (!create[table]) {
         create[table] = {
+          meta   : {},
           foreign: [],
           index  : {},
           unique : {},
