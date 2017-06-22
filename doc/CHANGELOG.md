@@ -1,3 +1,13 @@
+<a name="2.2.0"></a>
+# [2.2.0](https://github.com/SpoonX/wetland/compare/v2.1.0...v2.2.0) (2017-06-22)
+
+
+### Features
+
+* **SchemaBuilder:** add support for collate and charset ([d18d9ff](https://github.com/SpoonX/wetland/commit/d18d9ff))
+
+
+
 <a name="2.1.0"></a>
 # [2.1.0](https://github.com/SpoonX/wetland/compare/v2.0.1...v2.1.0) (2017-06-03)
 
