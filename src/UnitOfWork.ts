@@ -100,7 +100,7 @@ export class UnitOfWork {
   /**
    * @type {Array}
    */
-  private afterCommit: Array<{target: EntityInterface, method: string}> = [];
+  private afterCommit: Array<{ target: EntityInterface, method: string }> = [];
 
   /**
    * Create a new UnitOfWork.
@@ -188,7 +188,7 @@ export class UnitOfWork {
   }
 
   /**
-   * returns as provided entity is clean
+   * Returns as provided entity is clean
    *
    * @param {EntityInterface} entity
    *
@@ -199,7 +199,7 @@ export class UnitOfWork {
   }
 
   /**
-   * returns if provided entity is dirty.
+   * Returns if provided entity is dirty.
    *
    * @param {EntityInterface} entity
    *
@@ -306,7 +306,7 @@ export class UnitOfWork {
   }
 
   /**
-   * set the state of an entity.
+   * Set the state of an entity.
    *
    * @param {ProxyInterface} entity
    * @param {string}          state
@@ -425,7 +425,7 @@ export class UnitOfWork {
   }
 
   /**
-   * prepare the cascades for provided entity.
+   * Prepare the cascades for provided entity.
    *
    * @param {EntityInterface} entity
    *
@@ -468,7 +468,7 @@ export class UnitOfWork {
   }
 
   /**
-   * prepare cascades for a single entity.
+   * Prepare cascades for a single entity.
    *
    * @param {EntityInterface} entity
    * @param {string}          property
@@ -507,7 +507,7 @@ export class UnitOfWork {
   }
 
   /**
-   * prepare cascades for all staged changes.
+   * Prepare cascades for all staged changes.
    *
    * @returns {UnitOfWork}
    */
@@ -552,12 +552,12 @@ export class UnitOfWork {
    *
    * @returns {Promise<UnitOfWork>}
    */
-  public commit(skipClean: boolean = false): Promise<any> {
+  public commit(skipClean: boolean = false, skipLifecyclehooks: boolean = false): Promise<any> {
     this.prepareCascades();
 
-    return this.insertNew()
-      .then(() => this.updateDirty())
-      .then(() => this.deleteDeleted())
+    return this.insertNew(skipLifecyclehooks)
+      .then(() => this.updateDirty(skipLifecyclehooks))
+      .then(() => this.deleteDeleted(skipLifecyclehooks))
       .then(() => this.updateRelationships())
       .then(() => this.commitOrRollback(true))
       .then(() => this.processAfterCommit())
@@ -631,7 +631,7 @@ export class UnitOfWork {
   }
 
   /**
-   * rollback previously applied IDs.
+   * Rollback previously applied IDs.
    *
    * @returns {UnitOfWork}
    */
@@ -690,7 +690,7 @@ export class UnitOfWork {
   }
 
   /**
-   * clear the state for provided entity.
+   * Clear the state for provided entity.
    *
    * @param {EntityInterface} entity
    * EntityInterface
@@ -793,14 +793,12 @@ export class UnitOfWork {
    *
    * @returns {Promise<any>}
    */
-  private insertNew(): Promise<any> {
+  private insertNew(skipLifecyclehooks: boolean = false): Promise<any> {
 
     return this.persist(this.newObjects, <T>(queryBuilder: QueryBuilder<T>, target: T & ProxyInterface) => {
-      let mapping    = Mapping.forEntity(target);
-      let primaryKey = mapping.getPrimaryKey();
-
-      return this.lifecycleCallback('create', target)
-        .then(() => queryBuilder.insert(target, primaryKey).getQuery().execute())
+      let mapping     = Mapping.forEntity(target);
+      let primaryKey  = mapping.getPrimaryKey();
+      let insertQuery = queryBuilder.insert(target, primaryKey).getQuery().execute()
         .then(result => {
           if (target.isEntityProxy) {
             target[primaryKey] = {_skipDirty: result[0]};
@@ -810,6 +808,13 @@ export class UnitOfWork {
             target[primaryKey] = result[0];
           }
         });
+
+      if (skipLifecyclehooks) {
+        return insertQuery;
+      }
+
+      return this.lifecycleCallback('create', target)
+        .then(() => insertQuery);
     });
   }
 
@@ -818,7 +823,7 @@ export class UnitOfWork {
    *
    * @returns {Promise<any>}
    */
-  private updateDirty(): Promise<any> {
+  private updateDirty(skipLifecyclehooks: boolean = false): Promise<any> {
     return this.persist(this.dirtyObjects, <T>(queryBuilder: QueryBuilder<T>, target: T) => {
       let dirtyProperties = MetaData.forInstance(target).fetch(`entityState.dirty`, []);
       let targetMapping   = Mapping.forEntity(target);
@@ -831,8 +836,14 @@ export class UnitOfWork {
         });
       }
 
+      let updateQuery = queryBuilder.update(newValues).where({[primaryKey]: target[primaryKey]}).getQuery().execute();
+
+      if (skipLifecyclehooks) {
+        return updateQuery;
+      }
+
       return this.lifecycleCallback('update', target, newValues)
-        .then(() => queryBuilder.update(newValues).where({[primaryKey]: target[primaryKey]}).getQuery().execute());
+        .then(() => updateQuery);
     });
   }
 
@@ -841,19 +852,25 @@ export class UnitOfWork {
    *
    * @returns {Promise<any>}
    */
-  private deleteDeleted(): Promise<any> {
+  private deleteDeleted(skipLifecyclehooks: boolean = false): Promise<any> {
     return this.persist(this.deletedObjects, <T>(queryBuilder: QueryBuilder<T>, target: T & EntityProxy) => {
       let primaryKey = Mapping.forEntity(target).getPrimaryKeyField();
 
       // @todo Use target's mapping to delete relations for non-cascaded properties.
 
+      let deleteQuery = queryBuilder.remove().where({[primaryKey]: target[primaryKey]}).getQuery().execute();
+
+      if (skipLifecyclehooks) {
+        return deleteQuery;
+      }
+
       return this.lifecycleCallback('remove', target, this.deletedObjects)
-        .then(() => queryBuilder.remove().where({[primaryKey]: target[primaryKey]}).getQuery().execute());
+        .then(() => deleteQuery);
     });
   }
 
   /**
-   * apply relationship changes in the database.
+   * Apply relationship changes in the database.
    *
    * @returns {Promise<{}>}
    */
@@ -973,7 +990,7 @@ export class UnitOfWork {
    *
    * @returns {UnitOfWork}
    */
-  public clear(...entities: Array<EntityInterface|ProxyInterface>): UnitOfWork {
+  public clear(...entities: Array<EntityInterface | ProxyInterface>): UnitOfWork {
     (entities.length ? entities : this.newObjects).forEach(created => this.clearEntityState(created));
     (entities.length ? entities : this.deletedObjects).forEach(deleted => this.clearEntityState(deleted));
     (entities.length ? entities : this.cleanObjects).forEach(clean => this.clearEntityState(clean));
