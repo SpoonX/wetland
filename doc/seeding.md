@@ -39,3 +39,59 @@ The no lifecycle mode means that feature will not go through the lifecyles befor
 
 Everything must be in a single folder, subfolder are not supported for the moment.
 The name of the file **must** be the name of the entity, the extension **must** either be `csv` or `json`.
+
+### Config
+
+The seeder has to be configured.
+
+```js
+const config = {
+  seed         : {
+    fixturesDirectory   : 'fixtures', // Each filename is an entity
+    bypassLifecyclehooks: true,
+    clean               : false
+  },
+  entities     : []
+}
+```
+
+## The code
+
+If you want to use the seeder you must ask wetland to give you one.
+
+```js
+const seeder = wetland.getSeeder();
+```
+
+### Clean seeding
+
+If you do clean seeding you should use the seeder like this :
+
+```js
+const migrator = wetland.getMigrator();
+const seeder = wetland.getSeeder();
+
+seeder.clean() // Will clean the database, NO MAGICAL GOING BACK
+          .then(() => migrator.devMigrations(false)) // Will actually do the migrations : needed here because the clean method wipes the database entirely
+          .then(() => seeder.seed()) // Will seed accordingly to the configuration you gave wetland
+```
+
+## Safe seeding
+
+If you want to do safe seeding you should use the seeder like this :
+
+```js
+const migrator = wetland.getMigrator();
+const seeder = wetland.getSeeder();
+
+migrator.devMigrations(false) // Will migrate the database
+          .then(() => seeder.seed()) // Will seed accordingly to the configuration you gave wetland
+```
+
+All of the above assume you are using the seeder in the dev environment : most likely the most common use case would be tests and dev setup (seeding your database some data for development). But you could chose to use it for production but then most likely you want to stay safe and not use dev migrations effectively just doing this :
+
+```js
+const seeder = wetland.getSeeder();
+
+seeder.seed()
+```
