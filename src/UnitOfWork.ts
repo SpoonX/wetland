@@ -550,6 +550,9 @@ export class UnitOfWork {
   /**
    * Commit the current state.
    *
+   * @param {boolean} skipClean
+   * @param {boolean} skipLifecyclehooks
+   *
    * @returns {Promise<UnitOfWork>}
    */
   public commit(skipClean: boolean = false, skipLifecyclehooks: boolean = false): Promise<any> {
@@ -791,6 +794,8 @@ export class UnitOfWork {
   /**
    * Persist new entities.
    *
+   * @param {boolean} skipLifecyclehooks
+   *
    * @returns {Promise<any>}
    */
   private insertNew(skipLifecyclehooks: boolean = false): Promise<any> {
@@ -821,6 +826,8 @@ export class UnitOfWork {
   /**
    * Update dirty entities.
    *
+   * @param {boolean} skipLifecyclehooks
+   *
    * @returns {Promise<any>}
    */
   private updateDirty(skipLifecyclehooks: boolean = false): Promise<any> {
@@ -849,6 +856,8 @@ export class UnitOfWork {
 
   /**
    * Delete removed entities from the database.
+   *
+   * @param {boolean} skipLifecyclehooks
    *
    * @returns {Promise<any>}
    */

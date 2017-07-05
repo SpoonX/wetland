@@ -268,6 +268,9 @@ export class Scope {
    * This means calculating changes to make, as well as the order to do so.
    * One of the things involved in this is making the distinction between stores.
    *
+   * @param {boolean} skipClean
+   * @param {boolean} skipLifecyclehooks
+   *
    * @return {Promise}
    */
   public flush(skipClean: boolean = false, skipLifecyclehooks: boolean = false): Promise<any> {
