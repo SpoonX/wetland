@@ -184,7 +184,7 @@ export class EntityRepository<T> {
 
     options.limit = 1;
 
-    return this.find(criteria, options).then(result => result ? result[0] : result);
+    return this.find(criteria, options).then(result => result ? result[0] : null);
   }
 
   /**
