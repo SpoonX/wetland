@@ -20,6 +20,8 @@ export interface EntityInterface {
   beforeRemove?(entityManager: Scope): Promise<any> | void;
 
   afterRemove?(entityManager: Scope): Promise<any> | void;
+
+  [key: string]: any
 }
 
 export interface ProxyInterface extends EntityInterface {
@@ -32,6 +34,8 @@ export interface ProxyInterface extends EntityInterface {
   getTarget?(): EntityInterface;
 
   isProxyingActive?(): boolean;
+
+  [key: string]: any
 }
 
 export type EntityCtor<T> = new (...args: any[]) => T;
