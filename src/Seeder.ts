@@ -1,15 +1,15 @@
 import {Wetland} from './Wetland';
 import {Store} from './Store';
 import {Homefront} from 'homefront';
-import {EntityCtor} from "./EntityInterface";
-import {ArrayCollection} from "./ArrayCollection";
+import {EntityCtor} from './EntityInterface';
+import {ArrayCollection} from './ArrayCollection';
 import * as fs from 'fs';
 import * as rimraf from 'rimraf';
-import * as parse  from "csv-parse";
-import * as path from "path";
+import * as parse  from 'csv-parse';
+import * as path from 'path';
 import * as Bluebird from 'bluebird';
-import {Mapping} from "./Mapping";  
-import {UnitOfWork} from "./UnitOfWork";
+import {Mapping} from './Mapping';
+import {UnitOfWork} from './UnitOfWork';
 
 export class Seeder {
 
