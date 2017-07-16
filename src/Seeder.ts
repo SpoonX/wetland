@@ -3,13 +3,12 @@ import {Store} from './Store';
 import {Homefront} from 'homefront';
 import {EntityCtor} from "./EntityInterface";
 import {ArrayCollection} from "./ArrayCollection";
-const fs     = require('fs');
-const rimraf = require('rimraf');
-const parse  = require("csv-parse");
+import * as fs from 'fs';
+import * as rimraf from 'rimraf';
+import * as parse  from "csv-parse";
 import * as path from "path";
 import * as Bluebird from 'bluebird';
-import {Mapping} from "./Mapping";
-import {Entity} from "./Entity";
+import {Mapping} from "./Mapping";  
 import {UnitOfWork} from "./UnitOfWork";
 
 export class Seeder {
