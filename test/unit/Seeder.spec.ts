@@ -1,11 +1,11 @@
 import {assert} from 'chai';
-import {Scope} from "../../src/Scope";
+import {Scope} from '../../src/Scope';
 import {Wetland} from '../../src/Wetland';
 import * as path from 'path';
 import * as Bluebird from 'bluebird';
-const rimraf = require('rimraf');
-const parse  = require("csv-parse");
-const fs     = require('fs');
+import * as fs from 'fs';
+import * as rimraf from 'rimraf';
+import * as parse  from 'csv-parse';
 
 const tmpTestDir  = path.join(__dirname, '../.tmp');
 const dataDir     = `${tmpTestDir}/.data`;
