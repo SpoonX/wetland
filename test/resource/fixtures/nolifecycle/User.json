@@ -1,0 +1,14 @@
+[
+  {
+    "id": 5,
+    "posts": [1],
+    "username": "Snowden",
+    "password": "I hate NSA"
+  },
+  {
+    "id": 89,
+    "posts": [2],
+    "username": "Sheldon",
+    "password": "I love trains"
+  }
+]

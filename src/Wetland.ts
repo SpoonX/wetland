@@ -10,6 +10,7 @@ import * as path from 'path';
 import {SnapshotManager} from './SnapshotManager';
 import {SchemaManager} from './SchemaManager';
 import {Populate} from './Populate';
+import {Seeder} from "./Seeder";
 
 export class Wetland {
   /**
@@ -217,6 +218,15 @@ export class Wetland {
     }
 
     return store;
+  }
+
+  /**
+   * Get a seeder.
+   *
+   * @return {Seeder}
+   */
+  public getSeeder(): Seeder {
+    return new Seeder(this);
   }
 
   /**

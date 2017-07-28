@@ -119,7 +119,7 @@ export class Scope {
    *
    * @returns {EntityInterface|null}
    */
-  public resolveEntityReference(hint: Entity): {new ()} {
+  public resolveEntityReference(hint: Entity): { new () } {
     return this.manager.resolveEntityReference(hint);
   }
 
@@ -206,7 +206,7 @@ export class Scope {
    *
    * @returns {{}}
    */
-  public getEntities(): {[key: string]: {entity: EntityCtor<EntityInterface>, mapping: Mapping<EntityInterface>}} {
+  public getEntities(): { [key: string]: { entity: EntityCtor<EntityInterface>, mapping: Mapping<EntityInterface> } } {
     return this.manager.getEntities();
   }
 
@@ -268,10 +268,13 @@ export class Scope {
    * This means calculating changes to make, as well as the order to do so.
    * One of the things involved in this is making the distinction between stores.
    *
+   * @param {boolean} skipClean
+   * @param {boolean} skipLifecyclehooks
+   *
    * @return {Promise}
    */
-  public flush(skipClean: boolean = false): Promise<any> {
-    return this.unitOfWork.commit(skipClean);
+  public flush(skipClean: boolean = false, skipLifecyclehooks: boolean = false): Promise<any> {
+    return this.unitOfWork.commit(skipClean, skipLifecyclehooks);
   }
 
   /**
@@ -286,4 +289,4 @@ export class Scope {
   }
 }
 
-export type Entity = string | {new ()} | EntityInterface;
+export type Entity = string | { new () } | EntityInterface;
