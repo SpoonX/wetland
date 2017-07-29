@@ -1,3 +1,15 @@
+<a name="2.3.0-1"></a>
+# [2.3.0-1](https://github.com/SpoonX/wetland/compare/v2.3.0-0...v2.3.0-1) (2017-07-29)
+
+
+### Bug Fixes
+
+* **EntityProxy:** cast undefined to null for actual undefined checks ([9a7764a](https://github.com/SpoonX/wetland/commit/9a7764a))
+* **Hydrator:** skip dirty for collections ([41cbfc3](https://github.com/SpoonX/wetland/commit/41cbfc3))
+* **unitofwork:** fix lifecyclehooks execution ([af3af23](https://github.com/SpoonX/wetland/commit/af3af23))
+
+
+
 <a name="2.3.0-0"></a>
 # [2.3.0-0](https://github.com/SpoonX/wetland/compare/v2.2.0...v2.3.0-0) (2017-07-28)
 
