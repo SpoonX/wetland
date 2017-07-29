@@ -193,6 +193,10 @@ export class EntityProxy {
     // Return the actual proxy for the entity.
     entityProxy = new Proxy<T & ProxyInterface>(entity, <Object> {
       set: (target: Object, property: string, value: any) => {
+        if (typeof value === 'undefined') {
+          value = null;
+        }
+
         // Allow all dirty checks to be skipped.
         if (setDirty(target, property, value)) {
           return true;

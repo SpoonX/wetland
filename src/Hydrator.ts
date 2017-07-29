@@ -245,7 +245,7 @@ export class Hydrator {
         return;
       }
 
-      entity[joinRecipe.property].add(hydrated);
+      entity[joinRecipe.property].add({_skipDirty: hydrated});
     });
   }
 
