@@ -799,27 +799,29 @@ export class UnitOfWork {
    * @returns {Promise<any>}
    */
   private insertNew(skipLifecyclehooks: boolean = false): Promise<any> {
-
     return this.persist(this.newObjects, <T>(queryBuilder: QueryBuilder<T>, target: T & ProxyInterface) => {
-      let mapping     = Mapping.forEntity(target);
-      let primaryKey  = mapping.getPrimaryKey();
-      let insertQuery = queryBuilder.insert(target, primaryKey).getQuery().execute()
-        .then(result => {
-          if (target.isEntityProxy) {
-            target[primaryKey] = {_skipDirty: result[0]};
+      let mapping    = Mapping.forEntity(target);
+      let primaryKey = mapping.getPrimaryKey();
 
-            target.activateProxying();
-          } else {
-            target[primaryKey] = result[0];
-          }
-        });
+      const executeInsertion = () => {
+        return queryBuilder.insert(target, primaryKey).getQuery().execute()
+          .then(result => {
+            if (target.isEntityProxy) {
+              target[primaryKey] = {_skipDirty: result[0]};
+
+              target.activateProxying();
+            } else {
+              target[primaryKey] = result[0];
+            }
+          });
+      };
 
       if (skipLifecyclehooks) {
-        return insertQuery;
+        return executeInsertion();
       }
 
       return this.lifecycleCallback('create', target)
-        .then(() => insertQuery);
+        .then(() => executeInsertion());
     });
   }
 
@@ -843,14 +845,16 @@ export class UnitOfWork {
         });
       }
 
-      let updateQuery = queryBuilder.update(newValues).where({[primaryKey]: target[primaryKey]}).getQuery().execute();
+      const executeUpdate = () => {
+        return queryBuilder.update(newValues).where({[primaryKey]: target[primaryKey]}).getQuery().execute();
+      };
 
       if (skipLifecyclehooks) {
-        return updateQuery;
+        return executeUpdate();
       }
 
       return this.lifecycleCallback('update', target, newValues)
-        .then(() => updateQuery);
+        .then(() => executeUpdate());
     });
   }
 
@@ -867,14 +871,16 @@ export class UnitOfWork {
 
       // @todo Use target's mapping to delete relations for non-cascaded properties.
 
-      let deleteQuery = queryBuilder.remove().where({[primaryKey]: target[primaryKey]}).getQuery().execute();
+      const executeDelete = () => {
+        return queryBuilder.remove().where({[primaryKey]: target[primaryKey]}).getQuery().execute();
+      };
 
       if (skipLifecyclehooks) {
-        return deleteQuery;
+        return executeDelete();
       }
 
       return this.lifecycleCallback('remove', target, this.deletedObjects)
-        .then(() => deleteQuery);
+        .then(() => executeDelete());
     });
   }
 
