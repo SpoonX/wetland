@@ -3,6 +3,7 @@ import {Connection, Store} from './Store';
 import {SnapshotManager} from './SnapshotManager';
 import * as rm from 'del';
 import * as path from 'path';
+import {SchemaBuilder} from "./SchemaBuilder";
 
 export class Cleaner {
 
@@ -34,52 +35,22 @@ export class Cleaner {
   }
 
   /**
-   * Generate drop table queries for all wetland's registered entities table name.
-   *
-   * @param {Connection} connection
-   * @return {Array<Promise<any>>}
-   */
-  private generateDropTableQueries(connection: Connection): Array<Promise<any>> {
-    const entities = this.wetland.getManager().getEntities();
-
-    const dropTablesQueries = [];
-
-    Reflect.ownKeys(entities).forEach(entityName => {
-      dropTablesQueries.push(connection.raw(`DROP TABLE IF EXISTS ${entities[entityName].mapping.getTableName()}`));
-    });
-
-    return dropTablesQueries;
-  }
-
-  /**
    * Drop all tables' entities.
    *
-   * @param store
    * @return {Promise<any>}
    */
-  private dropTables(store: Store): Promise<any> {
+  private dropTables(): any {
+    const manager         = this.wetland.getManager();
+    const snapshotManager = this.wetland.getSnapshotManager();
+    const schemaBuilder   = new SchemaBuilder(manager);
 
-    function alterForeignKeyChecks(status: boolean): Promise<any> {
-      if (store.getClient() === 'sqlite3') {
-        let statusText = status ? 'ON' : 'OFF';
+    return snapshotManager
+      .fetch()
+      .then(previous => {
+        let instructions = snapshotManager.diff(previous, {});
 
-        return connection.raw(`PRAGMA foreign_keys=${statusText}`);
-      }
-
-      let statusText = status ? 1 : 0;
-
-      return connection.raw(`SET FOREIGN_KEY_CHECKS=${statusText};`);
-    }
-
-    const disableForeignKeyChecks = (): Promise<any> => alterForeignKeyChecks(false);
-
-    const enableForeignKeyChecks = (): Promise<any> => alterForeignKeyChecks(true);
-
-    const connection = store.getConnection(Store.ROLE_MASTER);
-
-    return disableForeignKeyChecks()
-      .then(() => Promise.all(this.generateDropTableQueries(connection)))
-      .then(() => enableForeignKeyChecks());
+        return schemaBuilder.process(instructions).apply();
+      });
   }
 
   /**
@@ -88,7 +59,7 @@ export class Cleaner {
    * @return {Promise<any>}
    */
   public clean(): Promise<any> {
-    return this.dropTables(this.wetland.getStore())
+    return this.dropTables()
       .then(() => this.cleanDataDirectory());
   }
 }
