@@ -1,3 +1,19 @@
+<a name="2.3.0-2"></a>
+# [2.3.0-2](https://github.com/SpoonX/wetland/compare/v2.3.0-1...v2.3.0-2) (2017-08-02)
+
+
+### Bug Fixes
+
+* **cleaner:** use schema builder to drop tables fixing vendor issues ([4b3794d](https://github.com/SpoonX/wetland/commit/4b3794d))
+
+
+### Features
+
+* **cleaner:** add getCleaner to wetland ([318f57f](https://github.com/SpoonX/wetland/commit/318f57f))
+* **cleaner:** use del instead of rimraf for the cleaner ([914e92a](https://github.com/SpoonX/wetland/commit/914e92a))
+
+
+
 <a name="2.3.0-1"></a>
 # [2.3.0-1](https://github.com/SpoonX/wetland/compare/v2.3.0-0...v2.3.0-1) (2017-07-29)
 
