@@ -1,15 +1,13 @@
 import {Wetland} from './Wetland';
-import {Store} from './Store';
-import {Homefront} from 'homefront';
 import {EntityCtor} from './EntityInterface';
+import {UnitOfWork} from './UnitOfWork';
+import {Mapping} from './Mapping';
 import {ArrayCollection} from './ArrayCollection';
+import {Homefront} from 'homefront';
 import * as fs from 'fs';
-import * as rimraf from 'rimraf';
-import * as parse  from 'csv-parse';
+import * as parse from 'csv-parse';
 import * as path from 'path';
 import * as Bluebird from 'bluebird';
-import {Mapping} from './Mapping';
-import {UnitOfWork} from './UnitOfWork';
 
 export class Seeder {
 
@@ -20,65 +18,6 @@ export class Seeder {
   constructor(wetland: Wetland) {
     this.wetland = wetland;
     this.config  = this.config.merge(wetland.getConfig().fetch('seed'));
-  }
-
-  /**
-   * Clean the data directory.
-   *
-   * @return {Promise<any>}
-   */
-  private cleanDirectory(): Promise<any> {
-    const rmDir: any = Bluebird.promisify(rimraf);
-
-    return rmDir(this.wetland.getConfig().fetch('dataDirectory'));
-  }
-
-  /**
-   * Reset database.
-   *
-   * @param store
-   * @return {Promise<any>}
-   */
-  private resetDatabase(store: Store): Promise<any> {
-    const knex     = require('knex')(store);
-    const database = store.getConnections()[Store.ROLE_MASTER].database;
-
-    return knex.raw(`DROP DATABASE IF EXISTS ${database};`)
-      .then(() => this.cleanDirectory())
-      .then(() => knex.raw(`CREATE DATABASE ${database};`));
-  }
-
-  /**
-   * Reset the embedded database.
-   *
-   * @param store
-   * @return {Promise<any>}
-   */
-  private resetEmbeddedDatabase(store: Store): Promise<any> {
-    let filename = store.getConnections()[Store.ROLE_MASTER].filename;
-
-    if (!fs.existsSync(filename)) {
-      return this.cleanDirectory();
-    }
-
-    const rm: any = Bluebird.promisify(fs.unlink);
-    return rm(filename)
-      .then(this.cleanDirectory());
-  }
-
-  /**
-   * Clean the database and the wetland's data directory.
-   *
-   * @return {Promise<any>}
-   */
-  public clean(): Promise<any> {
-    const store = this.wetland.getStore();
-
-    if (store.getClient() === 'sqlite3') {
-      return this.resetEmbeddedDatabase(store);
-    }
-
-    return this.resetDatabase(store);
   }
 
   /**

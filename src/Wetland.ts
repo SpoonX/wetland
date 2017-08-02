@@ -10,7 +10,8 @@ import * as path from 'path';
 import {SnapshotManager} from './SnapshotManager';
 import {SchemaManager} from './SchemaManager';
 import {Populate} from './Populate';
-import {Seeder} from "./Seeder";
+import {Seeder} from './Seeder';
+import {Cleaner} from './Cleaner';
 
 export class Wetland {
   /**
@@ -49,7 +50,7 @@ export class Wetland {
   /**
    * @type {{}}
    */
-  private stores: {[key: string]: Store} = {};
+  private stores: { [key: string]: Store } = {};
 
   /**
    * @type {SchemaManager}
@@ -227,6 +228,15 @@ export class Wetland {
    */
   public getSeeder(): Seeder {
     return new Seeder(this);
+  }
+
+  /**
+   * Get a cleaner.
+   *
+   * @return {Cleaner}
+   */
+  public getCleaner(): Cleaner {
+    return new Cleaner(this);
   }
 
   /**

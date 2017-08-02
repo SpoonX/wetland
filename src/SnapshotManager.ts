@@ -19,7 +19,11 @@ export class SnapshotManager {
   /**
    * @type {{}}
    */
-  private config: {snapshotDirectory: string, devSnapshotDirectory: string};
+  private config: { snapshotDirectory: string, devSnapshotDirectory: string };
+
+  public static SNAPSHOTS_PATH: string = 'snapshots';
+
+  public static DEV_SNAPSHOTS_PATH: string = 'dev_snapshots';
 
   /**
    * Construct a new SnapshotManager manager.
@@ -32,8 +36,8 @@ export class SnapshotManager {
 
     let config  = wetland.getConfig();
     this.config = {
-      snapshotDirectory   : path.join(config.fetch('dataDirectory'), 'snapshots'),
-      devSnapshotDirectory: path.join(config.fetch('dataDirectory'), 'dev_snapshots')
+      snapshotDirectory   : path.join(config.fetch('dataDirectory'), SnapshotManager.SNAPSHOTS_PATH),
+      devSnapshotDirectory: path.join(config.fetch('dataDirectory'), SnapshotManager.DEV_SNAPSHOTS_PATH)
     };
 
     this.ensureSnapshotDirectory();
