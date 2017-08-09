@@ -1,3 +1,13 @@
+<a name="2.3.1"></a>
+## [2.3.1](https://github.com/SpoonX/wetland/compare/v2.3.0...v2.3.1) (2017-08-09)
+
+
+### Features
+
+* **UnitOfWork:** send afterUpdate the updated properties ([2510059](https://github.com/SpoonX/wetland/commit/2510059))
+
+
+
 <a name="2.3.0"></a>
 # [2.3.0](https://github.com/SpoonX/wetland/compare/v2.3.0-2...v2.3.0) (2017-08-03)
 
