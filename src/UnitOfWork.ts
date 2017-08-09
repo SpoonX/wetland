@@ -551,16 +551,16 @@ export class UnitOfWork {
    * Commit the current state.
    *
    * @param {boolean} skipClean
-   * @param {boolean} skipLifecyclehooks
+   * @param {boolean} skipLifecycleHooks
    *
    * @returns {Promise<UnitOfWork>}
    */
-  public commit(skipClean: boolean = false, skipLifecyclehooks: boolean = false): Promise<any> {
+  public commit(skipClean: boolean = false, skipLifecycleHooks: boolean = false): Promise<any> {
     this.prepareCascades();
 
-    return this.insertNew(skipLifecyclehooks)
-      .then(() => this.updateDirty(skipLifecyclehooks))
-      .then(() => this.deleteDeleted(skipLifecyclehooks))
+    return this.insertNew(skipLifecycleHooks)
+      .then(() => this.updateDirty(skipLifecycleHooks))
+      .then(() => this.deleteDeleted(skipLifecycleHooks))
       .then(() => this.updateRelationships())
       .then(() => this.commitOrRollback(true))
       .then(() => this.processAfterCommit())
