@@ -100,7 +100,7 @@ export class UnitOfWork {
   /**
    * @type {Array}
    */
-  private afterCommit: Array<{ target: EntityInterface, method: string }> = [];
+  private afterCommit: Array<{target: EntityInterface, method: string, parameters: Array<any>}> = [];
 
   /**
    * Create a new UnitOfWork.
@@ -551,16 +551,16 @@ export class UnitOfWork {
    * Commit the current state.
    *
    * @param {boolean} skipClean
-   * @param {boolean} skipLifecyclehooks
+   * @param {boolean} skipLifecycleHooks
    *
    * @returns {Promise<UnitOfWork>}
    */
-  public commit(skipClean: boolean = false, skipLifecyclehooks: boolean = false): Promise<any> {
+  public commit(skipClean: boolean = false, skipLifecycleHooks: boolean = false): Promise<any> {
     this.prepareCascades();
 
-    return this.insertNew(skipLifecyclehooks)
-      .then(() => this.updateDirty(skipLifecyclehooks))
-      .then(() => this.deleteDeleted(skipLifecyclehooks))
+    return this.insertNew(skipLifecycleHooks)
+      .then(() => this.updateDirty(skipLifecycleHooks))
+      .then(() => this.deleteDeleted(skipLifecycleHooks))
       .then(() => this.updateRelationships())
       .then(() => this.commitOrRollback(true))
       .then(() => this.processAfterCommit())
@@ -574,7 +574,7 @@ export class UnitOfWork {
     let methods = [];
 
     this.afterCommit.forEach(action => {
-      methods.push(action.target[action.method]());
+      methods.push(action.target[action.method](...action.parameters, this.entityManager));
     });
 
     return Promise.all(methods);
@@ -594,7 +594,7 @@ export class UnitOfWork {
     let afterMethod  = 'after' + method[0].toUpperCase() + method.substr(1);
 
     if (typeof entity[afterMethod] === 'function') {
-      this.afterCommit.push({target: entity, method: afterMethod});
+      this.afterCommit.push({target: entity, method: afterMethod, parameters});
     }
 
     let callbackResult = typeof entity[beforeMethod] === 'function'
