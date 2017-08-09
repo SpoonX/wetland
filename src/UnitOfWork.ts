@@ -100,7 +100,7 @@ export class UnitOfWork {
   /**
    * @type {Array}
    */
-  private afterCommit: Array<{ target: EntityInterface, method: string }> = [];
+  private afterCommit: Array<{target: EntityInterface, method: string, parameters: Array<any>}> = [];
 
   /**
    * Create a new UnitOfWork.
@@ -574,7 +574,7 @@ export class UnitOfWork {
     let methods = [];
 
     this.afterCommit.forEach(action => {
-      methods.push(action.target[action.method]());
+      methods.push(action.target[action.method](...action.parameters, this.entityManager));
     });
 
     return Promise.all(methods);
@@ -594,7 +594,7 @@ export class UnitOfWork {
     let afterMethod  = 'after' + method[0].toUpperCase() + method.substr(1);
 
     if (typeof entity[afterMethod] === 'function') {
-      this.afterCommit.push({target: entity, method: afterMethod});
+      this.afterCommit.push({target: entity, method: afterMethod, parameters});
     }
 
     let callbackResult = typeof entity[beforeMethod] === 'function'
