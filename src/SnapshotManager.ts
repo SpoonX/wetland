@@ -516,7 +516,7 @@ export class SnapshotManager {
         // We own the fk.
         let joinColumn = mapping.fields[property].joinColumn;
         let changes    = {
-          field  : {name: joinColumn.name, type: 'integer', unsigned: true, nullable: true},
+          field  : {name: joinColumn.name, type: 'integer', unsigned: true, nullable: (typeof joinColumn.nullable === 'boolean' ? joinColumn.nullable : true)},
           foreign: createForeign(mapping, property, targetMapping)
         };
 
