@@ -1,3 +1,13 @@
+<a name="2.3.2"></a>
+## [2.3.2](https://github.com/SpoonX/wetland/compare/v2.3.1...v2.3.2) (2017-08-21)
+
+
+### Bug Fixes
+
+* **SnapshotManager:** use nullable value for joinColumn from mapping ([ce84a91](https://github.com/SpoonX/wetland/commit/ce84a91))
+
+
+
 <a name="2.3.1"></a>
 ## [2.3.1](https://github.com/SpoonX/wetland/compare/v2.3.0...v2.3.1) (2017-08-09)
 
