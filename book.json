@@ -3,7 +3,8 @@
         "edit-link",
         "github",
         "theme-api",
-        "anchors"
+        "anchors",
+        "mathjax"
     ],
     "pluginsConfig": {
         "edit-link": {
