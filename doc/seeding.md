@@ -2,6 +2,47 @@
 
 Seeding consist in populating the database from fixtures.
 
+## Fixtures
+
+A `fixture` is file which represents entities belonging to a repository.
+In wetland fixtures can be written in `JSON` and `csv` (If you think we need to support more don't hesitate to create a PR).
+
+### Types of file
+
+#### JSON
+
+For `json` entities are represented by object in an array. Each object in the array is an entity.
+
+##### Example
+
+Post.json
+```json
+[
+  {
+    "title": "Main post",
+    "content": "Content...."
+  },
+  {
+    "title": "Test",
+    "content": "Content...."
+  }
+]
+```
+
+#### CSV
+
+For `csv` entities are represented by a line (column support is not here but an issue is opened !) expect for the first line which represents the field name.
+
+##### Example
+
+Pet.csv
+```csv
+id,name
+9,Kyle
+2,Jill
+10,Jullia
+```
+
 ## Types of seeding
 
 Wetland supports $$2^2 = 4$$ modes of seeding.
