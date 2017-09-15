@@ -145,7 +145,7 @@ $ wetland migrator dev -r
 ### Dev migrations
 **Q:** Wait, why did we just use `wetland migrator dev -r` instead of `wetland migrator schema -r`!?
 
-**A:** Good question! Wetland uses something called [dev migrations](../snapshots.md#dev-migrations).
+**A:** Good question! Wetland uses something called [dev migrations](Tutorial/snapshots.md#dev-migrations).
 
 Simply put, dev migrations make use of the [snapshot system](../snapshots.md). This allows wetland to diff your schema using snapshots (which get created every time you run dev migrations), and automatically migrate your database for you as you write code.
 
