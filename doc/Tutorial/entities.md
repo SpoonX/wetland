@@ -145,11 +145,11 @@ $ wetland migrator dev -r
 ### Dev migrations
 **Q:** Wait, why did we just use `wetland migrator dev -r` instead of `wetland migrator schema -r`!?
 
-**A:** Good question! Wetland uses something called [dev migrations](Tutorial/snapshots.md#dev-migrations).
+**A:** Good question! Wetland uses something called [dev migrations](/Tutorial/snapshots.md#dev-migrations).
 
-Simply put, dev migrations make use of the [snapshot system](../snapshots.md). This allows wetland to diff your schema using snapshots (which get created every time you run dev migrations), and automatically migrate your database for you as you write code.
+Simply put, dev migrations make use of the [snapshot system](/Tutorial/snapshots.md). This allows wetland to diff your schema using snapshots (which get created every time you run dev migrations), and automatically migrate your database for you as you write code.
 
-You can read more about snapshots and dev migrations [in the docs for snapshots](../snapshots.md).
+You can read more about snapshots and dev migrations [in the docs for snapshots](/Tutorial/snapshots.md).
 
 ## Next step
 Now that we've taken a quick look at entities, it's time to move on.
@@ -157,4 +157,4 @@ Now that we've taken a quick look at entities, it's time to move on.
 In the next step of this tutorial, we'll briefly look at snapshots, and what they are.
 Then, we'll implement automated dev migrations into our application and it should start to make more sense.
 
-[Go to the next part](snapshots.md).
+[Go to the next part](/Tutorial/snapshots.md).
