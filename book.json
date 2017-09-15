@@ -4,7 +4,7 @@
         "github",
         "theme-api",
         "anchors",
-        "mathjax"
+        "katex"
     ],
     "pluginsConfig": {
         "edit-link": {

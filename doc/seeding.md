@@ -111,8 +111,9 @@ If you do clean seeding you should use the seeder like this :
 ```js
 const migrator = wetland.getMigrator();
 const seeder = wetland.getSeeder();
+const cleaner = wetland.getCleaner();
 
-seeder.clean() // Will clean the database, NO MAGICAL GOING BACK
+cleaner.clean() // Will clean the database, NO MAGICAL GOING BACK
           .then(() => migrator.devMigrations(false)) // Will actually do the migrations : needed here because the clean method wipes the database entirely
           .then(() => seeder.seed()) // Will seed accordingly to the configuration you gave wetland
 ```
