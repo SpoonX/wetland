@@ -13,6 +13,7 @@ import {Tag} from '../resource/entity/shop/tag';
 import {User} from '../resource/entity/shop/user';
 import {Profile} from '../resource/entity/shop/Profile';
 import * as path from 'path';
+import {EntityManager} from '../../src/EntityManager';
 
 let tmpTestDir = path.join(__dirname, '../.tmp');
 
@@ -617,6 +618,34 @@ describe('UnitOfWork', () => {
             }).catch(done);
         }).catch(done);
       }).catch(done);
+    });
+  });
+
+  describe('.processAfterCommit()', () => {
+    it('Should call post-lifecyle callbacks hook with a clean unit of work', callback => {
+      class User {
+        static setMapping(mapping) {
+          mapping.forProperty('id').primary().increments();
+        }
+
+        afterCreate(entityManager) {
+          const unitOfWork = entityManager.getUnitOfWork();
+
+          assert.lengthOf(unitOfWork.getDirtyObjects(), 0);
+          assert.lengthOf(unitOfWork.getDeletedObjects(), 0);
+          assert.lengthOf(unitOfWork.getNewObjects(), 0);
+
+          callback();
+        }
+      }
+
+      let wetland = new Wetland({entities: [User]});
+
+      let migrator = wetland.getMigrator();
+      let manager  = wetland.getManager();
+
+      migrator.devMigrations(false)
+        .then(() => manager.persist(new User()).flush());
     });
   });
 });

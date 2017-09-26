@@ -1036,7 +1036,7 @@ export class UnitOfWork {
    *
    * @returns {UnitOfWork}
    */
-  public clean(): UnitOfWork {
+  public clean(): Promise<void> {
     this.newObjects.each(created => this.registerClean(created));
     this.dirtyObjects.each(updated => this.registerClean(updated));
     this.relationshipsChangedObjects.each(changed => this.registerClean(changed));
@@ -1046,6 +1046,6 @@ export class UnitOfWork {
     this.transactions   = {};
     this.afterCommit    = [];
 
-    return this;
+    return Promise.resolve();
   }
 }
