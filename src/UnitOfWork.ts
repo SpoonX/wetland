@@ -563,10 +563,10 @@ export class UnitOfWork {
       .then(() => this.deleteDeleted(skipLifecycleHooks))
       .then(() => this.updateRelationships())
       .then(() => this.commitOrRollback(true))
-      .then(() => this.processAfterCommit())
       .then(() => this.entityManager.getConfig().fetch('entityManager.refreshUpdated') && this.refreshDirty())
       .then(() => this.entityManager.getConfig().fetch('entityManager.refreshCreated') && this.refreshNew())
       .then(() => !skipClean && this.clean())
+      .then(() => !skipClean && this.processAfterCommit())
       .catch(error => this.commitOrRollback(false, error));
   }
 
