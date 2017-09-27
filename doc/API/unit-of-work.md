@@ -20,7 +20,7 @@ unitOfWork.cascadeSingle(entity, 'property', entity['property'], mapping);
 
 {% method %}
 ## .clean()
-Marks everything as clean.
+Mark everything as clean, empty transactions and empty after commits.
 
 {% common %}
 ```js
