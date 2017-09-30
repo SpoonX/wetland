@@ -32,15 +32,15 @@ class MyEntity {
     // Will be executed before update of the entity.
   }
 
-  afterUpdate(entityManager) {
+  afterUpdate(updatedValues, entityManager) {
     // Will be executed after update of the entity
   }
 
-  beforeRemove (entityManager) {
+  beforeRemove (deletedObjects, entityManager) {
     // Will be executed before removal of the entity
   }
 
-  afterRemove (entityManager) {
+  afterRemove (deletedObjects, entityManager) {
     // Will be executed after removal of the entity
   }
 }
