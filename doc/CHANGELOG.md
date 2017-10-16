@@ -1,3 +1,15 @@
+<a name="2.4.0"></a>
+# [2.4.0](https://github.com/SpoonX/wetland/compare/v2.3.2...v2.4.0) (2017-10-16)
+
+
+### Bug Fixes
+
+* **gitbook:** add mathjax to plugins to support maths statements ([378c194](https://github.com/SpoonX/wetland/commit/378c194))
+* **unitofwork:** only run process after commit after the scope is clean ([b12fda7](https://github.com/SpoonX/wetland/commit/b12fda7))
+* **unitofwork:** separate cleaning tasks ([2406da0](https://github.com/SpoonX/wetland/commit/2406da0))
+
+
+
 <a name="2.3.2"></a>
 ## [2.3.2](https://github.com/SpoonX/wetland/compare/v2.3.1...v2.3.2) (2017-08-21)
 
