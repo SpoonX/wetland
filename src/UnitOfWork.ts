@@ -563,14 +563,20 @@ export class UnitOfWork {
       .then(() => this.deleteDeleted(skipLifecycleHooks))
       .then(() => this.updateRelationships())
       .then(() => this.commitOrRollback(true))
-      .then(() => this.processAfterCommit())
       .then(() => this.entityManager.getConfig().fetch('entityManager.refreshUpdated') && this.refreshDirty())
       .then(() => this.entityManager.getConfig().fetch('entityManager.refreshCreated') && this.refreshNew())
-      .then(() => !skipClean && this.clean())
+      .then(() => !skipClean && this.cleanObjectsAndTransactions())
+      .then(() => !skipClean && this.processAfterCommit())
+      .then(() => !skipClean && this.cleanAfterCommit())
       .catch(error => this.commitOrRollback(false, error));
   }
 
-  private processAfterCommit() {
+  /**
+   * Execute post commit lifecyle callbacks.
+   *
+   * @return {Promise<Array<Function>>}
+   */
+  private processAfterCommit(): Promise<Array<Function>> {
     let methods = [];
 
     this.afterCommit.forEach(action => {
@@ -1032,11 +1038,22 @@ export class UnitOfWork {
   }
 
   /**
-   * Mark everything as clean.
+   * Empty after commit.
    *
-   * @returns {UnitOfWork}
+   * @return {Promise<void>}
    */
-  public clean(): UnitOfWork {
+  private cleanAfterCommit(): Promise<void> {
+    this.afterCommit = [];
+
+    return Promise.resolve();
+  }
+
+  /**
+   * Mark everything as clean and empty transactions.
+   *
+   * @return {Promise<void>}
+   */
+  private cleanObjectsAndTransactions(): Promise<void> {
     this.newObjects.each(created => this.registerClean(created));
     this.dirtyObjects.each(updated => this.registerClean(updated));
     this.relationshipsChangedObjects.each(changed => this.registerClean(changed));
@@ -1044,8 +1061,17 @@ export class UnitOfWork {
 
     this.deletedObjects = new ArrayCollection;
     this.transactions   = {};
-    this.afterCommit    = [];
 
-    return this;
+    return Promise.resolve();
+  }
+
+  /**
+   * Mark everything as clean, empty transactions and empty after commits.
+   *
+   * @returns {UnitOfWork}
+   */
+  public clean(): Promise<void> {
+    return this.cleanObjectsAndTransactions()
+      .then(() => this.cleanAfterCommit());
   }
 }
