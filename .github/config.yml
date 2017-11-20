@@ -26,3 +26,7 @@ requestInfoLabelToAdd: needs-more-info
 requestInfoOn:
   pullRequest: true
   issue: true
+
+todo:
+  keyword: "@makeAnIssue"
+  autoAssign: true
