@@ -23,3 +23,4 @@ export {Criteria} from './Criteria/Criteria';
 export {Where} from './Criteria/Where';
 export {Having} from './Criteria/Having';
 export {Entity} from './Entity';
+export * from './decorators/Mapping';
