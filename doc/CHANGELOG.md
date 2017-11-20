@@ -1,3 +1,13 @@
+<a name="2.4.1"></a>
+## [2.4.1](https://github.com/SpoonX/wetland/compare/v2.4.0...v2.4.1) (2017-11-20)
+
+
+### Bug Fixes
+
+* **exports:** export the decorators ([2bbe99b](https://github.com/SpoonX/wetland/commit/2bbe99b))
+
+
+
 <a name="2.4.0"></a>
 # [2.4.0](https://github.com/SpoonX/wetland/compare/v2.3.2...v2.4.0) (2017-10-16)
 
