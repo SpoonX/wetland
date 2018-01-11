@@ -518,6 +518,42 @@ export class Mapping<T> {
   }
 
   /**
+   * Convenience method that automatically sets a PK id.
+   *
+   * @returns {Mapping}
+   */
+  public autoPK(): this {
+    return this.increments('id').primary('id');
+  }
+
+  /**
+   * Convenience method that automatically sets a createdAt.
+   *
+   * @returns {Mapping}
+   */
+  public autoCreatedAt(): this {
+    return this.field('createdAt', { type: 'datetime', defaultTo: this.now() });
+  }
+
+  /**
+   * Convenience method that automatically sets an updatedAt.
+   *
+   * @returns {Mapping}
+   */
+  public autoUpdatedAt(): this {
+    return this.field('createdAt', { type: 'datetime', defaultTo: this.now() });
+  }
+
+  /**
+   * Convenience method that automatically sets a PK, updatedAt and createdAt.
+   *
+   * @returns {Mapping}
+   */
+  public autoFields(): this {
+    return this.autoPK().autoCreatedAt().autoUpdatedAt()
+  }
+
+  /**
    * Get the column name for the primary key.
    *
    * @returns {string|null}
@@ -1006,6 +1042,50 @@ export class Field {
    */
   public primary(): this {
     this.mapping.primary(this.property);
+
+    return this;
+  }
+
+  /**
+   * Generate a PK field id
+   *
+   * @return {Field}
+   */
+  public autoPK() {
+    this.mapping.autoPK();
+
+    return this;
+  }
+
+  /**
+   * Generate a createdAt field
+   *
+   * @return {Field}
+   */
+  public autoCreatedAt() {
+    this.mapping.autoCreatedAt();
+
+    return this;
+  }
+
+  /**
+   * Generate an updatedAt field
+   *
+   * @return {Field}
+   */
+  public autoUpdatedAt() {
+    this.mapping.autoUpdatedAt();
+
+    return this;
+  }
+
+  /**
+   * Generate a PK, createdAt and updatedAt field
+   *
+   * @return {Field}
+   */
+  public autoFields() {
+    this.mapping.autoFields();
 
     return this;
   }

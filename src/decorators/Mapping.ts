@@ -23,6 +23,17 @@ export function entity(options?: {repository?: typeof EntityRepository, name?: s
 }
 
 /**
+ * Decorate autoFields (id, createdAt, updatedAt) for an entity.
+ *
+ * @return {Mapping}
+ */
+export function autoFields() {
+  return (target: Object) => {
+    Mapping.forEntity(target).autoFields();
+  };
+}
+
+/**
  * Decorate your entity with an index. Examples:
  *
  *  - Compound
