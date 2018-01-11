@@ -44,6 +44,15 @@ class User {
 
 ### Class decorators
 
+#### @autoFields
+
+Adds auto fields to your entity (id, createdAt, updatedAt).
+
+```js
+@autoFields()
+class Foo {}
+```
+
 #### @entity
 
 Declares a class as an entity.
