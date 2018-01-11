@@ -1,3 +1,13 @@
+<a name="2.5.0"></a>
+# [2.5.0](https://github.com/SpoonX/wetland/compare/v2.4.2...v2.5.0) (2018-01-11)
+
+
+### Features
+
+* **Mapping:** add convenience methods for pk, updatedAt and createdAt ([8156fca](https://github.com/SpoonX/wetland/commit/8156fca))
+
+
+
 <a name="2.4.2"></a>
 ## [2.4.2](https://github.com/SpoonX/wetland/compare/v2.4.1...v2.4.2) (2018-01-11)
 
