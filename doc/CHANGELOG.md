@@ -1,3 +1,13 @@
+<a name="2.4.2"></a>
+## [2.4.2](https://github.com/SpoonX/wetland/compare/v2.4.1...v2.4.2) (2018-01-11)
+
+
+### Bug Fixes
+
+* **EntityProxy:** compare dates on their value to prevent false positives on dirty checks ([678729a](https://github.com/SpoonX/wetland/commit/678729a))
+
+
+
 <a name="2.4.1"></a>
 ## [2.4.1](https://github.com/SpoonX/wetland/compare/v2.4.0...v2.4.1) (2017-11-20)
 
