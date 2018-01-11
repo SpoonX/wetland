@@ -96,6 +96,40 @@ repository.find({name: 'cake'}, {joins: ['candles', 'baker', 'baker.address']})
   });
 ```
 
+### Entity example
+
+#### Javascript
+
+```js
+const { UserRepository } = require('../repository/UserRepository');
+
+class User {
+  static setMapping(mapping) {
+    // Adds id, updatedAt and createdAt for your convenience.
+    mapping.autoFields();
+
+    mapping.entity({ repository: UserRepository })
+    mapping.field('dateOfBirth', { type: 'datetime' });
+  }
+}
+
+module.exports.User = User;
+```
+
+#### Typescript
+
+```js
+import { entity, autoFields, field } from 'wetland';
+import { UserRepository } from '../repository/UserRepository';
+
+@entity({ repository: UserRepository })
+@autoFields()
+export class User {
+  @field({ type: 'datetime' })
+  public dateOfBirth: Date;
+}
+```
+
 ## License
 
 MIT
