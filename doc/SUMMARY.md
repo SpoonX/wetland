@@ -31,6 +31,7 @@
 
 * [Entity Manager](API/entity-manager.md)
 * [Entity Repository](API/entity-repository.md)
+* [Decorators](decorators.md)
 * [Mapping](API/mapping.md)
 * [Migrator](API/migrator.md)
 * [Query Builder](API/query-builder.md)
