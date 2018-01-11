@@ -1,7 +1,9 @@
 export class Simple {
   public name: string;
 
-  public static setMapping(mapping) {
+  public dateOfBirth: Date;
 
+  public static setMapping(mapping) {
+    mapping.field('dateOfBirth', {type: 'datetime'})
   }
 }

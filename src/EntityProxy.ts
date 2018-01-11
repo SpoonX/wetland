@@ -63,6 +63,25 @@ export class EntityProxy {
     }
 
     /**
+     * Check if provided values for {property} are different. Performs special checks for all Date types.
+     *
+     * @param {string} property
+     * @param {Date}   current
+     * @param {Date}   next
+     *
+     * @returns {boolean}
+     */
+    function areDifferent(property: string, current: Date, next: Date): Boolean {
+      const isDate = ['date', 'dateTime', 'datetime', 'time'].indexOf(mapping.getType(property)) > -1;
+
+      if (!isDate) {
+        return current !== next;
+      }
+
+      return (new Date(current)).toString() !== (new Date(next)).toString();
+    }
+
+    /**
      * Check if value is a setDirty value.
      *
      * @param {{}}      target
@@ -206,7 +225,7 @@ export class EntityProxy {
         if (!relations || !relations[property]) {
 
           // We're proxying and the value changed. Register as dirty.
-          if (isProxyActive() && target[property] !== value) {
+          if (isProxyActive() && areDifferent(property, target[property], value)) {
             unitOfWork.registerDirty(target, property);
           }
 

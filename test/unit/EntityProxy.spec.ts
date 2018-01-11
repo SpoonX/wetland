@@ -55,7 +55,7 @@ describe('EntityProxy', () => {
       patched.activateProxying();
 
       assert.throws(() => {
-        patched.single = simple;
+        patched.single = simple as Simple;
       }, "Can't assign to 'Parent.single'. Expected instance of 'Simple'.");
     });
 
@@ -96,6 +96,51 @@ describe('EntityProxy', () => {
       patchedCollection.push(patched);
 
       assert.deepEqual(unitOfWork.getRelationshipsChangedObjects(), patchedCollection);
+    });
+
+    it('should properly detect date changes', () => {
+      const unitOfWork   = getUnitOfWork();
+      const target       = EntityProxy.patchEntity(new Simple, unitOfWork.getEntityManager());
+      const dateConstant = new Date;
+      const compare      = new ArrayCollection;
+
+      compare.add(target);
+
+      target.name        = 'date test';
+      target.dateOfBirth = dateConstant;
+
+      unitOfWork.registerClean(target, true);
+      target.activateProxying();
+
+      assert.deepEqual(unitOfWork.getDirtyObjects(), new ArrayCollection);
+
+      target.dateOfBirth = new Date;
+
+      // Should remain clean
+      assert.deepEqual(unitOfWork.getDirtyObjects(), compare);
+    });
+
+    it('should leave alone dates that are the same', () => {
+      const unitOfWork   = getUnitOfWork([Simple]);
+      const target       = EntityProxy.patchEntity(new Simple, unitOfWork.getEntityManager());
+      const dateConstant = new Date;
+      const dateClone    = new Date(dateConstant);
+
+      target.name        = 'date test';
+      target.dateOfBirth = dateConstant;
+
+      unitOfWork.registerClean(target, true);
+      target.activateProxying();
+
+      assert.strictEqual(dateClone.toString(), dateConstant.toString());
+      assert.deepEqual(unitOfWork.getDirtyObjects(), new ArrayCollection);
+
+      assert.strictEqual((new Date(dateClone)).toString(), (new Date(dateConstant)).toString());
+
+      target.dateOfBirth = dateClone;
+
+      // Should remain clean
+      assert.deepEqual(unitOfWork.getDirtyObjects(), new ArrayCollection);
     });
 
     it('should register collection changes when adding an entity to a collection extended', () => {
