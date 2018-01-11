@@ -541,7 +541,7 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public autoUpdatedAt(): this {
-    return this.field('createdAt', { type: 'datetime', defaultTo: this.now() });
+    return this.field('updatedAt', { type: 'datetime', defaultTo: this.now() });
   }
 
   /**
@@ -550,7 +550,7 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public autoFields(): this {
-    return this.autoPK().autoCreatedAt().autoUpdatedAt()
+    return this.autoPK().autoCreatedAt().autoUpdatedAt();
   }
 
   /**
