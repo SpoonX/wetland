@@ -161,12 +161,14 @@ export class SnapshotManager {
    * @returns {Object}
    */
   public diff(oldMapping: Object, newMapping: Object): Object {
-    let dependencies    = {};
     let instructions    = {};
     let diff            = diffObjectKeys(oldMapping, newMapping);
     let getInstructions = store => {
       store               = store || this.entityManager.getConfig().fetch('defaultStore');
-      instructions[store] = instructions[store] || {alter: {}, drop: [], create: {}, rename: []};
+
+      if (!instructions[store]) {
+        instructions[store] = {alter: {}, drop: [], create: {}, rename: [], foreign: {create: {}, drop: {}}}
+      }
 
       return instructions[store];
     };
@@ -229,8 +231,8 @@ export class SnapshotManager {
             let relation = newMapping[entity].relations[field.name];
             let alter    = getAlterInstructions(instructions.alter, tableName);
 
-            alter.dropForeign.push(previousJoinColumn.name);
-            alter.foreign.push(createForeign(newMapping[entity], field.name, newMapping[relation.targetEntity]));
+            getForeignCreateInstructions(instructions.foreign, tableName).push(createForeign(newMapping[entity], field.name, newMapping[relation.targetEntity]));
+            getForeignDropInstructions(instructions.foreign, tableName).push(previousJoinColumn.name);
           }
 
           return;
@@ -351,7 +353,6 @@ export class SnapshotManager {
       let create       = getCreateInstructions(instructions.create, toCreate.entity.tableName);
       create.index     = toCreate.index;
       create.unique    = toCreate.unique;
-      create.foreign   = toCreate.foreign || [];
       create.meta      = {};
       create.fields    = Reflect.ownKeys(toCreate.fields)
         .filter(field => !toCreate.fields[field].relationship)
@@ -390,7 +391,8 @@ export class SnapshotManager {
         }
 
         create.fields.push(prepared.field);
-        create.foreign.push(prepared.foreign);
+
+        getForeignCreateInstructions(instructions.foreign, toCreate.entity.tableName).push(prepared.foreign);
       });
     });
 
@@ -411,50 +413,40 @@ export class SnapshotManager {
 
       Reflect.ownKeys(relations).forEach(property => {
         let relation = relations[property];
+        let oldFields = oldMapping[entity].fields;
 
         if ((relation.type === Mapping.RELATION_MANY_TO_ONE) || (relation.type === Mapping.RELATION_ONE_TO_ONE && !relation.mappedBy)) {
-
-          // we're owning. We reference a thing.
-          let owningTableName = oldMapping[entity].entity.tableName;
-          let owningIndex     = instructions.drop.indexOf(owningTableName);
-          let inverseIndex    = instructions.drop.indexOf(oldMapping[relation.targetEntity].entity.tableName);
-
-          if (inverseIndex > -1 && owningIndex > inverseIndex) {
-            // Put owning in front of inverse, escape the wrath of foreign keys.
-            instructions.drop.splice(owningIndex, 1);
-            instructions.drop.splice(inverseIndex, 0, owningTableName);
-          }
-
-          return;
+          return getForeignDropInstructions(instructions.foreign, oldMapping[entity].entity.tableName).push(oldFields[property].joinColumn.name);
         }
 
         // Inversed side. Perform check and return.
         if (relation.mappedBy) {
-          let sourceEntity  = oldMapping[relation.targetEntity];
-          let dropTableName = sourceEntity.entity.tableName;
-          let joinColumn    = sourceEntity.fields[relation.mappedBy].joinColumn.name;
-          let willDrop      = instructions.alter[dropTableName] && instructions.alter[dropTableName].dropForeign.indexOf(joinColumn) > -1;
-
-          if (instructions.drop.indexOf(dropTableName) === -1 && !willDrop) {
-            throw new Error(`Dropping ${entity} would not be possible, a foreign key constraint fails (${relation.targetEntity}).`);
-          }
-
           return;
         }
 
         // Many to many and owning
-        instructions.drop.push(oldMapping[entity].fields[property].joinTable.name);
+        instructions.drop.push(oldFields[property].joinTable.name);
       });
     });
+
+    function getForeignCreateInstructions(foreign, table) {
+      foreign.create[table] = foreign.create[table] || [];
+
+      return foreign.create[table];
+    }
+
+    function getForeignDropInstructions(foreign, table) {
+      foreign.drop[table] = foreign.drop[table] || [];
+
+      return foreign.drop[table];
+    }
 
     function getAlterInstructions(alter, table) {
       if (!alter[table]) {
         alter[table] = {
-          dropForeign: [],
           dropIndex  : [],
           dropUnique : [],
           dropColumn : [],
-          foreign    : [],
           index      : {},
           unique     : {},
           fields     : [],
@@ -469,7 +461,6 @@ export class SnapshotManager {
       if (!create[table]) {
         create[table] = {
           meta   : {},
-          foreign: [],
           index  : {},
           unique : {},
           fields : []
@@ -485,7 +476,7 @@ export class SnapshotManager {
       let instructions = getInstructions(mapping.store);
 
       if ((relation.type === Mapping.RELATION_MANY_TO_ONE) || (relation.type === Mapping.RELATION_ONE_TO_ONE && !relation.mappedBy)) {
-        return getAlterInstructions(instructions.alter, tableName).dropForeign.push(mapping.fields[property].joinColumn.name);
+        return getForeignDropInstructions(instructions.foreign, tableName).push(mapping.fields[property].joinColumn.name);
       }
 
       // Nothing to do for other side.
@@ -528,17 +519,14 @@ export class SnapshotManager {
         }
 
         if (create) {
-          dependencies[tableName] = dependencies[tableName] || [];
-
-          dependencies[tableName].push(changes.foreign.inTable);
-
           return changes;
         }
 
         let alterOrCreate = getAlterInstructions(instructions[create ? 'create' : 'alter'], tableName);
 
         alterOrCreate.fields.push(changes.field);
-        alterOrCreate.foreign.push(changes.foreign);
+
+        getForeignCreateInstructions(instructions.foreign, tableName).push(changes.foreign);
 
         return;
       }
@@ -552,11 +540,12 @@ export class SnapshotManager {
         mapping.fields[property].joinTable,
         tableName,
         targetMapping.entity.tableName,
-        instructions.create
+        instructions.create,
+        instructions.foreign
       );
     }
 
-    function buildJoinTable(joinTable, tableName, targetTableName, instructions) {
+    function buildJoinTable(joinTable, tableName, targetTableName, instructions, foreignInstructions) {
       let foreignColumns                       = [];
       let referenceColumns                     = [];
       let foreignColumnsInverse                = [];
@@ -586,29 +575,22 @@ export class SnapshotManager {
       joinTable.joinColumns.forEach(column => processTableColumns(column, foreignColumns, referenceColumns));
       joinTable.inverseJoinColumns.forEach(column => processTableColumns(column, referenceColumnsInverse, foreignColumnsInverse));
 
+      getForeignCreateInstructions(foreignInstructions, joinTable.name).push(
+        {
+          columns: foreignColumnsInverse,
+          references: referenceColumnsInverse,
+          inTable: targetTableName,
+          onDelete: 'cascade'
+        },
+        {
+          columns: referenceColumns,
+          references: foreignColumns,
+          inTable: tableName,
+          onDelete: 'cascade'
+        }
+      );
 
-      dependencies[joinTable.name] = dependencies[joinTable.name] || [];
-
-      dependencies[joinTable.name].push(tableName, targetTableName);
-
-      instructions[joinTable.name] = {
-        fields : joinTableFields,
-        index  : joinTableIndexes,
-        foreign: [
-          {
-            columns   : foreignColumnsInverse,
-            references: referenceColumnsInverse,
-            inTable   : targetTableName,
-            onDelete  : 'cascade'
-          },
-          {
-            columns   : referenceColumns,
-            references: foreignColumns,
-            inTable   : tableName,
-            onDelete  : 'cascade'
-          }
-        ]
-      };
+      instructions[joinTable.name] = {fields : joinTableFields, index  : joinTableIndexes};
     }
 
     function diffObjectKeys(from, to) {
@@ -632,38 +614,19 @@ export class SnapshotManager {
       return JSON.stringify(oldField) !== JSON.stringify(newField);
     }
 
-    return this.postDiffingOperations(instructions, dependencies);
+    return this.postDiffingOperations(instructions);
   }
 
   /**
    * Do some post-diffing operations on drafted instructions.
    *
    * @param {{}} instructions
-   * @param {{}} dependencies
    *
    * @returns {{}}}
    */
-  private postDiffingOperations(instructions: Object, dependencies: Object): Object {
+  private postDiffingOperations(instructions: Object): Object {
     Reflect.ownKeys(instructions).forEach(store => {
       let tableNames = Reflect.ownKeys(instructions[store].create);
-
-      Reflect.ownKeys(instructions[store].create).forEach(tableName => {
-        if (!dependencies[tableName]) {
-          return;
-        }
-
-        dependencies[tableName].forEach(dependency => {
-          let dependencyIndex = tableNames.indexOf(dependency);
-          let tableIndex      = tableNames.indexOf(tableName);
-
-          if (tableIndex > dependencyIndex) {
-            return;
-          }
-
-          tableNames.splice(tableIndex, 1);
-          tableNames.splice(dependencyIndex, 0, tableName);
-        });
-      });
 
       instructions[store].create = tableNames.map(tableName => {
         return {tableName, info: instructions[store].create[tableName]};
