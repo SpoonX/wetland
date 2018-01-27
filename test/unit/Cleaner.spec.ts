@@ -16,26 +16,26 @@ describe('Cleaner', () => {
 
       const wetland = new Wetland({
         dataDirectory: `${tmpTestDir}/.data`,
-        stores       : {
+        stores: {
           defaultStore: {
-            client    : 'mysql',
+            client: 'mysql',
             connection: {
               database: 'wetland_test',
-              user    : 'root',
+              user: 'root',
               password: ''
             }
           }
         },
-        seed         : {
+        seed: {
           fixturesDirectory: path.join(fixturesDir, getType(bypassLifecyclehooks)),
-          clean            : true,
+          clean: true,
           bypassLifecyclehooks
         },
-        entities     : [User, Pet, Post]
+        entities: [User, Pet, Post]
       });
 
-      const seeder   = wetland.getSeeder();
-      const cleaner  = wetland.getCleaner();
+      const seeder = wetland.getSeeder();
+      const cleaner = wetland.getCleaner();
       const migrator = wetland.getMigrator();
 
       return migrator.devMigrations(false)
@@ -52,32 +52,32 @@ describe('Cleaner', () => {
 
       const wetland = new Wetland({
         dataDirectory: `${tmpTestDir}/.data`,
-        stores       : {
+        stores: {
           defaultStore: {
-            client          : 'sqlite3',
+            client: 'sqlite3',
             useNullAsDefault: true,
-            connection      : {
+            connection: {
               filename: `${tmpTestDir}/cleaner.sqlite`
             }
           }
         },
-        seed         : {
+        seed: {
           fixturesDirectory: path.join(fixturesDir, getType(bypassLifecyclehooks)),
-          clean            : true,
+          clean: true,
           bypassLifecyclehooks
         },
-        entities     : [User, Pet, Post]
+        entities: [User, Pet, Post]
       });
 
-      const seeder   = wetland.getSeeder();
-      const cleaner  = wetland.getCleaner();
+      const seeder = wetland.getSeeder();
+      const cleaner = wetland.getCleaner();
       const migrator = wetland.getMigrator();
 
       return migrator.devMigrations(false)
-      .then(() => seeder.seed())
-      .then(() => cleaner.clean())
-      .then(() => migrator.devMigrations(false))
-      .then(() => seeder.seed());
+        .then(() => seeder.seed())
+        .then(() => cleaner.clean())
+        .then(() => migrator.devMigrations(false))
+        .then(() => seeder.seed());
     });
   });
 });
