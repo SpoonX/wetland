@@ -215,7 +215,14 @@ export class SchemaBuilder {
     return this;
   }
 
-  private buildDropForeignKeys(drop, code, spacing) {
+  /**
+   * Build foreign key creates.
+   *
+   * @param {{}}        drop
+   * @param {string[]}  code
+   * @param {function}  spacing
+   */
+  private buildDropForeignKeys(drop: Object, code: Array<string>, spacing: (change?: number)=>string) {
     const tableNames = Reflect.ownKeys(drop);
 
     if (!tableNames.length) {
@@ -236,8 +243,14 @@ export class SchemaBuilder {
     });
   }
 
-  // @todo check typings in all my changes.
-  private buildCreateForeignKeys(create, code, spacing) {
+  /**
+   * Build foreign key creates.
+   *
+   * @param {{}}        create
+   * @param {string[]}  code
+   * @param {function}  spacing
+   */
+  private buildCreateForeignKeys(create: Object, code: Array<string>, spacing: (change?: number)=>string) {
     const tableNames = Reflect.ownKeys(create);
 
     if (!tableNames.length) {
@@ -271,33 +284,6 @@ export class SchemaBuilder {
 
       spacing(-2);
       code.push(`${spacing()}});`);
-    });
-  }
-
-  /**
-   * Create a foreign key.
-   *
-   * @param {{}}       table
-   * @param {function} spacing
-   * @param {string[]} code
-   */
-  private buildCreateForeigssnKeys(table: {foreign: Array<any>}, spacing: (change?: number) => string, code: Array<string>): void {
-    table.foreign.forEach(foreign => {
-      let foreignCode = spacing();
-      foreignCode += `table.foreign(${JSON.stringify(foreign.columns).replace(/"/g, "'")})`;
-      foreignCode += `.references('${foreign.references}').inTable('${foreign.inTable}')`;
-
-      if (foreign.onDelete) {
-        foreignCode += `.onDelete('${foreign.onDelete}')`;
-      }
-
-      if (foreign.onUpdate) {
-        foreignCode += `.onUpdate('${foreign.onUpdate}')`;
-      }
-
-      foreignCode += ';';
-
-      code.push(foreignCode);
     });
   }
 
