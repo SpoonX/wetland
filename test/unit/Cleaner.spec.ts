@@ -34,8 +34,8 @@ describe('Cleaner', () => {
         entities: [User, Pet, Post]
       });
 
-      const seeder = wetland.getSeeder();
-      const cleaner = wetland.getCleaner();
+      const seeder   = wetland.getSeeder();
+      const cleaner  = wetland.getCleaner();
       const migrator = wetland.getMigrator();
 
       return migrator.devMigrations(false)
@@ -69,8 +69,8 @@ describe('Cleaner', () => {
         entities: [User, Pet, Post]
       });
 
-      const seeder = wetland.getSeeder();
-      const cleaner = wetland.getCleaner();
+      const seeder   = wetland.getSeeder();
+      const cleaner  = wetland.getCleaner();
       const migrator = wetland.getMigrator();
 
       return migrator.devMigrations(false)
