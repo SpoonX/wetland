@@ -1,3 +1,13 @@
+<a name="3.0.0"></a>
+# [3.0.0](https://github.com/SpoonX/wetland/compare/v2.5.0...v3.0.0) (2018-02-04)
+
+
+### Bug Fixes
+
+* **project:** shift foreign key policy to avoid bugs with circular refs and improve performance ([5d50d54](https://github.com/SpoonX/wetland/commit/5d50d54))
+
+
+
 <a name="2.5.0"></a>
 # [2.5.0](https://github.com/SpoonX/wetland/compare/v2.4.2...v2.5.0) (2018-01-11)
 
