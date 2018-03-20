@@ -1012,23 +1012,24 @@ export class UnitOfWork {
    * @returns {UnitOfWork}
    */
   public clear(...entities: Array<EntityInterface | ProxyInterface>): UnitOfWork {
-    (entities.length ? entities : this.newObjects).forEach(created => this.clearEntityState(created));
-    (entities.length ? entities : this.deletedObjects).forEach(deleted => this.clearEntityState(deleted));
-    (entities.length ? entities : this.cleanObjects).forEach(clean => this.clearEntityState(clean));
-    (entities.length ? entities : this.relationshipsChangedObjects).forEach(changed => this.clearEntityState(changed));
-
     if (entities.length) {
+      entities.forEach(entity => this.clearEntityState(entity))
       this.relationshipsChangedObjects.remove(...entities);
       this.dirtyObjects.remove(...entities);
       this.deletedObjects.remove(...entities);
       this.newObjects.remove(...entities);
       this.cleanObjects.remove(...entities);
     } else {
+      this.newObjects.forEach(created => this.clearEntityState(created))
+      this.deletedObjects.forEach(deleted => this.clearEntityState(deleted))
+      this.cleanObjects.forEach(clean => this.clearEntityState(clean))
+      this.relationshipsChangedObjects.forEach(changed => this.clearEntityState(changed))
+
+      this.newObjects                  = new ArrayCollection;
+      this.deletedObjects              = new ArrayCollection;
+      this.cleanObjects                = new ArrayCollection;
       this.relationshipsChangedObjects = new ArrayCollection;
       this.dirtyObjects                = new ArrayCollection;
-      this.deletedObjects              = new ArrayCollection;
-      this.newObjects                  = new ArrayCollection;
-      this.cleanObjects                = new ArrayCollection;
     }
 
     this.transactions = {};
