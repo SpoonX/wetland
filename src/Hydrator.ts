@@ -106,7 +106,7 @@ export class Hydrator {
    */
   public addRecipe(parent: null | string, alias: string, mapping: Mapping<Entity>, joinType?: string, property?: string): Recipe {
     let primaryKey        = mapping.getPrimaryKey();
-    let primaryKeyAliased = `${alias}.${primaryKey}`;
+    let primaryKeyAliased = `${alias}.${mapping.getColumnName(primaryKey)}`;
     let recipe            = {
       hydrate   : false,
       parent    : null,
