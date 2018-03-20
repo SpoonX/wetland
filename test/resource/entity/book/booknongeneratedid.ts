@@ -1,6 +1,6 @@
 import {ArrayCollection} from '../../../../src/ArrayCollection';
 import {Mapping} from '../../../../src/Mapping';
-import {PublisherNonGeneratedId} from './PublisherNonGeneratedId';
+import {PublisherNonGeneratedId} from './publishernongeneratedid';
 
 export class BookNonGeneratedId {
 
