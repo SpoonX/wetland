@@ -502,15 +502,18 @@ export class SnapshotManager {
       let relation     = mapping.relations[property];
       let tableName    = mapping.entity.tableName;
       let instructions = getInstructions(mapping.store);
+      let deserializedMapping = Mapping.restore(mapping)
 
       if ((relation.type === Mapping.RELATION_MANY_TO_ONE) || (relation.type === Mapping.RELATION_ONE_TO_ONE && !relation.mappedBy)) {
         // We own the fk.
         let joinColumn = mapping.fields[property].joinColumn;
+        let referencedField = deserializedMapping.getField(deserializedMapping.getPropertyName(joinColumn.referencedColumnName))
+        let type = referencedField.generatedValue ? 'integer' : referencedField.type
+        let unsigned = referencedField.generatedValue ? true : referencedField.unsigned
         let changes    = {
-          field  : {name: joinColumn.name, type: 'integer', unsigned: true, nullable: (typeof joinColumn.nullable === 'boolean' ? joinColumn.nullable : true)},
+          field  : {name: joinColumn.name, type, unsigned, nullable: (typeof joinColumn.nullable === 'boolean' ? joinColumn.nullable : true)},
           foreign: createForeign(mapping, property, targetMapping)
         };
-
         if (!targetMapping.columns[joinColumn.referencedColumnName]) {
           throw new Error(
             `Cannot create foreign key for '${tableName}', ` +

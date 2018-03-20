@@ -2,8 +2,10 @@ import {Wetland} from '../../src/Wetland';
 import {Scope} from '../../src/Scope';
 import {Hydrator} from '../../src/Hydrator';
 import {User} from '../resource/entity/postal/User';
+import {TransformUser} from '../resource/entity/postal/TransformUser';
 import {Tracker} from '../resource/entity/postal/Tracker';
 import {assert} from 'chai';
+import { ValueObject } from '../resource/entity/ValueObject';
 
 function getHydrator(): Hydrator {
   return new Hydrator(getManager());
@@ -16,7 +18,7 @@ function getManager(): Scope {
 }
 
 describe('Hydrator', () => {
-  describe('.consturctor()', () => {
+  describe('.constructor()', () => {
     it('should define constructor properties', () => {
       let hydrator = getHydrator();
 
@@ -34,6 +36,16 @@ describe('Hydrator', () => {
 
       assert.propertyVal(entity, 'name', 'foo');
     });
+
+    it('should map with transformation applied', () => {
+      let entity = getHydrator().fromSchema({
+        name: 'foo'
+      }, TransformUser);
+
+      const expectedValueObject = ValueObject.fromValue('foo')
+      assert.property(entity, 'name');
+      assert.isTrue(expectedValueObject.equals(entity.name))
+    })
 
     it('should not map invalid value to entities', () => {
       let entity = getHydrator().fromSchema({

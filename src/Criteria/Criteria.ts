@@ -180,6 +180,9 @@ export class Criteria {
         property = key;
       }
 
+      const dehydrator = this.hostMapping.getDehydrationTransformationFunction(property);
+      value = dehydrator(value)
+
       // Apply convenience checks (in, not in, is, is not).
       operator = this.applyConvenience(value, operator);
 

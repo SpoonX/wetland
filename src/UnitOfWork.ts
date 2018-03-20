@@ -390,7 +390,6 @@ export class UnitOfWork {
     this.setEntityState(dirtyObject, UnitOfWork.STATE_DIRTY);
 
     metaData.fetchOrPut('entityState.dirty', []).push(...property);
-
     return this;
   }
 
@@ -808,16 +807,20 @@ export class UnitOfWork {
     return this.persist(this.newObjects, <T>(queryBuilder: QueryBuilder<T>, target: T & ProxyInterface) => {
       let mapping    = Mapping.forEntity(target);
       let primaryKey = mapping.getPrimaryKey();
-
+      let primaryKeyField = mapping.getPrimaryKeyField()
+      let hydrator = mapping.getHydrationTransformationFunction(primaryKey)
       const executeInsertion = () => {
-        return queryBuilder.insert(target, primaryKey).getQuery().execute()
+        let primaryKeyDef = mapping.getField(primaryKey)
+        let isPKGenerated = !!primaryKeyDef.generatedValue
+        return queryBuilder.insert(target, primaryKeyField).getQuery().execute()
           .then(result => {
+            result = isPKGenerated ? hydrator(result[0]) : target[primaryKey]
             if (target.isEntityProxy) {
-              target[primaryKey] = {_skipDirty: result[0]};
+              target[primaryKey] = {_skipDirty: result};
 
               target.activateProxying();
             } else {
-              target[primaryKey] = result[0];
+              target[primaryKey] = result;
             }
           });
       };
@@ -873,12 +876,15 @@ export class UnitOfWork {
    */
   private deleteDeleted(skipLifecyclehooks: boolean = false): Promise<any> {
     return this.persist(this.deletedObjects, <T>(queryBuilder: QueryBuilder<T>, target: T & EntityProxy) => {
-      let primaryKey = Mapping.forEntity(target).getPrimaryKeyField();
+      let mapping = Mapping.forEntity(target)
+      let primaryKey = mapping.getPrimaryKeyField()
+      let primaryKeyProperty = mapping.getPropertyName(primaryKey)
+      let dehydrator = mapping.getDehydrationTransformationFunction(primaryKeyProperty)
 
       // @todo Use target's mapping to delete relations for non-cascaded properties.
-
+      // @STOCARD: TODO!!!!!!
       const executeDelete = () => {
-        return queryBuilder.remove().where({[primaryKey]: target[primaryKey]}).getQuery().execute();
+        return queryBuilder.remove().where({[primaryKey]: dehydrator(target[primaryKey])}).getQuery().execute();
       };
 
       if (skipLifecyclehooks) {
@@ -931,9 +937,12 @@ export class UnitOfWork {
           let primaryKey = mapping.getPrimaryKey();
 
           // Update id of property on own side, based on joinColumn.
+          // @TODO: STOCARD, Probably dehydration is needed here
           return this.persistTarget(owningSide, <T>(queryBuilder: QueryBuilder<T>, target: T) => {
-            let query    = queryBuilder.where({[primaryKey]: target[primaryKey]});
-            let newValue = otherSide[joinColumn.referencedColumnName];
+            let query = queryBuilder.where({ [primaryKey]: target[primaryKey] });
+            let property = mapping.getPropertyName(joinColumn.referencedColumnName)
+            let dehydrator = mapping.getDehydrationTransformationFunction(property)
+            let newValue = dehydrator(otherSide[joinColumn.referencedColumnName]);
 
             if (action === UnitOfWork.RELATIONSHIP_REMOVED) {
               query.where({[joinColumn.name]: newValue});
@@ -945,10 +954,12 @@ export class UnitOfWork {
           });
         }
 
+        let owningMapping = Mapping.forEntity(owning)
+        let otherMapping = Mapping.forEntity(other)
         let owningSide = relation.mappedBy ? other : owning;
         let otherSide  = relation.mappedBy ? owning : other;
         let joinTable  = relation.mappedBy
-          ? Mapping.forEntity(other).getJoinTable(relation.mappedBy)
+          ? otherMapping.getJoinTable(relation.mappedBy)
           : changedMapping.getJoinTable(property);
 
         // Create a new row in join table.
@@ -958,11 +969,13 @@ export class UnitOfWork {
             let values       = {};
 
             joinTable.joinColumns.forEach(column => {
-              values[column.name] = owningSide[column.referencedColumnName];
+              const dehydrator = owningMapping.getDehydrationTransformationFunction(column.referencedColumnName)
+              values[column.name] = dehydrator(owningSide[column.referencedColumnName]);
             });
 
             joinTable.inverseJoinColumns.forEach(column => {
-              values[column.name] = otherSide[column.referencedColumnName];
+              const dehydrator = otherMapping.getDehydrationTransformationFunction(column.referencedColumnName)
+              values[column.name] = dehydrator(otherSide[column.referencedColumnName]);
             });
 
             if (action === UnitOfWork.RELATIONSHIP_ADDED) {
@@ -1012,10 +1025,10 @@ export class UnitOfWork {
    * @returns {UnitOfWork}
    */
   public clear(...entities: Array<EntityInterface | ProxyInterface>): UnitOfWork {
-    (entities.length ? entities : this.newObjects).forEach(created => this.clearEntityState(created));
-    (entities.length ? entities : this.deletedObjects).forEach(deleted => this.clearEntityState(deleted));
-    (entities.length ? entities : this.cleanObjects).forEach(clean => this.clearEntityState(clean));
-    (entities.length ? entities : this.relationshipsChangedObjects).forEach(changed => this.clearEntityState(changed));
+    (<Array<any>>(entities.length ? entities : this.newObjects)).forEach(created => this.clearEntityState(created));
+    (<Array<any>>(entities.length ? entities : this.deletedObjects)).forEach(deleted => this.clearEntityState(deleted));
+    (<Array<any>>(entities.length ? entities : this.cleanObjects)).forEach(clean => this.clearEntityState(clean));
+    (<Array<any>>(entities.length ? entities : this.relationshipsChangedObjects)).forEach(changed => this.clearEntityState(changed));
 
     if (entities.length) {
       this.relationshipsChangedObjects.remove(...entities);

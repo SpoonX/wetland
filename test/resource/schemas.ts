@@ -160,6 +160,167 @@ export let schemas = {
       }
     ]
   },
+  transformtodo  : {
+    columns               : [
+      {
+        column_default: null,
+        table_name    : 'transformlist',
+        column_name   : 'done',
+        data_type     : 'tinyint',
+        extra         : '',
+        column_key    : '',
+        column_type   : 'tinyint(1)',
+        is_nullable   : 'YES'
+      },
+      {
+        column_default: null,
+        table_name    : 'transformlist',
+        column_name   : 'id',
+        data_type     : 'varchar',
+        extra         : '',
+        column_key    : 'PRI',
+        column_type   : 'varchar(255)',
+        is_nullable   : 'NO'
+      },
+      {
+        column_default: null,
+        table_name    : 'transformlist',
+        column_name   : 'name',
+        data_type     : 'varchar',
+        extra         : '',
+        column_key    : '',
+        column_type   : 'varchar(255)',
+        is_nullable   : 'NO'
+      },
+      {
+        column_default: null,
+        table_name    : 'transformtodo',
+        column_name   : 'creator_id',
+        data_type     : 'varchar',
+        extra         : '',
+        column_key    : 'MUL',
+        column_type   : 'varchar(255)',
+        is_nullable   : 'YES'
+      },
+      {
+        column_default: null,
+        table_name    : 'transformtodo',
+        column_name   : 'done',
+        data_type     : 'tinyint',
+        extra         : '',
+        column_key    : '',
+        column_type   : 'tinyint(1)',
+        is_nullable   : 'YES'
+      },
+      {
+        column_default: null,
+        table_name    : 'transformtodo',
+        column_name   : 'id',
+        data_type     : 'varchar',
+        extra         : '',
+        column_key    : 'PRI',
+        column_type   : 'varchar(255)',
+        is_nullable   : 'NO'
+      },
+      {
+        column_default: null,
+        table_name    : 'transformtodo',
+        column_name   : 'list_id',
+        data_type     : 'varchar',
+        extra         : '',
+        column_key    : 'MUL',
+        column_type   : 'varchar(255)',
+        is_nullable   : 'YES'
+      },
+      {
+        column_default: null,
+        table_name    : 'transformtodo',
+        column_name   : 'task',
+        data_type     : 'varchar',
+        extra         : '',
+        column_key    : '',
+        column_type   : 'varchar(255)',
+        is_nullable   : 'NO'
+      },
+      {
+        column_default: null,
+        table_name    : 'transformuser',
+        column_name   : 'id',
+        data_type     : 'varchar',
+        extra         : '',
+        column_key    : 'PRI',
+        column_type   : 'varchar(255)',
+        is_nullable   : 'NO'
+      },
+      {
+        column_default: null,
+        table_name    : 'transformuser',
+        column_name   : 'name',
+        data_type     : 'varchar',
+        extra         : '',
+        column_key    : '',
+        column_type   : 'varchar(24)',
+        is_nullable   : 'NO'
+      }
+    ],
+    constraints           : [
+      {
+        table_name            : 'transformlist',
+        column_name           : 'id',
+        constraint_name       : 'PRIMARY',
+        referenced_table_name : null,
+        referenced_column_name: null
+      },
+      {
+        table_name            : 'transformtodo',
+        column_name           : 'creator_id',
+        constraint_name       : 'transformtodo_creator_id_foreign',
+        referenced_table_name : 'transformuser',
+        referenced_column_name: 'id'
+      },
+      {
+        table_name            : 'transformtodo',
+        column_name           : 'id',
+        constraint_name       : 'PRIMARY',
+        referenced_table_name : null,
+        referenced_column_name: null
+      },
+      {
+        table_name            : 'transformtodo',
+        column_name           : 'list_id',
+        constraint_name       : 'transformtodo_list_id_foreign',
+        referenced_table_name : 'transformlist',
+        referenced_column_name: 'id'
+      },
+      {
+        table_name            : 'transformuser',
+        column_name           : 'id',
+        constraint_name       : 'PRIMARY',
+        referenced_table_name : null,
+        referenced_column_name: null
+      }
+    ],
+    referentialConstraints: [
+      {
+        constraint_name         : 'transformtodo_creator_id_foreign',
+        unique_constraint_schema: 'wetland_test',
+        unique_constraint_name  : 'PRIMARY',
+        update_rule             : 'RESTRICT',
+        delete_rule             : 'RESTRICT',
+        table_name              : 'transformtodo',
+        referenced_table_name   : 'transformuser'
+      },
+      {
+        constraint_name         : 'transformtodo_list_id_foreign',
+        unique_constraint_schema: 'wetland_test',
+        unique_constraint_name  : 'PRIMARY',
+        update_rule             : 'RESTRICT',
+        delete_rule             : 'RESTRICT',
+        table_name              : 'transformtodo',
+        referenced_table_name   : 'transformlist'
+      }
+    ]
+  },
   postal: {
     columns               : [
       {

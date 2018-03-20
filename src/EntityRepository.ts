@@ -178,12 +178,26 @@ export class EntityRepository<T> {
   public findOne(criteria?: {} | number | string, options: FindOptions = {}): Promise<T> {
     options.alias = options.alias || this.mapping.getTableName();
 
-    if (typeof criteria === 'number' || typeof criteria === 'string') {
-      criteria = {[options.alias + '.' + this.mapping.getPrimaryKeyField()]: criteria}
+    if (typeof criteria === 'number' || typeof criteria === 'string' || (!(criteria === null || typeof criteria !== 'object') && criteria.constructor !== Object)) {
+      return this.findById(criteria, options)
     }
 
     options.limit = 1;
 
+    return this.find(criteria, options).then(result => result ? result[0] : null);
+  }
+
+  /**
+   * Find a single entity by its id.
+   *
+   * @param {{}|number|string}  [criteria]
+   * @param {FindOptions}       [options]
+   *
+   * @returns {Promise<Object>}
+   */
+  public findById(id: any, options: FindOptions = {}): Promise<T> {
+    const criteria = { [this.mapping.getPrimaryKey()]: id };
+    options.limit = 1;
     return this.find(criteria, options).then(result => result ? result[0] : null);
   }
 

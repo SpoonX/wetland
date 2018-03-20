@@ -5,6 +5,7 @@ import {EntityProxy} from './EntityProxy';
 import {UnitOfWork} from './UnitOfWork';
 import {EntityInterface, ProxyInterface} from './EntityInterface';
 import {Scope, Entity} from './Scope';
+import {EntityCtor} from './EntityInterface';
 
 export class Hydrator {
   /**
@@ -72,8 +73,8 @@ export class Hydrator {
       if (!property) {
         return;
       }
-
-      entity[property] = {_skipDirty: values[column]};
+      let hydrator = mapping.getHydrationTransformationFunction(property)
+      entity[property] = {_skipDirty: hydrator(values[column])};
     });
 
     return entity;
@@ -106,7 +107,7 @@ export class Hydrator {
    */
   public addRecipe(parent: null | string, alias: string, mapping: Mapping<Entity>, joinType?: string, property?: string): Recipe {
     let primaryKey        = mapping.getPrimaryKey();
-    let primaryKeyAliased = `${alias}.${primaryKey}`;
+    let primaryKeyAliased = `${alias}.${mapping.getColumnName(primaryKey)}`;
     let recipe            = {
       hydrate   : false,
       parent    : null,
@@ -114,6 +115,7 @@ export class Hydrator {
       primaryKey: {alias: primaryKeyAliased, property: primaryKey},
       type      : joinType,
       columns   : {},
+      mapping,
       property,
       alias,
     };
@@ -191,7 +193,9 @@ export class Hydrator {
 
     if (recipe.parent) {
       // Assign self to parent (only for many).
-      recipe.parent.entities[row[recipe.parent.column]][recipe.parent.property].add({_skipDirty: entity});
+      let parentCollection = recipe.parent.entities[row[recipe.parent.column]][recipe.parent.property]
+      let operation = (parentCollection instanceof ArrayCollection) ? 'add' : 'push'
+      parentCollection[operation]({ _skipDirty: entity })
     }
 
     if (recipe.joins) {
@@ -258,7 +262,10 @@ export class Hydrator {
    * @returns {Hydrator}
    */
   private addToCatalogue(recipe: Recipe, entity: ProxyInterface): this {
-    let primary                 = entity[recipe.primaryKey.property];
+    let mapping                 = recipe.mapping
+    let primaryKeyProperty      = recipe.primaryKey.property
+    let dehydrator              = mapping.getDehydrationTransformationFunction(primaryKeyProperty)
+    let primary                 = dehydrator(entity[primaryKeyProperty]);
     let catalogue               = this.getCatalogue(recipe.alias);
     catalogue.entities[primary] = entity;
 
@@ -317,10 +324,15 @@ export class Hydrator {
     }
 
     let entity                         = new recipe.entity;
+    const mapping = recipe.mapping
     entity[recipe.primaryKey.property] = row[recipe.primaryKey.alias];
 
     Object.getOwnPropertyNames(recipe.columns).forEach(alias => {
-      entity[recipe.columns[alias]] = row[alias];
+      const entityPropertyName = recipe.columns[alias]
+      // get the configured per field hydration transformation function and apply it to the database raw values
+      // before assigning the value to the entity
+      const hydrationTransformationFunction = recipe.mapping.getHydrationTransformationFunction(entityPropertyName)
+      entity[entityPropertyName] = hydrationTransformationFunction(row[alias]);
     });
 
     this.unitOfWork.registerClean(entity, true);
@@ -345,7 +357,8 @@ export interface Catalogue {
 export interface Recipe {
   hydrate: boolean,
   alias: string,
-  entity: {new ()},
+  entity: EntityCtor<any>
+  mapping: Mapping<Entity>
   primaryKey: {alias: string, property: string},
   columns: {},
   catalogue?: Catalogue,

@@ -133,9 +133,8 @@ export class Populate {
         if (['date', 'dateTime', 'datetime', 'time'].indexOf(field.type) > -1 && !(data[property] instanceof Date)) {
           data[property] = new Date(data[property]);
         }
-
-        base[property] = data[property];
-
+        const dehydrator = mapping.getDehydrationTransformationFunction(property)
+        base[property] = dehydrator(data[property]);
         return;
       }
 
