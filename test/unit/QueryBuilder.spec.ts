@@ -5,6 +5,8 @@ import {queries} from '../resource/queries';
 import {Todo} from '../resource/entity/todo/Todo';
 import {List} from '../resource/entity/todo/List';
 import {assert} from 'chai';
+import {TransformTodo} from '../resource/entity/transformtodo/TransformTodo';
+import {ValueObject} from '../resource/entity/ValueObject';
 
 let wetland = new Wetland({
   stores  : {
@@ -17,11 +19,15 @@ let wetland = new Wetland({
       }
     }
   },
-  entities: [Todo, List]
+  entities: [Todo, List, TransformTodo]
 });
 
 function getQueryBuilder() {
   return wetland.getManager().getRepository(Todo).getQueryBuilder('t');
+}
+
+function getQueryBuilderForTransformedEntity() {
+  return wetland.getManager().getRepository(TransformTodo).getQueryBuilder('t');
 }
 
 describe('QueryBuilder', () => {
@@ -256,15 +262,22 @@ describe('QueryBuilder', () => {
   describe('.insert()', () => {
     it('should create an insert query', () => {
       let queryBuilder = getQueryBuilder();
-      let keys         = ['task', 'done'];
       let query        = queryBuilder
         .insert({'task': 'Bake cake', 'done': true})
         .getQuery()
         .getSQL();
 
-      keys.forEach(key => {
-        assert.include(query, key);
-      });
+        assert.strictEqual(query, queries.queryBuilder.insert)
+    });
+
+    it('should create an insert query with dehydrated values', () => {
+      let queryBuilder = getQueryBuilderForTransformedEntity();
+      let query        = queryBuilder
+        .insert({'id': ValueObject.fromValue('uuidplaceholder'), 'task': ValueObject.fromValue('Bake cake'), 'done': ValueObject.fromValue(true)})
+        .getQuery()
+        .getSQL();
+
+      assert.strictEqual(query, queries.queryBuilder.insertTransformed)
     });
   });
 
@@ -278,6 +291,17 @@ describe('QueryBuilder', () => {
         .getSQL();
 
       assert.strictEqual(query, queries.queryBuilder.update);
+    });
+
+    it('should created an update query with dehydrated values', () => {
+      let queryBuilder = getQueryBuilderForTransformedEntity();
+      let query        = queryBuilder
+        .update({'done': ValueObject.fromValue(true), 'task': ValueObject.fromValue('Bake awesome cake')})
+        .where({'id': ValueObject.fromValue('uuidplaceholder')})
+        .getQuery()
+        .getSQL();
+
+      assert.strictEqual(query, queries.queryBuilder.updateTransformed);
     });
   });
 
@@ -399,6 +423,17 @@ describe('QueryBuilder', () => {
         .getSQL();
 
       assert.strictEqual(query, queries.queryBuilder.deleteById);
+    });
+
+    it('should create a delete query with dehydrated values.', () => {
+      let queryBuilder = getQueryBuilderForTransformedEntity();
+      let query        = queryBuilder
+        .remove()
+        .where({'id': ValueObject.fromValue(1)})
+        .getQuery()
+        .getSQL();
+
+      assert.strictEqual(query, queries.queryBuilder.deleteByIdTransformed);
     });
   });
 

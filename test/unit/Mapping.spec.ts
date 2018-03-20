@@ -7,6 +7,8 @@ import {FooEntity} from '../resource/entity/Foo';
 import {EntityRepository} from '../../src/EntityRepository';
 import {Wetland} from '../../src/Wetland';
 import {assert} from 'chai';
+import {TransformUser} from '../resource/entity/postal/TransformUser';
+import { ValueObject } from '../resource/entity/ValueObject';
 
 let wetland = new Wetland({
   mapping : {
@@ -97,11 +99,52 @@ describe('Mapping', () => {
       let mapping    = getMapping(wetland2, FooEntity);
       let columnName = {
         camelCase : 'camelCase',
-        PascalCase: 'PascalCase'
+        PascalCase: 'PascalCase',
+        id: 'id'
       };
 
       assert.deepEqual(mapping.getMappingData().fetch('columns'), columnName);
     });
+
+    it('should use a field as primary key if primary: true is assigned', () => {
+      let mapping   = getMapping(wetland, FooEntity)
+
+      assert.strictEqual(mapping.getMappingData().fetch('primary'), 'id');
+    })
+
+    it('should return a noop hydration transformation function if none was defined for that field', () => {
+      let mapping   = getMapping(wetland, TransformUser)
+      let hydrator = mapping.getHydrationTransformationFunction('id')
+      let expected = ValueObject.fromValue('somerandomstuff')
+      assert.isFunction(hydrator)
+      assert.deepEqual(expected, hydrator(expected))
+    })
+
+    it('should return a noop dehydration transformation function if none was defined for that field', () => {
+      let mapping   = getMapping(wetland, TransformUser)
+      let dehydrator = mapping.getDehydrationTransformationFunction('id')
+      let expected = ValueObject.fromValue('somerandomstuff')
+      assert.isFunction(dehydrator)
+      assert.deepEqual(expected, dehydrator(expected))
+    })
+
+    it('should return the hydration transformation function if it was defined for that field', () => {
+      let mapping   = getMapping(wetland, TransformUser)
+      let hydrator = mapping.getHydrationTransformationFunction('name')
+      let name = 'This is my name'
+      let expected = ValueObject.fromValue(name)
+      assert.isFunction(hydrator)
+      assert.deepEqual(expected, hydrator(name))
+    })
+
+    it('should return the dehydration transformation function if it was defined for that field', () => {
+      let mapping   = getMapping(wetland, TransformUser)
+      let dehydrator = mapping.getDehydrationTransformationFunction('name')
+      let expected = 'This is my name'
+      let name = ValueObject.fromValue(expected)
+      assert.isFunction(dehydrator)
+      assert.deepEqual(expected, dehydrator(name))
+    })
   });
 
   describe('.getRepository()', () => {

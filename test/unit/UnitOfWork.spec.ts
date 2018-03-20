@@ -12,8 +12,16 @@ import {Image} from '../resource/entity/shop/image';
 import {Tag} from '../resource/entity/shop/tag';
 import {User} from '../resource/entity/shop/user';
 import {Profile} from '../resource/entity/shop/Profile';
+import {TransformProduct} from '../resource/entity/transformshop/TransformProduct';
+import {TransformCategory} from '../resource/entity/transformshop/TransformCategory';
+import {TransformImage} from '../resource/entity/transformshop/TransformImage';
+import {TransformTag} from '../resource/entity/transformshop/TransformTag';
+import {TransformUser} from '../resource/entity/transformshop/TransformUser';
+import {TransformProfile} from '../resource/entity/transformshop/TransformProfile';
+import {ValueObject} from '../resource/entity/ValueObject';
 import * as path from 'path';
 import {EntityManager} from '../../src/EntityManager';
+
 
 let tmpTestDir = path.join(__dirname, '../.tmp');
 
@@ -611,6 +619,107 @@ describe('UnitOfWork', () => {
           entityManager.getRepository(User).findOne({name: 'test tag one creator'}, {populate: {'profile': 'p'}})
             .then(user => {
               assert.strictEqual(user.profile.slogan, 'No harm, try harder.');
+
+              wetland.destroyConnections().then(() => {
+                done();
+              });
+            }).catch(done);
+        }).catch(done);
+      }).catch(done);
+    });
+
+    it('should persist all the changes properly also with transformed values (aka the shit-show-but-with-persist-as-well test)', done => {
+      let wetland = new Wetland({
+        stores  : {
+          defaultStore: {
+            client          : 'sqlite3',
+            useNullAsDefault: true,
+            connection      : {
+              filename: `${tmpTestDir}/shitshow-persist-transform.sqlite`
+            }
+          }
+        },
+        entities: [TransformProduct, TransformCategory, TransformImage, TransformTag, TransformUser, TransformProfile]
+      });
+
+      console.log(wetland.getSchemaManager().getSQL())
+      wetland.getSchemaManager().create().then(() => {
+        let entityManager  = wetland.getManager();
+        let unitOfWork     = entityManager.getUnitOfWork();
+        let product        = new TransformProduct;
+        let profile        = new TransformProfile;
+        let categoryOne    = new TransformCategory;
+        let categoryTwo    = new TransformCategory;
+        let categoryThree  = new TransformCategory;
+        let image          = new TransformImage;
+        let tagOne         = new TransformTag;
+        let tagTwo         = new TransformTag;
+        let tagThree       = new TransformTag;
+        let tagFour        = new TransformTag;
+        let creatorOne     = new TransformUser;
+        let creatorTwo     = new TransformUser;
+        let creatorThree   = new TransformUser;
+        let creatorFour    = new TransformUser;
+        profile.id         = ValueObject.fromValue('profile1')
+        profile.slogan     = ValueObject.fromValue('No harm, try harder.');
+        creatorOne.id      = ValueObject.fromValue('creator1')
+        creatorOne.name    = ValueObject.fromValue('test tag one creator');
+        creatorTwo.id      = ValueObject.fromValue('creator2')
+        creatorTwo.name    = ValueObject.fromValue('test tag two creator');
+        creatorThree.id    = ValueObject.fromValue('creator3')
+        creatorThree.name  = ValueObject.fromValue('test tag three creator');
+        creatorFour.id     = ValueObject.fromValue('creator4')
+        creatorFour.name   = ValueObject.fromValue('test tag four creator');
+        creatorOne.profile = profile;
+        image.id           = ValueObject.fromValue('image11')
+        image.name         = ValueObject.fromValue('test image');
+        tagOne.id          = ValueObject.fromValue('tag1')
+        tagOne.name        = ValueObject.fromValue('test tag one');
+        tagOne.creator     = creatorOne;
+        tagTwo.id          = ValueObject.fromValue('tag2')
+        tagTwo.name        = ValueObject.fromValue('test tag two');
+        tagTwo.creator     = creatorTwo;
+        tagThree.id        = ValueObject.fromValue('tag3');
+        tagThree.name      = ValueObject.fromValue('test tag three');
+        tagThree.creator   = creatorThree;
+        tagFour.id         = ValueObject.fromValue('tag4');
+        tagFour.name       = ValueObject.fromValue('test tag four');
+        tagFour.creator    = creatorFour;
+        product.id         = ValueObject.fromValue('product01')
+        product.name       = ValueObject.fromValue('test product');
+        categoryOne.id     = ValueObject.fromValue('category1')
+        categoryOne.name   = ValueObject.fromValue('test category one');
+        categoryTwo.id     = ValueObject.fromValue('category2')
+        categoryTwo.name   = ValueObject.fromValue('test category two');
+        categoryThree.id   = ValueObject.fromValue('category3')
+        categoryThree.name = ValueObject.fromValue('test category three');
+        product.categories = new ArrayCollection;
+        product.image      = image;
+        image.tags         = new ArrayCollection;
+        categoryThree.tags = new ArrayCollection;
+
+        categoryThree.tags.push(tagThree, tagFour);
+
+        unitOfWork.registerClean(categoryThree, true);
+        unitOfWork.registerClean(creatorThree, true);
+        unitOfWork.registerClean(tagThree, true);
+
+        unitOfWork.registerCollectionChange(UnitOfWork.RELATIONSHIP_REMOVED, categoryThree, 'tags', tagThree);
+        unitOfWork.registerCollectionChange(UnitOfWork.RELATIONSHIP_ADDED, categoryThree, 'tags', tagFour);
+        unitOfWork.registerDirty(tagFour, 'name');
+
+        product.categories.push(categoryOne, categoryTwo, categoryThree);
+        image.tags.push(tagOne, tagTwo);
+
+        entityManager.persist(product);
+
+        assert.strictEqual(unitOfWork.getNewObjects().length, 1);
+        assert.strictEqual(unitOfWork.getRelationshipsChangedObjects().length, 1);
+
+        entityManager.flush().then(() => {
+          entityManager.getRepository(TransformUser).findOne({name: ValueObject.fromValue('test tag one creator')}, {populate: {'profile': 'p'}})
+            .then(user => {
+              assert.deepEqual(user.profile.slogan, ValueObject.fromValue('No harm, try harder.'));
 
               wetland.destroyConnections().then(() => {
                 done();

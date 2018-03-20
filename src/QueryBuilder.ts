@@ -740,9 +740,9 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public insert(values, returning?: string): this {
+    let mappedReturning = !returning ? returning : this.mappings[this.alias].getColumnName(returning)
     this.setCriteriaHostAlias();
-
-    this.statement.insert(this.mapToColumns(values), returning);
+    this.statement.insert(this.mapToColumns(values), mappedReturning);
 
     return this;
   }
@@ -756,10 +756,11 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public update(values, returning?: any): this {
+    let mappedReturning = !returning ? returning : this.mappings[this.alias].getColumnName(returning)
     this.setCriteriaHostAlias();
 
     this.statement.from(this.mappings[this.alias].getTableName());
-    this.statement.update(this.mapToColumns(values), returning);
+    this.statement.update(this.mapToColumns(values), mappedReturning);
 
     return this;
   }
@@ -1010,37 +1011,39 @@ export class QueryBuilder<T> {
     mappedValues = {};
 
     Object.getOwnPropertyNames(values).forEach(property => {
+      let mappedValue
       let value = values[property];
-      let fieldName, type;
+      let fieldName, type, resolvedProperty, alias;
 
       if (property.indexOf('.') > -1) {
         let parts = property.split('.');
-
-        if (this.mappings[parts[0]].isRelation(parts[1]) && typeof value === 'object') {
-          return;
-        }
-
-        parts[1]  = this.mappings[parts[0]].getFieldName(parts[1], parts[1]);
-        type      = this.mappings[parts[0]].getType(parts[1]);
-        fieldName = parts.join('.');
+        alias = parts[0]
+        resolvedProperty = parts[1]
+        fieldName = property
       } else {
-        if (this.mappings[this.alias].isRelation(property) && typeof value === 'object') {
-          return;
-        }
-
-        fieldName = this.mappings[this.alias].getFieldName(property, property);
-        type      = this.mappings[this.alias].getType(property);
+        alias = this.alias
+        resolvedProperty = property
+        fieldName = this.mappings[alias].getFieldName(resolvedProperty, resolvedProperty);
       }
+
+      if (this.mappings[alias].isRelation(property) && typeof value === 'object') {
+        return;
+      }
+
+      type = this.mappings[alias].getType(resolvedProperty);
 
       if (!fieldName) {
-        throw new Error(`No field name found in mapping for ${this.mappings[this.alias].getEntityName()}::${property}.`);
+        throw new Error(`No field name found in mapping for ${this.mappings[alias].getEntityName()}::${resolvedProperty}.`);
       }
+
+      let dehydrator = this.mappings[alias].getDehydrationTransformationFunction(resolvedProperty);
+      mappedValue = dehydrator(value)
 
       if (type === 'json') {
-        value = JSON.stringify(value);
+        mappedValue = JSON.stringify(mappedValue);
       }
 
-      mappedValues[fieldName] = value;
+      mappedValues[fieldName] = mappedValue;
     });
 
     return mappedValues;

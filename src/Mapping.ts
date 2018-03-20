@@ -203,7 +203,9 @@ export class Mapping<T> {
     Homefront.merge(field, options);
 
     this.mapColumn(this.getColumnName(property), property);
-
+    if (options.primary) {
+      this.mapping.put('primary', property);
+    }
     return this;
   }
 
@@ -238,6 +240,52 @@ export class Mapping<T> {
    */
   public getColumnName(property): string | null {
     return this.getField(property).name;
+  }
+
+  /**
+   * Returns the hydration transformation function for a property.
+   * This function will be called before assigning the value to the entity
+   *
+   * @param {string} property
+   * @returns {TransformationFunction}
+   */
+  public getHydrationTransformationFunction(property): TransformationFunction {
+    const noopHydrationTransformationFunction = (value: any) => value
+
+    const field = this.getField(property, true)
+    if (!field) {
+      return noopHydrationTransformationFunction
+    }
+
+    let transformation = field.transformation
+    if (!transformation || !transformation.hydrate) {
+      return noopHydrationTransformationFunction
+    }
+
+    return transformation.hydrate
+  }
+
+  /**
+   * Returns the dehydrator transformation function for a property.
+   * This function will be called before assigning the value to the raw values
+   *
+   * @param {string} property
+   * @returns {TransformationFunction}
+   */
+  public getDehydrationTransformationFunction(property): TransformationFunction {
+    const noopDehydrationTransformationFunction = (value: any) => value
+
+    const field = this.getField(property, true)
+    if (!field) {
+      return noopDehydrationTransformationFunction
+    }
+
+    let transformation = field.transformation
+    if (!transformation || !transformation.dehydrate) {
+      return noopDehydrationTransformationFunction
+    }
+
+    return transformation.dehydrate
   }
 
   /**
@@ -1227,7 +1275,17 @@ export interface FieldOptions {
   relationship?: Relationship,
   joinColumn?: JoinColumn,
   joinTable?: JoinTable,
+  transformation?: Transformation,
   [key: string]: any
+}
+
+export interface TransformationFunction {
+  (value: any): any
+}
+
+export interface Transformation {
+  dehydrate?: TransformationFunction
+  hydrate?: TransformationFunction
 }
 
 export interface JoinTable {
@@ -1250,7 +1308,7 @@ export interface JoinColumn {
 }
 
 export interface Relationship {
-  targetEntity: string|{new ()},
+  targetEntity: string|EntityCtor<any>,
   type?: string,
   inversedBy?: string,
   mappedBy?: string

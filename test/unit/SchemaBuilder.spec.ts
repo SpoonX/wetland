@@ -13,6 +13,7 @@ describe('SchemaBuilder', () => {
 
   describe('.create()', () => {
     it('should create my tables (todo)', done => testEntities('todo', done));
+    it('should create my tables (transformtodo)', done => testEntities('transformtodo', done));
     it('should create my tables (postal)', done => testEntities('postal', done));
   });
 });
@@ -49,6 +50,6 @@ function testProperty(connection, section, property, table) {
       .from('information_schema.' + table)
       .where(target)
       .where(property === 'columns' ? 'table_schema' : 'constraint_schema', '=', 'wetland_test')
-      .then(result => assert.lengthOf(result, 1, `'${section}' broken with ${JSON.stringify(target)}`));
+      .then(result => assert.lengthOf(result, 1, `'${section}' broken with ${JSON.stringify(target)}`))
   }));
 }

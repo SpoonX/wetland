@@ -20,7 +20,6 @@ export class EntityProxy {
     if (entity['isEntityProxy']) {
       return entity;
     }
-
     let proxyActive = active;
     let metaData    = MetaData.forInstance(entity);
     let mapping     = Mapping.forEntity(entity);
@@ -93,7 +92,6 @@ export class EntityProxy {
     function setDirty(target: Object, property: string, value: any): boolean {
       if (typeof value === 'object' && value !== null && '_skipDirty' in value) {
         target[property] = value._skipDirty;
-
         return true;
       }
 
@@ -116,7 +114,6 @@ export class EntityProxy {
       // Create a new proxy, and ensure there's an existing collection.
       entity[property] = new Proxy<Object>(collection, <Object> {
         set: (collection: Collection<Object>, key: string | number, relationEntity: any) => {
-
           // Check if this is a set _skipDirty, if so return.
           if (setDirty(collection, key as string, relationEntity)) {
             return true;
@@ -223,7 +220,6 @@ export class EntityProxy {
 
         // If there's no relation, set the value.
         if (!relations || !relations[property]) {
-
           // We're proxying and the value changed. Register as dirty.
           if (isProxyActive() && areDifferent(property, target[property], value)) {
             unitOfWork.registerDirty(target, property);
