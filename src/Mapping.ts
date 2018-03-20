@@ -204,6 +204,10 @@ export class Mapping<T> {
 
     this.mapColumn(this.getColumnName(property), property);
 
+    if (options.primary) {
+      this.mapping.put('primary', property);
+    }
+
     return this;
   }
 
