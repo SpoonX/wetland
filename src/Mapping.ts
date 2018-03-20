@@ -1250,7 +1250,7 @@ export interface JoinColumn {
 }
 
 export interface Relationship {
-  targetEntity: string|{new ()},
+  targetEntity: string|EntityCtor<any>,
   type?: string,
   inversedBy?: string,
   mappedBy?: string
