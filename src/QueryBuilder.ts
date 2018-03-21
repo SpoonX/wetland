@@ -740,9 +740,11 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public insert(values, returning?: string): this {
+    let returnColumn = returning ? this.mappings[this.alias].getColumnName(returning) : undefined
+
     this.setCriteriaHostAlias();
 
-    this.statement.insert(this.mapToColumns(values), returning);
+    this.statement.insert(this.mapToColumns(values), returnColumn);
 
     return this;
   }
@@ -756,10 +758,12 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public update(values, returning?: any): this {
+    let returnColumn = returning ? this.mappings[this.alias].getColumnName(returning) : undefined
+
     this.setCriteriaHostAlias();
 
     this.statement.from(this.mappings[this.alias].getTableName());
-    this.statement.update(this.mapToColumns(values), returning);
+    this.statement.update(this.mapToColumns(values), returnColumn);
 
     return this;
   }
