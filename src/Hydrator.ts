@@ -191,7 +191,9 @@ export class Hydrator {
 
     if (recipe.parent) {
       // Assign self to parent (only for many).
-      recipe.parent.entities[row[recipe.parent.column]][recipe.parent.property].add({_skipDirty: entity});
+      let parentCollection = recipe.parent.entities[row[recipe.parent.column]][recipe.parent.property]
+      let operation = (parentCollection instanceof ArrayCollection) ? parentCollection.add : parentCollection.push
+      operation.call(parentCollection, { _skipDirty: entity })
     }
 
     if (recipe.joins) {
