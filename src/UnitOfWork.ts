@@ -1012,10 +1012,17 @@ export class UnitOfWork {
    * @returns {UnitOfWork}
    */
   public clear(...entities: Array<EntityInterface | ProxyInterface>): UnitOfWork {
-    (entities.length ? entities : this.newObjects).forEach(created => this.clearEntityState(created));
-    (entities.length ? entities : this.deletedObjects).forEach(deleted => this.clearEntityState(deleted));
-    (entities.length ? entities : this.cleanObjects).forEach(clean => this.clearEntityState(clean));
-    (entities.length ? entities : this.relationshipsChangedObjects).forEach(changed => this.clearEntityState(changed));
+    (<Array<EntityInterface | ProxyInterface>>(entities.length ? entities : this.newObjects))
+      .forEach((created: EntityProxy) => this.clearEntityState(created));
+
+    (<Array<EntityInterface | ProxyInterface>>(entities.length ? entities : this.deletedObjects))
+      .forEach(deleted => this.clearEntityState(deleted));
+
+    (<Array<EntityInterface | ProxyInterface>>(entities.length ? entities : this.cleanObjects))
+      .forEach(clean => this.clearEntityState(clean));
+
+    (<Array<EntityInterface | ProxyInterface>>(entities.length ? entities : this.relationshipsChangedObjects))
+      .forEach(changed => this.clearEntityState(changed));
 
     if (entities.length) {
       this.relationshipsChangedObjects.remove(...entities);
