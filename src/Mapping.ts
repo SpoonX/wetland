@@ -190,9 +190,7 @@ export class Mapping<T> {
 
     let toUnderscore = entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
     let propertyName = toUnderscore ? this.nameToUnderscore(property) : property;
-    let field        = this.mapping.fetchOrPut(`fields.${property}`, {
-      cascades: entityManager.getConfig().fetch('mapping.defaults.cascades', [])
-    });
+    let field        = this.mapping.fetchOrPut(`fields.${property}`, {});
 
     if (field.name) {
       this.mapping.remove(`columns.${this.getColumnName(property)}`);
@@ -941,9 +939,15 @@ export class Mapping<T> {
    */
   public completeMapping(): this {
     let relations = this.getRelations();
+    let manager   = this.entityManager;
 
     for (let property in relations) {
       let relation = relations[property];
+      let field    = this.getField(property);
+
+      if (typeof field.cascades === 'undefined') {
+        this.cascade(property, manager.getConfig().fetch('mapping.defaults.cascades', []));
+      }
 
       // Make sure joinTable is complete.
       if (relation.type === Mapping.RELATION_MANY_TO_MANY && relation.inversedBy) {
@@ -956,7 +960,7 @@ export class Mapping<T> {
 
       // Make sure refs are strings
       if (typeof relation.targetEntity !== 'string') {
-        let reference         = this.entityManager.resolveEntityReference(relation.targetEntity);
+        let reference         = manager.resolveEntityReference(relation.targetEntity);
         relation.targetEntity = Mapping.forEntity(reference).getEntityName();
       }
     }
