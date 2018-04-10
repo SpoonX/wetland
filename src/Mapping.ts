@@ -676,8 +676,29 @@ export class Mapping<T> {
       throw new Error('Required property "targetEntity" not found in options.');
     }
 
+    this.setDefaultCascades(property);
+
     this.extendField(property, {relationship: options});
     Homefront.merge(this.mapping.fetchOrPut('relations', {}), {[property]: options});
+
+    return this;
+  }
+
+  /**
+   * Sets the default cascades if no cascade options exist
+   *
+   * @param {string} property
+   */
+  private setDefaultCascades(property: string) {
+    if (!this.entityManager) {
+      return;
+    }
+
+    const field = this.getField(property, true);
+
+    if (field && typeof field.cascades === 'undefined') {
+      this.cascade(property, this.entityManager.getConfig().fetch('mapping.defaults.cascades', []));
+    }
 
     return this;
   }
@@ -943,11 +964,10 @@ export class Mapping<T> {
 
     for (let property in relations) {
       let relation = relations[property];
-      let field    = this.getField(property);
 
-      if (typeof field.cascades === 'undefined') {
-        this.cascade(property, manager.getConfig().fetch('mapping.defaults.cascades', []));
-      }
+      this.setDefaultCascades(property);
+
+      this.cascade(property, this.getField(property).cascades);
 
       // Make sure joinTable is complete.
       if (relation.type === Mapping.RELATION_MANY_TO_MANY && relation.inversedBy) {
