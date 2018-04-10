@@ -1,3 +1,21 @@
+<a name="3.1.0"></a>
+# [3.1.0](https://github.com/SpoonX/wetland/compare/v3.0.0...v3.1.0) (2018-04-10)
+
+
+### Bug Fixes
+
+* **Mapping:** remove cascades from `field()` to `completeMapping()` ([8371b34](https://github.com/SpoonX/wetland/commit/8371b34))
+* **package.json:** fix test script ([4c68853](https://github.com/SpoonX/wetland/commit/4c68853))
+* **UnitOfWork:** fix typings ([d094679](https://github.com/SpoonX/wetland/commit/d094679))
+
+
+### Features
+
+* **Mapping:** add `setDefaultCascades` method ([36364e3](https://github.com/SpoonX/wetland/commit/36364e3))
+* **MetaData:** add clear method for MetaData ([4cdc486](https://github.com/SpoonX/wetland/commit/4cdc486))
+
+
+
 <a name="3.0.0"></a>
 # [3.0.0](https://github.com/SpoonX/wetland/compare/v2.5.0...v3.0.0) (2018-02-04)
 
