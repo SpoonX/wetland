@@ -408,6 +408,9 @@ describe('UnitOfWork', () => {
     });
 
     it('should throw an error for persist when new relation has no cascade persist set', () => {
+      // Fresh start.
+      MetaData.clear(Product, User);
+
       let unitOfWork    = getUnitOfWork([Product, User]);
       let entityManager = unitOfWork.getEntityManager();
       let product       = new Product;
