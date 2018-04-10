@@ -59,7 +59,3 @@ describe('clear()', () => {
     assert.isFalse(MetaData['metaMap'].has(Product));
   });
 });
-
-
-
-
