@@ -428,10 +428,11 @@ export class UnitOfWork {
    * Prepare the cascades for provided entity.
    *
    * @param {EntityInterface} entity
+   * @param {EntityInterface} cascadingParent
    *
    * @returns {UnitOfWork}
    */
-  public prepareCascadesFor(entity: EntityInterface): UnitOfWork {
+  public prepareCascadesFor(entity: EntityInterface, cascadingParent: EntityInterface = null): UnitOfWork {
     let mapping   = Mapping.forEntity(entity);
     let relations = mapping.getRelations();
 
@@ -444,6 +445,11 @@ export class UnitOfWork {
     Object.getOwnPropertyNames(relations).forEach(property => {
       // Not even an object? No need to perform _any_ checks.
       if (typeof entity[property] !== 'object' || entity[property] === null) {
+        return;
+      }
+
+      // Are we trying to persist the parent that just persisted us? Tsk tsk.
+      if (entity[property] === cascadingParent) {
         return;
       }
 
@@ -497,7 +503,7 @@ export class UnitOfWork {
       }
 
       // Woo, cascade persist. Cascade child as well.
-      this.prepareCascadesFor(relation);
+      this.prepareCascadesFor(relation, entity);
 
       // And register relation as new.
       this.registerNew(relation);
@@ -1012,10 +1018,17 @@ export class UnitOfWork {
    * @returns {UnitOfWork}
    */
   public clear(...entities: Array<EntityInterface | ProxyInterface>): UnitOfWork {
-    (entities.length ? entities : this.newObjects).forEach(created => this.clearEntityState(created));
-    (entities.length ? entities : this.deletedObjects).forEach(deleted => this.clearEntityState(deleted));
-    (entities.length ? entities : this.cleanObjects).forEach(clean => this.clearEntityState(clean));
-    (entities.length ? entities : this.relationshipsChangedObjects).forEach(changed => this.clearEntityState(changed));
+    (<Array<EntityInterface | ProxyInterface>>(entities.length ? entities : this.newObjects))
+      .forEach((created: EntityProxy) => this.clearEntityState(created));
+
+    (<Array<EntityInterface | ProxyInterface>>(entities.length ? entities : this.deletedObjects))
+      .forEach(deleted => this.clearEntityState(deleted));
+
+    (<Array<EntityInterface | ProxyInterface>>(entities.length ? entities : this.cleanObjects))
+      .forEach(clean => this.clearEntityState(clean));
+
+    (<Array<EntityInterface | ProxyInterface>>(entities.length ? entities : this.relationshipsChangedObjects))
+      .forEach(changed => this.clearEntityState(changed));
 
     if (entities.length) {
       this.relationshipsChangedObjects.remove(...entities);

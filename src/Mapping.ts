@@ -190,9 +190,7 @@ export class Mapping<T> {
 
     let toUnderscore = entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
     let propertyName = toUnderscore ? this.nameToUnderscore(property) : property;
-    let field        = this.mapping.fetchOrPut(`fields.${property}`, {
-      cascades: entityManager.getConfig().fetch('mapping.defaults.cascades', [])
-    });
+    let field        = this.mapping.fetchOrPut(`fields.${property}`, {});
 
     if (field.name) {
       this.mapping.remove(`columns.${this.getColumnName(property)}`);
@@ -678,8 +676,31 @@ export class Mapping<T> {
       throw new Error('Required property "targetEntity" not found in options.');
     }
 
+    this.setDefaultCascades(property);
+
     this.extendField(property, {relationship: options});
     Homefront.merge(this.mapping.fetchOrPut('relations', {}), {[property]: options});
+
+    return this;
+  }
+
+  /**
+   * Sets the default cascades if no cascade options exist
+   *
+   * @param {string} property
+   *
+   * @returns {Mapping}
+   */
+  private setDefaultCascades(property: string): this {
+    if (!this.entityManager) {
+      return;
+    }
+
+    const field = this.getField(property, true);
+
+    if (field && typeof field.cascades === 'undefined') {
+      this.cascade(property, this.entityManager.getConfig().fetch('mapping.defaults.cascades', []));
+    }
 
     return this;
   }
@@ -941,9 +962,12 @@ export class Mapping<T> {
    */
   public completeMapping(): this {
     let relations = this.getRelations();
+    let manager   = this.entityManager;
 
     for (let property in relations) {
       let relation = relations[property];
+
+      this.setDefaultCascades(property);
 
       // Make sure joinTable is complete.
       if (relation.type === Mapping.RELATION_MANY_TO_MANY && relation.inversedBy) {
@@ -956,7 +980,7 @@ export class Mapping<T> {
 
       // Make sure refs are strings
       if (typeof relation.targetEntity !== 'string') {
-        let reference         = this.entityManager.resolveEntityReference(relation.targetEntity);
+        let reference         = manager.resolveEntityReference(relation.targetEntity);
         relation.targetEntity = Mapping.forEntity(reference).getEntityName();
       }
     }

@@ -13,12 +13,11 @@ import {Tag} from '../resource/entity/shop/tag';
 import {User} from '../resource/entity/shop/user';
 import {Profile} from '../resource/entity/shop/Profile';
 import * as path from 'path';
-import {EntityManager} from '../../src/EntityManager';
 
 let tmpTestDir = path.join(__dirname, '../.tmp');
 
-function getUnitOfWork(entities?): UnitOfWork {
-  let wetland = new Wetland({});
+function getUnitOfWork(entities?, config = {}): UnitOfWork {
+  let wetland = new Wetland(config);
 
   if (entities) {
     wetland.registerEntities(entities);
@@ -58,9 +57,9 @@ describe('UnitOfWork', () => {
 
       assert.strictEqual(relations.added.simples[0], simple1);
       assert.strictEqual(relations.added.simples[1], simple2);
-      assert.strictEqual(relations.added.simples.length, 2);
-      assert.strictEqual(Object.keys(relations.added).length, 1);
-      assert.strictEqual(Object.keys(relations.removed).length, 0);
+      assert.lengthOf(relations.added.simples, 2);
+      assert.lengthOf(Object.keys(relations.added), 1);
+      assert.lengthOf(Object.keys(relations.removed), 0);
     });
 
     it('should register a removed relation for a collection', () => {
@@ -73,9 +72,9 @@ describe('UnitOfWork', () => {
       let relations = MetaData.forInstance(parent).fetch('entityState.relations');
 
       assert.strictEqual(relations.removed.simples[0], simple);
-      assert.strictEqual(relations.removed.simples.length, 1);
-      assert.strictEqual(Object.keys(relations.removed).length, 1);
-      assert.strictEqual(Object.keys(relations.added).length, 0);
+      assert.lengthOf(relations.removed.simples, 1);
+      assert.lengthOf(Object.keys(relations.removed), 1);
+      assert.lengthOf(Object.keys(relations.added), 0);
     });
 
     it('should clean up changed properties and reference on revert', () => {
@@ -92,9 +91,9 @@ describe('UnitOfWork', () => {
       let relations = MetaData.forInstance(parent).fetch('entityState.relations');
 
       assert.strictEqual(relations.added.simples[0], simple1);
-      assert.strictEqual(relations.added.simples.length, 1);
-      assert.strictEqual(Object.keys(relations.added).length, 2);
-      assert.strictEqual(Object.keys(relations.removed).length, 0);
+      assert.lengthOf(relations.added.simples, 1);
+      assert.lengthOf(Object.keys(relations.added), 2);
+      assert.lengthOf(Object.keys(relations.removed), 0);
       unitOfWork.registerCollectionChange(UnitOfWork.RELATIONSHIP_REMOVED, parent, 'simples', simple1);
       assert.deepEqual(relations, {added: {others: [simple2]}, removed: {}});
       unitOfWork.registerCollectionChange(UnitOfWork.RELATIONSHIP_REMOVED, parent, 'others', simple2);
@@ -343,11 +342,39 @@ describe('UnitOfWork', () => {
 
       unitOfWork.prepareCascades();
 
-      assert.strictEqual(unitOfWork.getDeletedObjects().length, 0);
-      assert.strictEqual(unitOfWork.getDirtyObjects().length, 0);
-      assert.strictEqual(unitOfWork.getNewObjects().length, 0);
-      assert.strictEqual(unitOfWork.getCleanObjects().length, 0);
-      assert.strictEqual(unitOfWork.getRelationshipsChangedObjects().length, 0);
+      assert.lengthOf(unitOfWork.getDeletedObjects(), 0);
+      assert.lengthOf(unitOfWork.getDirtyObjects(), 0);
+      assert.lengthOf(unitOfWork.getNewObjects(), 0);
+      assert.lengthOf(unitOfWork.getCleanObjects(), 0);
+      assert.lengthOf(unitOfWork.getRelationshipsChangedObjects(), 0);
+    });
+
+    it('should prepare cascades for one-sided relationship', function () {
+      let config          = {mapping: {defaults: {cascades: ['persist']}}};
+      let unitOfWork      = getUnitOfWork([Simple, Parent], config);
+      let entityManager   = unitOfWork.getEntityManager();
+      let parent          = new Parent;
+      let simple1         = new Simple;
+      let simple2         = new Simple;
+      let simple3         = new Simple;
+      simple1.dateOfBirth = new Date('1/1/2001');
+      simple2.dateOfBirth = new Date('1/1/2002');
+      simple3.dateOfBirth = new Date('1/1/2003');
+      parent.single       = simple1;
+
+      parent.simples.add(simple2, simple3);
+
+      entityManager.persist(parent);
+
+      unitOfWork.prepareCascades();
+
+      assert.lengthOf(unitOfWork.getDeletedObjects(), 0);
+      assert.lengthOf(unitOfWork.getDirtyObjects(), 0);
+      assert.lengthOf(unitOfWork.getNewObjects(), 4);
+      assert.lengthOf(unitOfWork.getCleanObjects(), 0);
+      assert.lengthOf(unitOfWork.getRelationshipsChangedObjects(), 1);
+      assert.strictEqual(unitOfWork.getRelationshipsChangedObjects()[0].single, simple1);
+      assert.sameMembers(unitOfWork.getRelationshipsChangedObjects()[0].simples, [simple2, simple3]);
     });
 
     it('should prepare cascades for persist when new relation', () => {
@@ -367,11 +394,11 @@ describe('UnitOfWork', () => {
 
       unitOfWork.prepareCascades();
 
-      assert.strictEqual(unitOfWork.getDeletedObjects().length, 0);
-      assert.strictEqual(unitOfWork.getDirtyObjects().length, 0);
-      assert.strictEqual(unitOfWork.getNewObjects().length, 3);
-      assert.strictEqual(unitOfWork.getCleanObjects().length, 0);
-      assert.strictEqual(unitOfWork.getRelationshipsChangedObjects().length, 1);
+      assert.lengthOf(unitOfWork.getDeletedObjects(), 0);
+      assert.lengthOf(unitOfWork.getDirtyObjects(), 0);
+      assert.lengthOf(unitOfWork.getNewObjects(), 3);
+      assert.lengthOf(unitOfWork.getCleanObjects(), 0);
+      assert.lengthOf(unitOfWork.getRelationshipsChangedObjects(), 1);
       assert.strictEqual(unitOfWork.getRelationshipsChangedObjects()[0], product);
 
       assert.deepEqual(MetaData.forInstance(product).fetch('entityState.relations'), {
@@ -381,6 +408,9 @@ describe('UnitOfWork', () => {
     });
 
     it('should throw an error for persist when new relation has no cascade persist set', () => {
+      // Fresh start.
+      MetaData.clear(Product, User);
+
       let unitOfWork    = getUnitOfWork([Product, User]);
       let entityManager = unitOfWork.getEntityManager();
       let product       = new Product;
@@ -426,7 +456,7 @@ describe('UnitOfWork', () => {
 
       unitOfWork.prepareCascades();
 
-      assert.strictEqual(unitOfWork.getNewObjects().length, 2);
+      assert.lengthOf(unitOfWork.getNewObjects(), 2);
     });
 
     it('should prepare cascades recursively (aka the shit-show test)', () => {
@@ -484,18 +514,18 @@ describe('UnitOfWork', () => {
 
       entityManager.persist(product);
 
-      assert.strictEqual(unitOfWork.getNewObjects().length, 1);
-      assert.strictEqual(unitOfWork.getRelationshipsChangedObjects().length, 1);
+      assert.lengthOf(unitOfWork.getNewObjects(), 1);
+      assert.lengthOf(unitOfWork.getRelationshipsChangedObjects(), 1);
 
       unitOfWork.prepareCascades();
 
-      assert.strictEqual(unitOfWork.getDeletedObjects().length, 0);
-      assert.strictEqual(unitOfWork.getDirtyObjects().length, 0);
-      assert.strictEqual(unitOfWork.getNewObjects().length, 11);
-      assert.strictEqual(unitOfWork.getCleanObjects().length, 3);
+      assert.lengthOf(unitOfWork.getDeletedObjects(), 0);
+      assert.lengthOf(unitOfWork.getDirtyObjects(), 0);
+      assert.lengthOf(unitOfWork.getNewObjects(), 11);
+      assert.lengthOf(unitOfWork.getCleanObjects(), 3);
 
       // 1 product, 1 category (other two don't have relations), 3 tags, 1 image
-      assert.strictEqual(unitOfWork.getRelationshipsChangedObjects().length, 7);
+      assert.lengthOf(unitOfWork.getRelationshipsChangedObjects(), 7);
 
       assert.deepEqual(MetaData.forInstance(product).fetch('entityState.relations'), {
         removed: {},
@@ -604,8 +634,8 @@ describe('UnitOfWork', () => {
 
         entityManager.persist(product);
 
-        assert.strictEqual(unitOfWork.getNewObjects().length, 1);
-        assert.strictEqual(unitOfWork.getRelationshipsChangedObjects().length, 1);
+        assert.lengthOf(unitOfWork.getNewObjects(), 1);
+        assert.lengthOf(unitOfWork.getRelationshipsChangedObjects(), 1);
 
         entityManager.flush().then(() => {
           entityManager.getRepository(User).findOne({name: 'test tag one creator'}, {populate: {'profile': 'p'}})

@@ -36,6 +36,15 @@ export class MetaData {
   }
 
   /**
+   * Clear the MetaData for provided targets.
+   *
+   * @param {*} targets
+   */
+  static clear(...targets: any[]): void {
+    targets.forEach(target => MetaData.metaMap.delete(MetaData.getConstructor(target)));
+  }
+
+  /**
    * Get metadata for provided target (accepts instance).
    *
    * @param {ProxyInterface} instance

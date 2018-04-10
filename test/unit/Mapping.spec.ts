@@ -4,6 +4,8 @@ import {Product} from '../resource/entity/shop/product';
 import {Category} from '../resource/entity/shop/category';
 import {User} from '../resource/entity/shop/user';
 import {FooEntity} from '../resource/entity/Foo';
+import {Book} from '../resource/entity/book/book';
+import {Publisher} from '../resource/entity/book/publisher';
 import {EntityRepository} from '../../src/EntityRepository';
 import {Wetland} from '../../src/Wetland';
 import {assert} from 'chai';
@@ -17,6 +19,13 @@ let wetland = new Wetland({
 
 let wetland2 = new Wetland({
   entities: [FooEntity]
+});
+
+let wetlandCascades = new Wetland({
+  entities: [Book, Publisher, Product, User],
+  mapping : {
+    defaults: {cascades: ['persist']}
+  }
 });
 
 function getMapping(wetland, entity) {
@@ -42,19 +51,40 @@ describe('Mapping', () => {
     });
   });
 
+  describe('.setEntityManager()', () => {
+    it('should set the entity manager and apply staged mappings', () => {
+      let mapping       = new Mapping(FooEntity);
+      let entityManager = wetland.getEntityManager();
+      let entity        = {
+        repository: EntityRepository,
+        name      : 'FooEntity',
+        tableName : 'foo_entity',
+        store     : null
+      };
+
+      assert.isUndefined(mapping['entityManager']);
+      assert.lengthOf(mapping['stagedMappings'], 1);
+      assert.isNull(mapping.getMappingData().fetch('entity'));
+
+      mapping.setEntityManager(entityManager);
+
+      assert.deepEqual(mapping['entityManager'], entityManager);
+      assert.lengthOf(mapping['stagedMappings'], 0);
+      assert.deepEqual(mapping.getMappingData().fetch('entity'), entity);
+    });
+  });
+
   describe('.field()', () => {
     it('should replace case to underscore by default and add the options', () => {
       let mapping = getMapping(wetland, ToUnderscore);
       let camel   = {
-        name    : 'camel_case_to_underscore',
-        cascades: [],
-        type    : 'string',
-        size    : 20
+        name: 'camel_case_to_underscore',
+        type: 'string',
+        size: 20
       };
       let pascal  = {
-        name    : 'pascal_to_underscore',
-        cascades: [],
-        type    : 'integer'
+        name: 'pascal_to_underscore',
+        type: 'integer'
       };
 
       assert.deepEqual(mapping.getField('camelCaseToUnderscore'), camel);
@@ -101,6 +131,35 @@ describe('Mapping', () => {
       };
 
       assert.deepEqual(mapping.getMappingData().fetch('columns'), columnName);
+    });
+  });
+
+  describe('.completeMapping()', () => {
+    it('should complete mapping with cascades option from wetland config', function () {
+      let manager    = wetlandCascades.getEntityManager();
+      let mapping    = getMapping(wetlandCascades, Book).setEntityManager(manager);
+      let field      = mapping.getField('publisher');
+      let joinColumn = {
+        name                : 'publisher_id',
+        referencedColumnName: 'id',
+        unique              : false,
+        nullable            : false
+      };
+
+      mapping.completeMapping();
+
+      assert.deepEqual(field.cascades, ['persist']);
+      assert.deepEqual(field.joinColumn, joinColumn)
+    });
+
+    it('should overwrite default cascades option', function () {
+      let manager = wetlandCascades.getEntityManager();
+      let mapping = getMapping(wetlandCascades, User).setEntityManager(manager);
+      let field   = mapping.getField('profile');
+
+      mapping.completeMapping();
+
+      assert.sameMembers(field.cascades, ['persist', 'delete']);
     });
   });
 
@@ -243,30 +302,25 @@ describe('Mapping', () => {
           name          : 'underscore_id'
         },
         camelCaseToUnderscore  : {
-          name    : 'camel_case_to_underscore',
-          cascades: [],
-          type    : 'string',
-          size    : 20
+          name: 'camel_case_to_underscore',
+          type: 'string',
+          size: 20
         },
         PascalToUnderscore     : {
-          name    : 'pascal_to_underscore',
-          cascades: [],
-          type    : 'integer'
+          name: 'pascal_to_underscore',
+          type: 'integer'
         },
         already_underscore     : {
-          name    : 'already_underscore',
-          cascades: [],
-          type    : 'boolean'
+          name: 'already_underscore',
+          type: 'boolean'
         },
         camelCaseAnd_underscore: {
-          name    : 'camel_case_and_underscore',
-          cascades: [],
-          type    : 'boolean'
+          name: 'camel_case_and_underscore',
+          type: 'boolean'
         },
         customName             : {
-          name    : 'customColumnName',
-          cascades: [],
-          type    : 'string'
+          name: 'customColumnName',
+          type: 'string'
         }
       };
 

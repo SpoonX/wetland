@@ -5,7 +5,7 @@
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts",
   "scripts": {
-    "test": "mocha dist/test/helper dist/test/unit/** --timeout 15000",
+    "test": "mocha dist/test/helper dist/test/unit/{*.spec.js,**/*.spec.js} --timeout 15000",
     "dtest": "npm run build && npm run test",
     "build": "rm -rf ./dist && tsc && gulp build",
     "version": "conventional-changelog -p angular -i doc/CHANGELOG.md -s && git add -A doc/CHANGELOG.md",
@@ -54,6 +54,7 @@
     "reflect-metadata": "^0.1.3",
     "rimraf": "^2.6.1",
     "sqlite3": "^3.1.4",
+    "ts-node": "^5.0.1",
     "typescript": "^2.6.2"
   }
 }
