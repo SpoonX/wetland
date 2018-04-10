@@ -4,6 +4,8 @@ import {Product} from '../resource/entity/shop/product';
 import {Category} from '../resource/entity/shop/category';
 import {User} from '../resource/entity/shop/user';
 import {FooEntity} from '../resource/entity/Foo';
+import {Book} from '../resource/entity/book/book';
+import {Publisher} from '../resource/entity/book/publisher';
 import {EntityRepository} from '../../src/EntityRepository';
 import {Wetland} from '../../src/Wetland';
 import {assert} from 'chai';
@@ -17,6 +19,13 @@ let wetland = new Wetland({
 
 let wetland2 = new Wetland({
   entities: [FooEntity]
+});
+
+let wetlandCascades = new Wetland({
+  entities: [Book, Publisher, Product, User],
+  mapping : {
+    defaults: {cascades: ['persist']}
+  }
 });
 
 function getMapping(wetland, entity) {
@@ -42,6 +51,29 @@ describe('Mapping', () => {
     });
   });
 
+  describe('.setEntityManager()', () => {
+    it('should set the entity manager and apply staged mappings', () => {
+      let mapping       = new Mapping(FooEntity);
+      let entityManager = wetland.getEntityManager();
+      let entity        = {
+        repository: EntityRepository,
+        name      : 'FooEntity',
+        tableName : 'foo_entity',
+        store     : null
+      };
+
+      assert.isUndefined(mapping['entityManager']);
+      assert.lengthOf(mapping['stagedMappings'], 1);
+      assert.isNull(mapping.getMappingData().fetch('entity'));
+
+      mapping.setEntityManager(entityManager);
+
+      assert.deepEqual(mapping['entityManager'], entityManager);
+      assert.lengthOf(mapping['stagedMappings'], 0);
+      assert.deepEqual(mapping.getMappingData().fetch('entity'), entity);
+    });
+  });
+
   describe('.field()', () => {
     it('should replace case to underscore by default and add the options', () => {
       let mapping = getMapping(wetland, ToUnderscore);
@@ -50,7 +82,7 @@ describe('Mapping', () => {
         type: 'string',
         size: 20
       };
-      let pascal = {
+      let pascal  = {
         name: 'pascal_to_underscore',
         type: 'integer'
       };
@@ -99,6 +131,35 @@ describe('Mapping', () => {
       };
 
       assert.deepEqual(mapping.getMappingData().fetch('columns'), columnName);
+    });
+  });
+
+  describe('.completeMapping()', () => {
+    it('should complete mapping with cascades option from wetland config', function () {
+      let manager    = wetlandCascades.getEntityManager();
+      let mapping    = getMapping(wetlandCascades, Book).setEntityManager(manager);
+      let field      = mapping.getField('publisher');
+      let joinColumn = {
+        name                : 'publisher_id',
+        referencedColumnName: 'id',
+        unique              : false,
+        nullable            : false
+      };
+
+      mapping.completeMapping();
+
+      assert.deepEqual(field.cascades, ['persist']);
+      assert.deepEqual(field.joinColumn, joinColumn)
+    });
+
+    it('should overwrite default cascades option', function () {
+      let manager = wetlandCascades.getEntityManager();
+      let mapping = getMapping(wetlandCascades, User).setEntityManager(manager);
+      let field   = mapping.getField('profile');
+
+      mapping.completeMapping();
+
+      assert.sameMembers(field.cascades, ['persist', 'delete']);
     });
   });
 
@@ -234,7 +295,7 @@ describe('Mapping', () => {
   describe('.getFields()', () => {
     it('should get the fields for mapped entity', () => {
       let mapping = getMapping(wetland, ToUnderscore);
-      let fields = {
+      let fields  = {
         id                     : {
           primary       : true,
           generatedValue: 'autoIncrement',
