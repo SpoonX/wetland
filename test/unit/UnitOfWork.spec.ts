@@ -415,6 +415,7 @@ describe('UnitOfWork', () => {
 
       entityManager.persist(product);
 
+      // Expected error which wasn't thrown because author.cascade === ['persist'] 
       assert.throws(() => {
         unitOfWork.prepareCascades();
       }, 'Un-persisted relation found on "Product.author". Either persist the entity, or use the cascade persist option.');
