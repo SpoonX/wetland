@@ -688,8 +688,10 @@ export class Mapping<T> {
    * Sets the default cascades if no cascade options exist
    *
    * @param {string} property
+   *
+   * @returns {Mapping}
    */
-  private setDefaultCascades(property: string) {
+  private setDefaultCascades(property: string): this {
     if (!this.entityManager) {
       return;
     }
@@ -966,8 +968,6 @@ export class Mapping<T> {
       let relation = relations[property];
 
       this.setDefaultCascades(property);
-
-      this.cascade(property, this.getField(property).cascades);
 
       // Make sure joinTable is complete.
       if (relation.type === Mapping.RELATION_MANY_TO_MANY && relation.inversedBy) {
