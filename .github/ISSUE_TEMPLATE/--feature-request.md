@@ -1,6 +1,6 @@
 ---
 name: "\U0001F4A1Feature request"
-about: Suggest an idea for this project
+about: Suggest an idea for this project.
 
 ---
 
