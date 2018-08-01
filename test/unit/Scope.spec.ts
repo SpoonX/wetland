@@ -6,6 +6,8 @@ import {Simple} from '../resource/entity/Simple';
 import {EntityRepository} from '../../src/EntityRepository';
 import {WithCustomRepository} from '../resource/entity/WithCustomRepository';
 import {CustomRepository} from '../resource/repository/CustomRepository';
+import {NoAutoIncrement} from "../resource/entity/NoAutoIncrement";
+import {Schema} from "../resource/Schema";
 
 function entityManager(entities?): Scope {
   let wetland = new Wetland({});
@@ -79,6 +81,52 @@ describe('Scope', () => {
     it('should return a reference', () => {
       // @todo test if delete works like this:
       // entityManager.remove(entityManager.getReference('Foo', 6));
+    });
+  });
+
+  describe('.refresh()', () => {
+    const wetland = new Wetland({
+      stores: {
+        defaultStore: {
+          client: 'mysql',
+          connection: {
+            user: 'root',
+            host: '127.0.0.1',
+            database: 'wetland_test'
+          }
+        }
+      },
+      entities: [NoAutoIncrement]
+    });
+
+    before((done) => {
+      Schema.resetDatabase(() => wetland.getSchemaManager().create().then(() => done()));
+    });
+
+    it('should throw an error on refresh without AI if refresh is enabled.', done => {
+      const scope = wetland.getManager();
+
+      scope.persist(Object.assign(new NoAutoIncrement, {id: 123, foo: 'foo'}));
+
+      // Flush with default (refresh enabled).
+      scope.flush(false, false)
+        .then(() => done('flush should have failed.'))
+        .catch(error => {
+          assert.strictEqual(error.message, 'Cannot refresh entity without a PK value.');
+
+          done();
+        });
+    });
+
+    it('should not throw an error on refresh without PK if refresh is disabled', done => {
+      const scope = wetland.getManager();
+
+      scope.persist(Object.assign(new NoAutoIncrement, {id: 456, foo: 'foo'}));
+
+      // Flush with refresh disabled.
+      scope.flush(false, false, {refreshCreated: false})
+        .then(() => done())
+        .catch(() => done('Flush should have succeeded.'));
     });
   });
 
