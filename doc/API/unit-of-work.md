@@ -10,7 +10,7 @@ let unitOfWork = wetland.getManager().getUnitOfWork();
 
 {% method %}
 ## .cascadeSingle()
-Prepares cascade for a single entity. This method is used in `.prepareCascades()`. 
+Prepares cascade for a single entity. This method is used in `.prepareCascades()`.
 
 {% common %}
 ```js
@@ -30,7 +30,7 @@ unitOfWork.clean();
 
 {% method %}
 ## .clear()
-Rolls back all affected objects. 
+Rolls back all affected objects.
 It reverts changes in dirty entities, un-persist new entities, un-stage deleted entities and refresh persisted entities.
 
 {% common %}
@@ -55,7 +55,19 @@ Commits the current state to the database.
 
 {% common %}
 ```js
-unitOfWork.commit();
+// Skip cleaning (state) of entities. Saves on performance.
+// Only use if you're done with the scope.
+const skipClean = true;
+
+// Skips the lifecycle hooks on the entities. Useful in rare situations.
+const skipLifecycleHooks = true;
+
+// Some options to override the defaults for this specific flush.
+// Refresh is responsible for re-fetching the entity's data from the database.
+const config = { refreshCreated: true, refreshUpdated: true };
+
+// Aaaand commit!
+unitOfWork.commit(skipClean, skipLifecycleHooks, config);
 ```
 {% endmethod %}
 
@@ -171,7 +183,7 @@ unitOfWork.prepareCascades();
 
 {% method %}
 ## .prepareCascadesFor()
-Prepares the cascades for provided entity. 
+Prepares the cascades for provided entity.
 Used internally by `.cascadeSingle()` to cascade a property's child and by `prepareCascades()` to prepare cascades for every entity.
 
 {% common %}
@@ -192,8 +204,8 @@ unitOfWork.registerClean(object);
 
 {% method %}
 ## .registerCollectionChange()
-Register a collection change between `targetEntity` and `relationEntity`. 
-Used internally by `.prepareCascadesFor()` to link up a new relation with entity. 
+Register a collection change between `targetEntity` and `relationEntity`.
+Used internally by `.prepareCascadesFor()` to link up a new relation with entity.
 Can also be used to remove a relationship.
 
 {% common %}
@@ -234,7 +246,7 @@ unitOfWork.registerNew(object);
 
 {% method %}
 ## .registerRelationChange()
-Register a relationship change between `targetEntity` and `relationEntity`. 
+Register a relationship change between `targetEntity` and `relationEntity`.
 Used by `.prepareCascadesFor()` to register relationship changes.
 
 {% common %}
@@ -245,7 +257,7 @@ unitOfWork.registerRelationChange('relationship_added', targetEntity, 'property'
 
 {% method %}
 ## .setEntityState()
-Sets the state of an entity. 
+Sets the state of an entity.
 Used internally by `.registerClean()`, `.registerNew()`, `.registerDirty()` and `.registerDeleted()`.
 
 {% common %}

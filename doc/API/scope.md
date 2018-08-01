@@ -43,7 +43,19 @@ One of the things involved in this is making the distinction between stores.
 
 {% common %}
 ```js
-scope.flush();
+// Skip cleaning (state) of entities. Saves on performance.
+// Only use if you're done with the scope.
+const skipClean = true;
+
+// Skips the lifecycle hooks on the entities. Useful in rare situations.
+const skipLifecycleHooks = true;
+
+// Some options to override the defaults for this specific flush.
+// Refresh is responsible for re-fetching the entity's data from the database.
+const config = { refreshCreated: true, refreshUpdated: true };
+
+// Aaaand flush!
+scope.flush(skipClean, skipLifecycleHooks, config);
 ```
 {% endmethod %}
 
