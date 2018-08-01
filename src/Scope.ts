@@ -134,11 +134,20 @@ export class Scope {
     let refreshes = [];
     let hydrator  = new Hydrator(this);
 
+    if (!Array.isArray(entity) || !entity.length) {
+      return Promise.resolve(null);
+    }
+
     entity.forEach(toRefresh => {
-      let entityCtor     = this.resolveEntityReference(toRefresh);
-      let primaryKeyName = Mapping.forEntity(entityCtor).getPrimaryKey();
-      let primaryKey     = toRefresh[primaryKeyName];
-      let refresh        = this.getRepository(entityCtor).getQueryBuilder()
+      const entityCtor     = this.resolveEntityReference(toRefresh);
+      const primaryKeyName = Mapping.forEntity(entityCtor).getPrimaryKey();
+      const primaryKey     = toRefresh[primaryKeyName];
+
+      if (!primaryKey) {
+        return refreshes.push(Promise.reject(new Error('Cannot refresh entity without a PK value.')));
+      }
+
+      const refresh = this.getRepository(entityCtor).getQueryBuilder()
         .where({[primaryKeyName]: primaryKey})
         .limit(1)
         .getQuery()
@@ -268,13 +277,16 @@ export class Scope {
    * This means calculating changes to make, as well as the order to do so.
    * One of the things involved in this is making the distinction between stores.
    *
-   * @param {boolean} skipClean
-   * @param {boolean} skipLifecyclehooks
-   *
-   * @return {Promise}
+   * @param {boolean}                                           skipClean
+   * @param {boolean}                                           skipLifecycleHooks
+   * @param {refreshCreated: boolean, refreshUpdated: boolean}  config
    */
-  public flush(skipClean: boolean = false, skipLifecyclehooks: boolean = false): Promise<any> {
-    return this.unitOfWork.commit(skipClean, skipLifecyclehooks);
+  public flush(
+    skipClean: boolean = false,
+    skipLifecycleHooks: boolean = false,
+    config: {refreshCreated?: boolean, refreshUpdated?: boolean} = {refreshCreated: null, refreshUpdated: null}
+  ): Promise<any> {
+    return this.unitOfWork.commit(skipClean, skipLifecycleHooks, config);
   }
 
   /**
