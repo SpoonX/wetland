@@ -556,21 +556,32 @@ export class UnitOfWork {
   /**
    * Commit the current state.
    *
-   * @param {boolean} skipClean
-   * @param {boolean} skipLifecycleHooks
+   * @param {boolean}                                           skipClean
+   * @param {boolean}                                           skipLifecycleHooks
+   * @param {refreshCreated: boolean, refreshUpdated: boolean}  config
    *
    * @returns {Promise<UnitOfWork>}
    */
-  public commit(skipClean: boolean = false, skipLifecycleHooks: boolean = false): Promise<any> {
+  public commit(
+    skipClean: boolean = false,
+    skipLifecycleHooks: boolean = false,
+    config: {refreshCreated?: boolean, refreshUpdated?: boolean} = {refreshCreated: null, refreshUpdated: null}
+  ): Promise<any> {
     this.prepareCascades();
+
+    const defaultConfig       = this.entityManager.getConfig();
+    const refreshCreated      = defaultConfig.fetch('entityManager.refreshCreated');
+    const refreshUpdated      = defaultConfig.fetch('entityManager.refreshUpdated');
+    const shouldRefreshUpdate = typeof config.refreshUpdated === 'boolean' ? config.refreshUpdated : refreshUpdated;
+    const shouldRefreshCreate = typeof config.refreshCreated === 'boolean' ? config.refreshCreated : refreshCreated;
 
     return this.insertNew(skipLifecycleHooks)
       .then(() => this.updateDirty(skipLifecycleHooks))
       .then(() => this.deleteDeleted(skipLifecycleHooks))
       .then(() => this.updateRelationships())
       .then(() => this.commitOrRollback(true))
-      .then(() => this.entityManager.getConfig().fetch('entityManager.refreshUpdated') && this.refreshDirty())
-      .then(() => this.entityManager.getConfig().fetch('entityManager.refreshCreated') && this.refreshNew())
+      .then(() => shouldRefreshUpdate && this.refreshDirty())
+      .then(() => shouldRefreshCreate && this.refreshNew())
       .then(() => !skipClean && this.cleanObjectsAndTransactions())
       .then(() => !skipClean && this.processAfterCommit())
       .then(() => !skipClean && this.cleanAfterCommit())
@@ -818,6 +829,10 @@ export class UnitOfWork {
       const executeInsertion = () => {
         return queryBuilder.insert(target, primaryKey).getQuery().execute()
           .then(result => {
+            if (!primaryKey) {
+              return;
+            }
+
             if (target.isEntityProxy) {
               target[primaryKey] = {_skipDirty: result[0]};
 
