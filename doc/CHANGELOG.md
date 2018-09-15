@@ -1,3 +1,19 @@
+<a name="3.1.1"></a>
+## [3.1.1](https://github.com/SpoonX/wetland/compare/v3.1.0...v3.1.1) (2018-09-15)
+
+
+### Bug Fixes
+
+* **Mapping:** add missing Mapping return ([60ff891](https://github.com/SpoonX/wetland/commit/60ff891))
+* **UnitOfWork:** throw error on missing pk value and add config to commit ([cbf5f6e](https://github.com/SpoonX/wetland/commit/cbf5f6e))
+
+
+### BREAKING CHANGES
+
+* **UnitOfWork:** This change will start throwing different errors. If you matched on the error message before you'll have to change that. Check the diff for details. Also, entities used to have null properties if no AI PK was found. This has been fixed. If you checked for them, please upodate your code.
+
+
+
 <a name="3.1.0"></a>
 # [3.1.0](https://github.com/SpoonX/wetland/compare/v3.0.0...v3.1.0) (2018-04-10)
 
