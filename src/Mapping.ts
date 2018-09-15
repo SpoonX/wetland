@@ -185,7 +185,7 @@ export class Mapping<T> {
     let entityManager = this.stageOrGetManager('field', arguments);
 
     if (!entityManager) {
-      return;
+      return this;
     }
 
     let toUnderscore = entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
