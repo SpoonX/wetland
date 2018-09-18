@@ -229,7 +229,7 @@ export class SchemaBuilder {
       return;
     }
 
-    tableNames.forEach(tableName => {
+    tableNames.forEach((tableName: string) => {
       const toDrop = drop[tableName];
 
       code.push(`\n${spacing()}builder.schema.alterTable('${tableName}', table => {`);
@@ -257,7 +257,7 @@ export class SchemaBuilder {
       return;
     }
 
-    tableNames.forEach(tableName => {
+    tableNames.forEach((tableName: string) => {
       const toCreate = create[tableName];
 
       code.push(`\n${spacing()}builder.schema.alterTable('${tableName}', table => {`);
@@ -382,7 +382,7 @@ export class SchemaBuilder {
 
       // Add index
       if (typeof table.index === 'object') {
-        Reflect.ownKeys(table.index).forEach(index => {
+        Reflect.ownKeys(table.index).forEach((index: string) => {
           ensureBuilder();
 
           code.push(`${spacing()}table.index(${JSON.stringify(table.index[index]).replace(/"/g, "'")}, '${index}');`);
@@ -391,7 +391,7 @@ export class SchemaBuilder {
 
       // Add unique
       if (typeof table.unique === 'object') {
-        Reflect.ownKeys(table.unique).forEach(uniqueConstraint => {
+        Reflect.ownKeys(table.unique).forEach((uniqueConstraint: string) => {
           ensureBuilder();
 
           code.push(`${spacing()}table.unique(${JSON.stringify(table.unique[uniqueConstraint]).replace(/"/g, "'")}, '${uniqueConstraint}');`);

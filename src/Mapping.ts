@@ -300,7 +300,7 @@ export class Mapping<T> {
   public getFieldNames(includeRelations: boolean = false): Array<string> {
     let fields = this.getFields();
 
-    return Reflect.ownKeys(fields).reduce((fieldNames, fieldName) => {
+    return Reflect.ownKeys(fields).reduce((fieldNames, fieldName: string) => {
       if (!fields[fieldName].relationship || includeRelations) {
         fieldNames.push(fieldName);
       }
@@ -1274,7 +1274,7 @@ export interface JoinColumn {
 }
 
 export interface Relationship {
-  targetEntity: string|{new ()},
+  targetEntity: string|EntityCtor<EntityInterface>,
   type?: string,
   inversedBy?: string,
   mappedBy?: string

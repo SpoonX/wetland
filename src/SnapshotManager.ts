@@ -347,7 +347,7 @@ export class SnapshotManager {
       });
     });
 
-    diff.create.forEach(entity => {
+    diff.create.forEach((entity: string) => {
       let toCreate     = newMapping[entity];
       let instructions = getInstructions(toCreate.store);
       let create       = getCreateInstructions(instructions.create, toCreate.entity.tableName);

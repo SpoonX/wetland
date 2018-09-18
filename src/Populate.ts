@@ -36,7 +36,7 @@ export class Populate {
     let options    = {populate: new Collection(), alias: mapping.getTableName()};
     let relations  = mapping.getRelations();
 
-    Reflect.ownKeys(data).forEach(property => {
+    Reflect.ownKeys(data).forEach((property: string) => {
       if (!relations || !relations[property]) {
         return;
       }

@@ -61,12 +61,12 @@ export class Run {
   public run(): Bluebird<any> {
     return Bluebird.each(this.migrations, migration => migration.run())
       .then(() => {
-        return Bluebird.map(Reflect.ownKeys(this.transactions), transaction => {
+        return Bluebird.map(Reflect.ownKeys(this.transactions) as any, (transaction: string) => {
           return (this.transactions[transaction] as Knex.Transaction).commit();
         });
       })
       .catch(error => {
-        return Bluebird.map(Reflect.ownKeys(this.transactions), transaction => {
+        return Bluebird.map(Reflect.ownKeys(this.transactions) as any, (transaction: string) => {
           return (this.transactions[transaction] as Knex.Transaction).rollback();
         }).then(() => Bluebird.reject(error));
       });

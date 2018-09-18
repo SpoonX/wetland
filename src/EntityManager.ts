@@ -59,7 +59,7 @@ export class EntityManager {
    *
    * @returns {Function}
    */
-  public getEntity(name: string): {new ()} {
+  public getEntity(name: string): EntityCtor<EntityInterface> {
     let entity = this.entities[name];
 
     if (!entity) {
@@ -105,7 +105,7 @@ export class EntityManager {
    * @returns {Mapping}
    */
   public getMapping<T>(entity: T): Mapping<T> {
-    return Mapping.forEntity(this.resolveEntityReference(entity));
+    return Mapping.forEntity(this.resolveEntityReference(entity)) as Mapping<T>;
   }
 
   /**
@@ -130,15 +130,15 @@ export class EntityManager {
    *
    * @returns {EntityInterface|null}
    */
-  public resolveEntityReference(hint: Entity): {new ()} {
+  public resolveEntityReference(hint: Entity): EntityCtor<EntityInterface> {
     if (typeof hint === 'string') {
       return this.getEntity(hint);
     }
 
     if (typeof hint === 'object') {
-      return hint as {new ()};
+      return hint as EntityCtor<EntityInterface>;
     }
 
-    return typeof hint === 'function' ? hint as {new ()} : null;
+    return typeof hint === 'function' ? hint as EntityCtor<EntityInterface> : null;
   }
 }

@@ -3,7 +3,7 @@ import {Mapping} from './Mapping';
 import {ArrayCollection} from './ArrayCollection';
 import {EntityProxy} from './EntityProxy';
 import {UnitOfWork} from './UnitOfWork';
-import {EntityInterface, ProxyInterface} from './EntityInterface';
+import {EntityInterface, ProxyInterface, EntityCtor} from './EntityInterface';
 import {Scope, Entity} from './Scope';
 
 export class Hydrator {
@@ -59,11 +59,11 @@ export class Hydrator {
    * @param {{}}       values
    * @param {Function} EntityClass
    *
-   * @returns {EntityInterface|Function|{new()}}
+   * @returns {EntityInterface|Function|EntityCtor<EntityInterface>}
    */
-  public fromSchema(values: Object, EntityClass: EntityInterface | Function | {new ()}): ProxyInterface {
+  public fromSchema(values: Object, EntityClass: EntityInterface | Function | EntityCtor<EntityInterface>): ProxyInterface {
     let mapping = Mapping.forEntity(EntityClass);
-    let entity  = typeof EntityClass === 'function' ? new (EntityClass as {new ()}) : EntityClass;
+    let entity  = typeof EntityClass === 'function' ? new (EntityClass as EntityCtor<EntityInterface>) : EntityClass;
     entity      = EntityProxy.patchEntity(entity as EntityInterface, this.entityManager);
 
     Object.getOwnPropertyNames(values).forEach(column => {
@@ -110,7 +110,7 @@ export class Hydrator {
     let recipe            = {
       hydrate   : false,
       parent    : null,
-      entity    : mapping.getTarget(),
+      entity    : mapping.getTarget() as EntityCtor<EntityInterface>,
       primaryKey: {alias: primaryKeyAliased, property: primaryKey},
       type      : joinType,
       columns   : {},
@@ -345,7 +345,7 @@ export interface Catalogue {
 export interface Recipe {
   hydrate: boolean,
   alias: string,
-  entity: {new ()},
+  entity: EntityCtor<EntityInterface>,
   primaryKey: {alias: string, property: string},
   columns: {},
   catalogue?: Catalogue,
