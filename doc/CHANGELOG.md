@@ -1,3 +1,13 @@
+<a name="4.1.0"></a>
+# [4.1.0](https://github.com/SpoonX/wetland/compare/v4.0.2...v4.1.0) (2018-09-23)
+
+
+### Features
+
+* **EntityRepository:** add simple paging support ([b588434](https://github.com/SpoonX/wetland/commit/b588434))
+
+
+
 <a name="4.0.2"></a>
 ## [4.0.2](https://github.com/SpoonX/wetland/compare/v4.0.1...v4.0.2) (2018-09-23)
 
