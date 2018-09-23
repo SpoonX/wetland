@@ -3,6 +3,8 @@ import {Wetland} from './Wetland';
 import {Scope, Entity} from './Scope';
 import {EntityInterface, EntityCtor} from './EntityInterface';
 import {Homefront} from 'homefront';
+import { EntityRepository } from './EntityRepository';
+import { Store } from './Store';
 
 /**
  * The main entity manager for wetland.
@@ -13,9 +15,9 @@ export class EntityManager {
   /**
    * The wetland instance this entity manager belongs to.
    *
-   * @type {Wetland}
+   * @type { Wetland }
    */
-  private wetland: Wetland = null;
+  private readonly wetland: Wetland = null;
 
   /**
    * Holds the entities registered with the entity manager indexed on name.
@@ -23,6 +25,13 @@ export class EntityManager {
    * @type {{}}
    */
   private entities: {[key: string]: {entity: EntityCtor<EntityInterface>, mapping: Mapping<EntityInterface>}} = {};
+
+  /**
+   * Holds instances of repositories that have been instantiated before, as a cache.
+   *
+   * @type { Map }
+   */
+  private repositories: Map<EntityCtor<EntityInterface>, EntityRepository<any>> = new Map();
 
   /**
    * Construct a new core entity manager.
@@ -67,6 +76,49 @@ export class EntityManager {
     }
 
     return entity.entity;
+  }
+
+  /**
+   * Get a repository instance for the provided Entity reference.
+   *
+   * @param {string|Entity} entity
+   * @param {Scope}         scope
+   *
+   * @returns {EntityRepository}
+   */
+  public getRepository<T>(entity: string | EntityCtor<T>, scope?: Scope): EntityRepository<T> {
+    const entityReference = this.resolveEntityReference(entity) as EntityCtor<T>;
+
+    if (!this.repositories.has(entityReference) || scope) {
+      const Repository = Mapping.forEntity(entityReference).getRepository();
+
+      if (scope) {
+        return new Repository(scope, entityReference)
+      }
+
+      this.repositories.set(entityReference, new Repository(this, entityReference));
+    }
+
+    return this.repositories.get(entityReference) as EntityRepository<T>;
+  }
+
+  /**
+   * Get store for provided entity.
+   *
+   * @param {EntityInterface} entity
+   *
+   * @returns {Store}
+   */
+  public getStore(entity?: EntityInterface | string): Store {
+    let storeName = null;
+
+    if (typeof entity === 'string') {
+      storeName = entity;
+    } else if (entity) {
+      storeName = this.getMapping(entity).getStoreName();
+    }
+
+    return this.wetland.getStore(storeName);
   }
 
   /**

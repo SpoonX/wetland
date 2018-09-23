@@ -15,7 +15,7 @@ export class Scope {
   /**
    * @type {UnitOfWork}
    */
-  private unitOfWork: UnitOfWork;
+  private readonly unitOfWork: UnitOfWork;
 
   /**
    * @type {EntityManager}
@@ -58,15 +58,12 @@ export class Scope {
   /**
    * Proxy method the entityManager getRepository method.
    *
-   * @param {Entity} entity
+   * @param {string|Entity} entity
    *
    * @returns {EntityRepository}
    */
-  public getRepository<T>(entity: EntityCtor<T>): EntityRepository<T> {
-    let entityReference = this.manager.resolveEntityReference(entity) as EntityCtor<T>;
-    let Repository      = Mapping.forEntity(entityReference).getRepository();
-
-    return new Repository(this, entityReference);
+  public getRepository<T>(entity: string | EntityCtor<T>): EntityRepository<T> {
+    return this.manager.getRepository(entity, this);
   }
 
   /**
@@ -190,15 +187,7 @@ export class Scope {
    * @returns {Store}
    */
   public getStore(entity?: EntityInterface | string): Store {
-    let storeName = null;
-
-    if (typeof entity === 'string') {
-      storeName = entity;
-    } else if (entity) {
-      storeName = this.manager.getMapping(entity).getStoreName();
-    }
-
-    return this.wetland.getStore(storeName);
+    return this.manager.getStore(entity);
   }
 
   /**

@@ -1,16 +1,17 @@
 import {Mapping} from './Mapping';
 import {QueryBuilder} from './QueryBuilder';
 import * as knex from 'knex';
-import {Scope} from './Scope';
 import {Store} from './Store';
 import {EntityCtor} from './EntityInterface';
+import { EntityManager } from './EntityManager';
+import { Scope } from './Scope';
 
 export class EntityRepository<T> {
 
   /**
-   * @type {Scope}
+   * @type {EntityManager|Scope}
    */
-  protected entityManager: Scope;
+  protected entityManager: EntityManager | Scope;
 
   /**
    * @type {{}}
@@ -22,15 +23,20 @@ export class EntityRepository<T> {
    */
   protected mapping: Mapping<T>;
 
+  /**
+   * Holds the query options.
+   *
+   * @type { string[] }
+   */
   protected queryOptions: Array<string> = ['orderBy', 'limit', 'offset', 'groupBy', 'select'];
 
   /**
    * Construct a new EntityRepository.
    *
-   * @param {Scope} entityManager
-   * @param {{}}    entity
+   * @param {EntityManager|Scope} entityManager
+   * @param {{}}            entity
    */
-  public constructor(entityManager: Scope, entity: EntityCtor<T>) {
+  public constructor(entityManager: EntityManager | Scope, entity: EntityCtor<T>) {
     this.entityManager = entityManager;
     this.entity        = entity;
     this.mapping       = Mapping.forEntity(entity);
@@ -48,10 +54,23 @@ export class EntityRepository<T> {
   /**
    * Get a reference to the entity manager.
    *
+   * @returns {EntityManager | Scope}
+   */
+  protected getEntityManager(): EntityManager | Scope{
+    return this.entityManager;
+  }
+
+  /**
+   * Get a scope. If this repository was constructed within a scope, you get said scope.
+   *
    * @returns {Scope}
    */
-  protected getEntityManager(): Scope {
-    return this.entityManager;
+  protected getScope(): Scope {
+    if (this.entityManager instanceof Scope) {
+      return this.entityManager;
+    }
+
+    return this.entityManager.createScope();
   }
 
   /**
@@ -71,7 +90,8 @@ export class EntityRepository<T> {
       statement = connection(`${this.mapping.getTableName()} as ${alias}`);
     }
 
-    return new QueryBuilder(this.entityManager, statement, this.mapping, alias);
+    // Create a new QueryBuilder, pass in a scoped entity manager.
+    return new QueryBuilder(this.getScope(), statement, this.mapping, alias);
   }
 
   /**
