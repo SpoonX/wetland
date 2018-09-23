@@ -34,7 +34,7 @@ export class EntityRepository<T> {
    * Construct a new EntityRepository.
    *
    * @param {EntityManager|Scope} entityManager
-   * @param {{}}            entity
+   * @param {{}}                  entity
    */
   public constructor(entityManager: EntityManager | Scope, entity: EntityCtor<T>) {
     this.entityManager = entityManager;
