@@ -1,3 +1,19 @@
+<a name="4.0.0"></a>
+# [4.0.0](https://github.com/SpoonX/wetland/compare/v3.1.2...v4.0.0) (2018-09-23)
+
+
+### Features
+
+* **EntityManager:** add performance repositories ([569a3d1](https://github.com/SpoonX/wetland/commit/569a3d1))
+
+
+### BREAKING CHANGES
+
+* **EntityManager:** The EntityRepository has a method called getEntityManager, which now conditionally returns the EntityManager or an instance of Scope.
+If you must have a Scope, call EntityRepository.getScope() instead.
+
+
+
 <a name="3.1.2"></a>
 ## [3.1.2](https://github.com/SpoonX/wetland/compare/v3.1.1...v3.1.2) (2018-09-18)
 
