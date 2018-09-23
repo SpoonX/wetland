@@ -18,7 +18,7 @@ entityRepository.find({name: 'Wesley'} , {populate: ['project']});
 
 {% method %}
 ## .findOne()
-Finds a single entity. In this method, criteria can be either an object, a number, a string or `null`. 
+Finds a single entity. In this method, criteria can be either an object, a number, a string or `null`.
 
 {% common %}
 ```js
@@ -53,6 +53,7 @@ entityRepository.getDerivedQueryBuilder(otherQueryBuilder, 'my_alias_derived');
 | orderBy   | any                                         |
 | alias     | string                                      |
 | limit     | number                                      |
+| page      | number                                      |
 | offset    | number                                      |
 | debug     | boolean                                     |
 | populate  | object,  array of strings, array of objects |
