@@ -1,10 +1,10 @@
 import {assert} from 'chai';
 import {Wetland} from '../../src/Wetland';
-import {EntityCtor} from '../../src/EntityInterface';
 import {Entity} from '../../src/Entity';
 import * as path from 'path';
 import * as Bluebird from 'bluebird';
 import * as rimraf from 'rimraf';
+import { EntityCtor } from '../../src';
 
 const tmpTestDir = path.join(__dirname, '../.tmp');
 const dataDir    = `${tmpTestDir}/.data`;
@@ -23,11 +23,11 @@ class User extends Entity {
   }
 
   beforeCreate() {
-    this.password = (new Buffer(this.password).toString('base64')); // Do not do that in prod
+    this.password = Buffer.from(this.password).toString('base64'); // Do not do that in prod
   }
 
   beforeUpdate(values) {
-    values.password = (new Buffer(values.password).toString('base64')); // Do not do that in prod
+    values.password = Buffer.from(values.password).toString('base64'); // Do not do that in prod
   }
 }
 
@@ -55,7 +55,7 @@ describe('Lifecyclehooks', () => {
   });
 
   describe('.beforeCreate()', () => {
-    it('should correctly base64 the password', () => {
+    it('should correctly base64 the password before create', () => {
       const wetland        = getWetland('before-create');
       const manager        = wetland.getManager();
       const UserRepository = manager.getRepository(User);
@@ -76,17 +76,16 @@ describe('Lifecyclehooks', () => {
         })
         .then((user: User) => {
           assert.notEqual(user.password, password);
-          assert.equal(user.password, (new Buffer(password)).toString('base64'));
+          assert.equal(user.password, Buffer.from(password).toString('base64'));
         });
     })
   });
 
   describe('.beforeUpdate()', () => {
-    it('should correctly base64 the password', () => {
+    it('should correctly base64 the password before update', () => {
       const wetland = getWetland('before-update');
 
       const manager        = wetland.getManager();
-      const populator      = wetland.getPopulator(manager);
       const UserRepository = manager.getRepository(manager.getEntity('User') as EntityCtor<Entity>);
 
       const username        = 'John Doe.';
@@ -112,7 +111,7 @@ describe('Lifecyclehooks', () => {
         })
         .then((user: User) => {
           assert.notEqual(user.password, updatedPassword);
-          assert.equal(user.password, (new Buffer(updatedPassword)).toString('base64'));
+          assert.equal(user.password, Buffer.from(updatedPassword).toString('base64'));
         });
     });
   });

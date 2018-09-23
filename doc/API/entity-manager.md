@@ -16,6 +16,23 @@ manager.createScope();
 {% endmethod %}
 
 {% method %}
+## .getRepository()
+Returns an entity repository instance for provided entity.
+
+**Note:** If you're planning on doing work with the unit of work (`wetland.getManager()` / `EntityManager.createScope()`) you must use the scope to get the repository.
+
+Repositories fetched from the entity manager are a more performant way of querying the database, but they're never linked to a scope.
+If all you're planning on doing is fetching data or performing simple queries, this method is for you.
+
+The queries performed on a repository fetched from the EntityManager _do_ run in an internal scope, so they're safe to use in for example APIs.
+
+{% common %}
+```js
+manager.getRepository(entity);
+```
+{% endmethod %}
+
+{% method %}
 ## .getConfig()
 Gets the config using `.getConfig()` from wetland.
 

@@ -106,7 +106,7 @@ export class Migrator {
    *
    * @returns {Bluebird<any>}
    */
-  public devMigrations(revert: boolean): Bluebird<any> {
+  public devMigrations(revert: boolean = false): Bluebird<any> {
     let snapshot = this.wetland.getSnapshotManager();
 
     return snapshot
