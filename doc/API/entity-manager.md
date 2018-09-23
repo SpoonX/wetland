@@ -28,7 +28,7 @@ The queries performed on a repository fetched from the EntityManager _do_ run in
 
 {% common %}
 ```js
-scope.getRepository(entity);
+manager.getRepository(entity);
 ```
 {% endmethod %}
 
