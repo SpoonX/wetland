@@ -4,6 +4,9 @@
   "description": "A modern object-relational mapper (ORM) for node.js.",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "mocha dist/test/helper dist/test/unit/{*.spec.js,**/*.spec.js} --timeout 15000",
     "dtest": "npm run build && npm run test",
@@ -32,6 +35,7 @@
   },
   "homepage": "https://wetland.spoonx.org",
   "dependencies": {
+    "@types/knex": "0.0.35",
     "bluebird": "^3.4.6",
     "csv-parse": "^1.2.0",
     "del": "^3.0.0",
