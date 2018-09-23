@@ -139,6 +139,11 @@ export class EntityRepository<T> {
       queryBuilder.where(criteria);
     }
 
+    // Calculate offset if paging is being used.
+    if (options.page && options.limit) {
+      options.offset = (options.page - 1) * options.limit;
+    }
+
     // Apply limit, offset etc.
     this.applyOptions(queryBuilder, options);
 
@@ -231,6 +236,7 @@ export interface FindOptions {
   orderBy?: any,
   groupBy?: any,
   alias?: string,
+  page?: number,
   limit?: number,
   offset?: number,
   debug?: boolean,
