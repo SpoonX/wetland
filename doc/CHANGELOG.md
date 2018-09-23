@@ -1,3 +1,8 @@
+<a name="4.0.1"></a>
+## [4.0.1](https://github.com/SpoonX/wetland/compare/v4.0.0...v4.0.1) (2018-09-23)
+
+
+
 <a name="4.0.0"></a>
 # [4.0.0](https://github.com/SpoonX/wetland/compare/v3.1.2...v4.0.0) (2018-09-23)
 
