@@ -67,7 +67,7 @@ export class Migrator {
    * @param {Wetland} wetland
    */
   public constructor(wetland: Wetland) {
-    this.config         = wetland.getConfig().defaults('migrator', {
+    this.config         = wetland.getConfig().applyDefaults('migrator', {
       store        : null,
       extension    : 'js',
       tableName    : 'wetland_migrations',

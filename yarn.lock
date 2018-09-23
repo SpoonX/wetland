@@ -1390,9 +1390,9 @@ homedir-polyfill@^1.0.0, homedir-polyfill@^1.0.1:
   dependencies:
     parse-passwd "^1.0.0"
 
-homefront@^1.3.2:
-  version "1.3.4"
-  resolved "https://registry.yarnpkg.com/homefront/-/homefront-1.3.4.tgz#c7a1694ffc18f9bb760039b9689016b1681ce3d0"
+homefront@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/homefront/-/homefront-3.0.0.tgz#4a73ec2d1daffef59e4141a0ceb3551e50629a95"
   dependencies:
     extend "^3.0.0"
 
