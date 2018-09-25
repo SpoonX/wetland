@@ -2,7 +2,7 @@
 
 Decorators are a way to decorate your entities so that you don't need to use setMapping ES6 syntax.
 
-Eventually it looks like this : 
+Eventually it looks like this :
 
 ```js
 @entity()
@@ -53,6 +53,37 @@ Adds auto fields to your entity (id, createdAt, updatedAt).
 class Foo {}
 ```
 
+#### @autoUpdatedAt
+
+Adds an updatedAt field to your entity.
+
+**Note:** this only sets the initial value, and doesn't maintain the value between updates. Use the beforeUpdate hook for that.
+
+```js
+@autoUpdatedAt()
+class Foo {}
+```
+
+#### @autoCreatedAt
+
+Adds an createdAt field to your entity.
+
+**Note:** this sets the initial value.
+
+```js
+@autoCreatedAt()
+class Foo {}
+```
+
+#### @autoPK
+
+Adds an auto incremented primary key with the name `id` to your entity.
+
+```js
+@autoPK()
+class Foo {}
+```
+
 #### @entity
 
 Declares a class as an entity.
@@ -63,7 +94,7 @@ Declares a class as an entity.
 @entity()
 class Foo {}
  ```
- 
+
  - Custom name and repository
 
 ```js
@@ -88,7 +119,7 @@ class Foo {}
 @index('idx_something', ['property'])
 @index('idx_something', 'property')
 class Foo {}
-``` 
+```
 
 - Generated index name "idx_property"
 
