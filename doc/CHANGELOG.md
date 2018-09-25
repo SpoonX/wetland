@@ -1,3 +1,13 @@
+<a name="4.1.2"></a>
+## [4.1.2](https://github.com/SpoonX/wetland/compare/v4.1.1...v4.1.2) (2018-09-25)
+
+
+### Features
+
+* **Mapping:** add auto field decorators ([515ac29](https://github.com/SpoonX/wetland/commit/515ac29))
+
+
+
 <a name="4.1.1"></a>
 ## [4.1.1](https://github.com/SpoonX/wetland/compare/v4.1.0...v4.1.1) (2018-09-25)
 
