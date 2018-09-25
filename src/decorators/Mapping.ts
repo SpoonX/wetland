@@ -116,6 +116,39 @@ export function primary() {
 }
 
 /**
+ * Convenience method that automatically sets a PK id.
+ *
+ * @returns {Mapping}
+ */
+export function autoPK() {
+  return (target: Object) => {
+    Mapping.forEntity(target).autoPK();
+  };
+}
+
+/**
+ * Convenience method that automatically sets a createdAt.
+ *
+ * @returns {Mapping}
+ */
+export function autoCreatedAt() {
+  return (target: Object) => {
+    Mapping.forEntity(target).autoCreatedAt();
+  };
+}
+
+/**
+ * Convenience method that automatically sets an updatedAt.
+ *
+ * @returns {Mapping}
+ */
+export function autoUpdatedAt() {
+  return (target: Object) => {
+    Mapping.forEntity(target).autoUpdatedAt();
+  };
+}
+
+/**
  * Map generatedValues. Examples:
  *
  *  // Auto increment
