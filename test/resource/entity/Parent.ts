@@ -1,5 +1,5 @@
-import {ArrayCollection} from '../../../src/ArrayCollection';
-import {Simple} from './Simple';
+import { ArrayCollection } from '../../../src/ArrayCollection';
+import { Simple } from './Simple';
 
 export class Parent {
   public name: string;
@@ -11,7 +11,7 @@ export class Parent {
   public single: Simple;
 
   public static setMapping(mapping) {
-    mapping.oneToMany('simples', {targetEntity: Simple, mappedBy: 'parent'});
-    mapping.oneToOne('single', {targetEntity: Simple});
+    mapping.oneToMany('simples', { targetEntity: Simple, mappedBy: 'parent' });
+    mapping.oneToOne('single', { targetEntity: Simple });
   }
 }

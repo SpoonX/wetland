@@ -1,16 +1,16 @@
-import {EntityManager} from '../../src/EntityManager';
-import {Wetland} from '../../src/Wetland';
-import {User} from '../resource/entity/postal/User';
-import {Order} from '../resource/entity/postal/Order';
-import {Address} from '../resource/entity/postal/Address';
-import {Tracker} from '../resource/entity/postal/Tracker';
-import {assert} from 'chai';
-function getManager(): EntityManager {
+import { EntityManager } from '../../src/EntityManager';
+import { Wetland } from '../../src/Wetland';
+import { User } from '../resource/entity/postal/User';
+import { Order } from '../resource/entity/postal/Order';
+import { Address } from '../resource/entity/postal/Address';
+import { Tracker } from '../resource/entity/postal/Tracker';
+import { assert } from 'chai';
+function getManager (): EntityManager {
   let wetland = new Wetland({
-    entities: [User, Order],
+    entities: [ User, Order ],
     mapping : {
-      defaultNamesToUnderscore: true
-    }
+      defaultNamesToUnderscore: true,
+    },
   });
 
   return wetland.getEntityManager();
@@ -70,13 +70,13 @@ describe('EntityManager', () => {
     it('Should get the mapping of the provided entity', () => {
       let fieldNames = getManager().getMapping('User').getFieldNames();
 
-      assert.deepEqual(fieldNames, ['id', 'name']);
+      assert.deepEqual(fieldNames, [ 'id', 'name' ]);
     });
   });
 
   describe('.registerEntities()', () => {
     it('Should register multiple entities', () => {
-      let manager = getManager().registerEntities([Address, Tracker]);
+      let manager = getManager().registerEntities([ Address, Tracker ]);
 
       assert.doesNotThrow(() => {
         return manager.getEntity('Address');

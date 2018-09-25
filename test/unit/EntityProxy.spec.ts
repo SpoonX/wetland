@@ -1,15 +1,15 @@
-import {EntityProxy} from '../../src/EntityProxy';
-import {assert} from 'chai';
-import {UnitOfWork} from '../../src/UnitOfWork';
-import {Wetland} from '../../src/Wetland';
-import {Simple} from '../resource/entity/Simple';
-import {Parent} from '../resource/entity/Parent';
-import {SimpleDifferent} from '../resource/entity/SimpleDifferent';
-import {ArrayCollection} from '../../src/ArrayCollection';
-import {MetaData} from '../../src/MetaData';
-import {EntityInterface} from '../../src/EntityInterface';
+import { EntityProxy } from '../../src/EntityProxy';
+import { assert } from 'chai';
+import { UnitOfWork } from '../../src/UnitOfWork';
+import { Wetland } from '../../src/Wetland';
+import { Simple } from '../resource/entity/Simple';
+import { Parent } from '../resource/entity/Parent';
+import { SimpleDifferent } from '../resource/entity/SimpleDifferent';
+import { ArrayCollection } from '../../src/ArrayCollection';
+import { MetaData } from '../../src/MetaData';
+import { EntityInterface } from '../../src/EntityInterface';
 
-function getUnitOfWork(entities?): UnitOfWork {
+function getUnitOfWork (entities?): UnitOfWork {
   let wetland = new Wetland({});
 
   if (entities) {
@@ -38,7 +38,7 @@ describe('EntityProxy', () => {
     });
 
     it('should patch the collections on an un-patched entity', () => {
-      let unitOfWork = getUnitOfWork([Parent]);
+      let unitOfWork = getUnitOfWork([ Parent ]);
       let parent     = new Parent;
       let patched    = EntityProxy.patchEntity(parent, unitOfWork.getEntityManager());
 
@@ -121,7 +121,7 @@ describe('EntityProxy', () => {
     });
 
     it('should leave alone dates that are the same', () => {
-      const unitOfWork   = getUnitOfWork([Simple]);
+      const unitOfWork   = getUnitOfWork([ Simple ]);
       const target       = EntityProxy.patchEntity(new Simple, unitOfWork.getEntityManager());
       const dateConstant = new Date;
       const dateClone    = new Date(dateConstant);
@@ -196,7 +196,7 @@ describe('EntityProxy', () => {
       assert.strictEqual(meta.fetch('entityState.relations.added.simples')[0], simpleThree);
       assert.deepEqual(meta.fetch('entityState.relations.removed'), {}); // broken
       assert.deepEqual(unitOfWork.getDirtyObjects(), simpleTwoCollection);
-      assert.deepEqual(metaSimple.fetch('entityState.dirty'), ['name']);
+      assert.deepEqual(metaSimple.fetch('entityState.dirty'), [ 'name' ]);
       assert.deepEqual(unitOfWork.getRelationshipsChangedObjects(), patchedCollection);
     });
 

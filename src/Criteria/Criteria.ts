@@ -1,5 +1,5 @@
-import {Mapping} from '../Mapping';
-import {QueryBuilder} from 'knex';
+import { Mapping } from '../Mapping';
+import { QueryBuilder } from 'knex';
 
 /**
  * Parse and apply criteria to statement.
@@ -12,34 +12,34 @@ export class Criteria {
    * @type {{}}
    */
   private operators = {
-    '<'                 : {operator: '<', value: value => value},
-    'lt'                : {operator: '<', value: value => value},
-    'lessThan'          : {operator: '<', value: value => value},
-    '<='                : {operator: '<=', value: value => value},
-    'lte'               : {operator: '<=', value: value => value},
-    'lessThanOrEqual'   : {operator: '<=', value: value => value},
-    '>'                 : {operator: '>', value: value => value},
-    'gt'                : {operator: '>', value: value => value},
-    'greaterThan'       : {operator: '>', value: value => value},
-    '>='                : {operator: '>=', value: value => value},
-    'greaterThanOrEqual': {operator: '>=', value: value => value},
-    'gte'               : {operator: '>=', value: value => value},
-    '!'                 : {operator: '<>', value: value => value},
-    'not'               : {operator: '<>', value: value => value},
-    'between'           : {operator: 'between', value: value => value},
-    'notBetween'        : {operator: 'not between', value: value => value},
-    'in'                : {operator: 'in', value: value => value},
-    'notIn'             : {operator: 'not in', value: value => value},
-    'is'                : {operator: 'is', value: value => value},
-    'isNot'             : {operator: 'is not', value: value => value},
-    'like'              : {operator: 'like', value: value => `%${value}%`},
-    'notLike'           : {operator: 'not like', value: value => `%${value}%`},
-    'contains'          : {operator: 'like', value: value => `%${value}%`},
-    'notContains'       : {operator: 'not like', value: value => `%${value}%`},
-    'startsWith'        : {operator: 'like', value: value => `${value}%`},
-    'notStartsWith'     : {operator: 'not like', value: value => `${value}%`},
-    'endsWith'          : {operator: 'like', value: value => `%${value}`},
-    'notEndsWith'       : {operator: 'not like', value: value => `%${value}`}
+    '<'                 : { operator: '<', value: value => value },
+    'lt'                : { operator: '<', value: value => value },
+    'lessThan'          : { operator: '<', value: value => value },
+    '<='                : { operator: '<=', value: value => value },
+    'lte'               : { operator: '<=', value: value => value },
+    'lessThanOrEqual'   : { operator: '<=', value: value => value },
+    '>'                 : { operator: '>', value: value => value },
+    'gt'                : { operator: '>', value: value => value },
+    'greaterThan'       : { operator: '>', value: value => value },
+    '>='                : { operator: '>=', value: value => value },
+    'greaterThanOrEqual': { operator: '>=', value: value => value },
+    'gte'               : { operator: '>=', value: value => value },
+    '!'                 : { operator: '<>', value: value => value },
+    'not'               : { operator: '<>', value: value => value },
+    'between'           : { operator: 'between', value: value => value },
+    'notBetween'        : { operator: 'not between', value: value => value },
+    'in'                : { operator: 'in', value: value => value },
+    'notIn'             : { operator: 'not in', value: value => value },
+    'is'                : { operator: 'is', value: value => value },
+    'isNot'             : { operator: 'is not', value: value => value },
+    'like'              : { operator: 'like', value: value => `%${value}%` },
+    'notLike'           : { operator: 'not like', value: value => `%${value}%` },
+    'contains'          : { operator: 'like', value: value => `%${value}%` },
+    'notContains'       : { operator: 'not like', value: value => `%${value}%` },
+    'startsWith'        : { operator: 'like', value: value => `${value}%` },
+    'notStartsWith'     : { operator: 'not like', value: value => `${value}%` },
+    'endsWith'          : { operator: 'like', value: value => `%${value}` },
+    'notEndsWith'       : { operator: 'not like', value: value => `%${value}` },
   };
 
   /**
@@ -47,7 +47,7 @@ export class Criteria {
    *
    * @type {{}}
    */
-  protected conditions: {and: string, or: string} = {and: 'where', or: 'orWhere'};
+  protected conditions: {and: string, or: string} = { and: 'where', or: 'orWhere' };
 
   /**
    * @type {string}
@@ -127,7 +127,7 @@ export class Criteria {
    * @returns {Criteria}
    */
   public stage(criteria: Object, condition = this.defaultCondition, statement?: QueryBuilder): Criteria {
-    this.staged.push({criteria, condition, statement});
+    this.staged.push({ criteria, condition, statement });
 
     return this;
   }

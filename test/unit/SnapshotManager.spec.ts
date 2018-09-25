@@ -1,13 +1,13 @@
-import {assert} from 'chai';
-import {Wetland} from '../../src/Wetland';
-import {SchemaBuilder} from '../../src/SchemaBuilder';
-import {SnapshotManager} from '../../src/SnapshotManager';
+import { assert } from 'chai';
+import { Wetland } from '../../src/Wetland';
+import { SchemaBuilder } from '../../src/SchemaBuilder';
+import { SnapshotManager } from '../../src/SnapshotManager';
 import oldEntities from '../resource/entity/snapshot/old';
 import newEntities from '../resource/entity/snapshot/new';
-import {Book} from '../resource/entity/book/book';
-import {Publisher} from '../resource/entity/book/publisher';
+import { Book } from '../resource/entity/book/book';
+import { Publisher } from '../resource/entity/book/publisher';
 
-function getWetland(entities?): Wetland {
+function getWetland (entities?): Wetland {
   let wetland = new Wetland({
     stores: {
       defaultStore: {
@@ -15,10 +15,10 @@ function getWetland(entities?): Wetland {
         connection: {
           user    : 'root',
           host    : '127.0.0.1',
-          database: 'wetland_test'
-        }
-      }
-    }
+          database: 'wetland_test',
+        },
+      },
+    },
   });
 
   if (entities) {
@@ -28,7 +28,7 @@ function getWetland(entities?): Wetland {
   return wetland;
 }
 
-function getMapping(entities): Object {
+function getMapping (entities): Object {
   return getWetland(entities).getSnapshotManager().getSerializable();
 }
 
@@ -54,7 +54,7 @@ describe('SnapshotManager', () => {
   describe('diff(jc): create join column', () => {
     it('Should be able to create a non null foreign key', () => {
       let oldMapping = getMapping([]),
-          newMapping = getMapping([Book, Publisher]);
+          newMapping = getMapping([ Book, Publisher ]);
 
       let wetland = getWetland(),
           snapshotManager = wetland.getSnapshotManager(),
@@ -66,6 +66,6 @@ describe('SnapshotManager', () => {
 
       assert.equal(sqlStatement[1], 'create table `publisher` (`id` int unsigned not null auto_increment primary key, `name` varchar(24) not null);');
       assert.equal(sqlStatement[0], 'create table `book` (`id` int unsigned not null auto_increment primary key, `name` varchar(24) not null, `publisher_id` int unsigned not null);');
-    })
+    });
   });
 });

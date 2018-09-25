@@ -9,7 +9,7 @@ export let schemas = {
         extra         : '',
         column_key    : '',
         column_type   : 'tinyint(1)',
-        is_nullable   : 'YES'
+        is_nullable   : 'YES',
       },
       {
         column_default: null,
@@ -19,7 +19,7 @@ export let schemas = {
         extra         : 'auto_increment',
         column_key    : 'PRI',
         column_type   : 'int(10) unsigned',
-        is_nullable   : 'NO'
+        is_nullable   : 'NO',
       },
       {
         column_default: null,
@@ -29,7 +29,7 @@ export let schemas = {
         extra         : '',
         column_key    : '',
         column_type   : 'varchar(255)',
-        is_nullable   : 'NO'
+        is_nullable   : 'NO',
       },
       {
         column_default: null,
@@ -39,7 +39,7 @@ export let schemas = {
         extra         : '',
         column_key    : 'MUL',
         column_type   : 'int(10) unsigned',
-        is_nullable   : 'YES'
+        is_nullable   : 'YES',
       },
       {
         column_default: null,
@@ -49,7 +49,7 @@ export let schemas = {
         extra         : '',
         column_key    : '',
         column_type   : 'tinyint(1)',
-        is_nullable   : 'YES'
+        is_nullable   : 'YES',
       },
       {
         column_default: null,
@@ -59,7 +59,7 @@ export let schemas = {
         extra         : 'auto_increment',
         column_key    : 'PRI',
         column_type   : 'int(10) unsigned',
-        is_nullable   : 'NO'
+        is_nullable   : 'NO',
       },
       {
         column_default: null,
@@ -69,7 +69,7 @@ export let schemas = {
         extra         : '',
         column_key    : 'MUL',
         column_type   : 'int(10) unsigned',
-        is_nullable   : 'YES'
+        is_nullable   : 'YES',
       },
       {
         column_default: null,
@@ -79,7 +79,7 @@ export let schemas = {
         extra         : '',
         column_key    : '',
         column_type   : 'varchar(255)',
-        is_nullable   : 'NO'
+        is_nullable   : 'NO',
       },
       {
         column_default: null,
@@ -89,7 +89,7 @@ export let schemas = {
         extra         : 'auto_increment',
         column_key    : 'PRI',
         column_type   : 'int(10) unsigned',
-        is_nullable   : 'NO'
+        is_nullable   : 'NO',
       },
       {
         column_default: null,
@@ -99,8 +99,8 @@ export let schemas = {
         extra         : '',
         column_key    : '',
         column_type   : 'varchar(24)',
-        is_nullable   : 'NO'
-      }
+        is_nullable   : 'NO',
+      },
     ],
     constraints           : [
       {
@@ -108,36 +108,36 @@ export let schemas = {
         column_name           : 'id',
         constraint_name       : 'PRIMARY',
         referenced_table_name : null,
-        referenced_column_name: null
+        referenced_column_name: null,
       },
       {
         table_name            : 'todo',
         column_name           : 'creator_id',
         constraint_name       : 'todo_creator_id_foreign',
         referenced_table_name : 'user',
-        referenced_column_name: 'id'
+        referenced_column_name: 'id',
       },
       {
         table_name            : 'todo',
         column_name           : 'id',
         constraint_name       : 'PRIMARY',
         referenced_table_name : null,
-        referenced_column_name: null
+        referenced_column_name: null,
       },
       {
         table_name            : 'todo',
         column_name           : 'list_id',
         constraint_name       : 'todo_list_id_foreign',
         referenced_table_name : 'list',
-        referenced_column_name: 'id'
+        referenced_column_name: 'id',
       },
       {
         table_name            : 'user',
         column_name           : 'id',
         constraint_name       : 'PRIMARY',
         referenced_table_name : null,
-        referenced_column_name: null
-      }
+        referenced_column_name: null,
+      },
     ],
     referentialConstraints: [
       {
@@ -147,7 +147,7 @@ export let schemas = {
         update_rule             : 'RESTRICT',
         delete_rule             : 'RESTRICT',
         table_name              : 'todo',
-        referenced_table_name   : 'user'
+        referenced_table_name   : 'user',
       },
       {
         constraint_name         : 'todo_list_id_foreign',
@@ -156,9 +156,9 @@ export let schemas = {
         update_rule             : 'RESTRICT',
         delete_rule             : 'RESTRICT',
         table_name              : 'todo',
-        referenced_table_name   : 'list'
-      }
-    ]
+        referenced_table_name   : 'list',
+      },
+    ],
   },
   postal: {
     columns               : [
@@ -170,7 +170,7 @@ export let schemas = {
         extra         : '',
         column_key    : '',
         column_type   : 'varchar(255)',
-        is_nullable   : 'NO'
+        is_nullable   : 'NO',
       },
       {
         column_default: null,
@@ -180,7 +180,7 @@ export let schemas = {
         extra         : '',
         column_key    : '',
         column_type   : 'int(11)',
-        is_nullable   : 'NO'
+        is_nullable   : 'NO',
       },
       {
         column_default: null,
@@ -190,7 +190,7 @@ export let schemas = {
         extra         : 'auto_increment',
         column_key    : 'PRI',
         column_type   : 'int(10) unsigned',
-        is_nullable   : 'NO'
+        is_nullable   : 'NO',
       },
       {
         column_default: null,
@@ -200,7 +200,7 @@ export let schemas = {
         extra         : '',
         column_key    : '',
         column_type   : 'varchar(255)',
-        is_nullable   : 'NO'
+        is_nullable   : 'NO',
       },
       {
         column_default: null,
@@ -210,7 +210,7 @@ export let schemas = {
         extra         : '',
         column_key    : '',
         column_type   : 'varchar(255)',
-        is_nullable   : 'NO'
+        is_nullable   : 'NO',
       },
       {
         column_default: null,
@@ -220,7 +220,7 @@ export let schemas = {
         extra         : '',
         column_key    : 'MUL',
         column_type   : 'int(10) unsigned',
-        is_nullable   : 'YES'
+        is_nullable   : 'YES',
       },
       {
         column_default: 'CURRENT_TIMESTAMP',
@@ -230,7 +230,7 @@ export let schemas = {
         extra         : '',
         column_key    : '',
         column_type   : 'timestamp',
-        is_nullable   : 'NO'
+        is_nullable   : 'NO',
       },
       {
         column_default: null,
@@ -240,7 +240,7 @@ export let schemas = {
         extra         : 'auto_increment',
         column_key    : 'PRI',
         column_type   : 'int(10) unsigned',
-        is_nullable   : 'NO'
+        is_nullable   : 'NO',
       },
       {
         column_default: null,
@@ -250,7 +250,7 @@ export let schemas = {
         extra         : '',
         column_key    : 'MUL',
         column_type   : 'int(10) unsigned',
-        is_nullable   : 'YES'
+        is_nullable   : 'YES',
       },
       {
         column_default: null,
@@ -260,7 +260,7 @@ export let schemas = {
         extra         : 'auto_increment',
         column_key    : 'PRI',
         column_type   : 'int(10) unsigned',
-        is_nullable   : 'NO'
+        is_nullable   : 'NO',
       },
       {
         column_default: null,
@@ -270,7 +270,7 @@ export let schemas = {
         extra         : '',
         column_key    : '',
         column_type   : 'varchar(255)',
-        is_nullable   : 'NO'
+        is_nullable   : 'NO',
       },
       {
         column_default: null,
@@ -280,7 +280,7 @@ export let schemas = {
         extra         : 'auto_increment',
         column_key    : 'PRI',
         column_type   : 'int(10) unsigned',
-        is_nullable   : 'NO'
+        is_nullable   : 'NO',
       },
       {
         column_default: null,
@@ -290,7 +290,7 @@ export let schemas = {
         extra         : '',
         column_key    : '',
         column_type   : 'int(11)',
-        is_nullable   : 'NO'
+        is_nullable   : 'NO',
       },
       {
         column_default: null,
@@ -300,7 +300,7 @@ export let schemas = {
         extra         : 'auto_increment',
         column_key    : 'PRI',
         column_type   : 'int(10) unsigned',
-        is_nullable   : 'NO'
+        is_nullable   : 'NO',
       },
       {
         column_default: null,
@@ -310,7 +310,7 @@ export let schemas = {
         extra         : '',
         column_key    : 'MUL',
         column_type   : 'int(10) unsigned',
-        is_nullable   : 'YES'
+        is_nullable   : 'YES',
       },
       {
         column_default: null,
@@ -320,7 +320,7 @@ export let schemas = {
         extra         : '',
         column_key    : 'MUL',
         column_type   : 'int(10) unsigned',
-        is_nullable   : 'YES'
+        is_nullable   : 'YES',
       },
       {
         column_default: null,
@@ -330,7 +330,7 @@ export let schemas = {
         extra         : 'auto_increment',
         column_key    : 'PRI',
         column_type   : 'int(10) unsigned',
-        is_nullable   : 'NO'
+        is_nullable   : 'NO',
       },
       {
         column_default: null,
@@ -340,8 +340,8 @@ export let schemas = {
         extra         : '',
         column_key    : '',
         column_type   : 'varchar(255)',
-        is_nullable   : 'NO'
-      }
+        is_nullable   : 'NO',
+      },
     ],
     constraints           : [
       {
@@ -349,71 +349,71 @@ export let schemas = {
         column_name           : 'id',
         constraint_name       : 'PRIMARY',
         referenced_table_name : null,
-        referenced_column_name: null
+        referenced_column_name: null,
       },
       {
         table_name            : 'delivery',
         column_name           : 'address_id',
         constraint_name       : 'delivery_address_id_foreign',
         referenced_table_name : 'address',
-        referenced_column_name: 'id'
+        referenced_column_name: 'id',
       },
       {
         table_name            : 'delivery',
         column_name           : 'id',
         constraint_name       : 'PRIMARY',
         referenced_table_name : null,
-        referenced_column_name: null
+        referenced_column_name: null,
       },
       {
         table_name            : 'delivery',
         column_name           : 'order_id',
         constraint_name       : 'delivery_order_id_foreign',
         referenced_table_name : 'order',
-        referenced_column_name: 'id'
+        referenced_column_name: 'id',
       },
       {
         table_name            : 'order',
         column_name           : 'id',
         constraint_name       : 'PRIMARY',
         referenced_table_name : null,
-        referenced_column_name: null
+        referenced_column_name: null,
       },
       {
         table_name            : 'tracker',
         column_name           : 'id',
         constraint_name       : 'PRIMARY',
         referenced_table_name : null,
-        referenced_column_name: null
+        referenced_column_name: null,
       },
       {
         table_name            : 'tracker_user',
         column_name           : 'id',
         constraint_name       : 'PRIMARY',
         referenced_table_name : null,
-        referenced_column_name: null
+        referenced_column_name: null,
       },
       {
         table_name            : 'tracker_user',
         column_name           : 'tracker_id',
         constraint_name       : 'tracker_user_tracker_id_foreign',
         referenced_table_name : 'tracker',
-        referenced_column_name: 'id'
+        referenced_column_name: 'id',
       },
       {
         table_name            : 'tracker_user',
         column_name           : 'user_id',
         constraint_name       : 'tracker_user_user_id_foreign',
         referenced_table_name : 'user',
-        referenced_column_name: 'id'
+        referenced_column_name: 'id',
       },
       {
         table_name            : 'user',
         column_name           : 'id',
         constraint_name       : 'PRIMARY',
         referenced_table_name : null,
-        referenced_column_name: null
-      }
+        referenced_column_name: null,
+      },
     ],
     referentialConstraints: [
       {
@@ -423,7 +423,7 @@ export let schemas = {
         update_rule             : 'RESTRICT',
         delete_rule             : 'RESTRICT',
         table_name              : 'delivery',
-        referenced_table_name   : 'address'
+        referenced_table_name   : 'address',
       },
       {
         constraint_name         : 'delivery_order_id_foreign',
@@ -432,7 +432,7 @@ export let schemas = {
         update_rule             : 'RESTRICT',
         delete_rule             : 'CASCADE',
         table_name              : 'delivery',
-        referenced_table_name   : 'order'
+        referenced_table_name   : 'order',
       },
       {
         constraint_name         : 'tracker_user_tracker_id_foreign',
@@ -441,7 +441,7 @@ export let schemas = {
         update_rule             : 'RESTRICT',
         delete_rule             : 'CASCADE',
         table_name              : 'tracker_user',
-        referenced_table_name   : 'tracker'
+        referenced_table_name   : 'tracker',
       },
       {
         constraint_name         : 'tracker_user_user_id_foreign',
@@ -450,8 +450,8 @@ export let schemas = {
         update_rule             : 'RESTRICT',
         delete_rule             : 'CASCADE',
         table_name              : 'tracker_user',
-        referenced_table_name   : 'user'
-      }
-    ]
-  }
+        referenced_table_name   : 'user',
+      },
+    ],
+  },
 };

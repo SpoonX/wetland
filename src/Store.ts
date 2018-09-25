@@ -46,7 +46,7 @@ export class Store {
    */
   private connections: Object = {
     [Store.ROLE_MASTER]: [],
-    [Store.ROLE_SLAVE] : []
+    [Store.ROLE_SLAVE] : [],
   };
 
   /**
@@ -54,7 +54,7 @@ export class Store {
    */
   private pointers: Object = {
     [Store.ROLE_MASTER]: 0,
-    [Store.ROLE_SLAVE] : 0
+    [Store.ROLE_SLAVE] : 0,
   };
 
   /**
@@ -108,9 +108,9 @@ export class Store {
    * @returns {Store}
    */
   public registerConnection(config: SingleConfig, role: string = null): Store {
-    if ([Store.ROLE_MASTER, Store.ROLE_SLAVE, null].indexOf(role) === -1) {
+    if ([ Store.ROLE_MASTER, Store.ROLE_SLAVE, null ].indexOf(role) === -1) {
       throw new Error(
-        `Trying to register using invalid role. Expected "${Store.ROLE_MASTER}" or "${Store.ROLE_SLAVE}".`
+        `Trying to register using invalid role. Expected "${Store.ROLE_MASTER}" or "${Store.ROLE_SLAVE}".`,
       );
     }
 
@@ -178,7 +178,7 @@ export class Store {
    * @returns {SingleConfig}
    */
   private makeConnectionConfig(config: Object, connection: Object): SingleConfig {
-    let connectionConfig = {connection};
+    let connectionConfig = { connection };
 
     Object.getOwnPropertyNames(config).forEach(key => {
       if (key === 'connection' || key === 'connections') {
@@ -244,28 +244,28 @@ export class Store {
 }
 
 export interface Connection {
-  [key: string]: any
+  [key: string]: any;
 }
 
 export interface SingleConfig {
-  debug?: boolean,
-  connection: Connection,
-  client?: string
+  debug?: boolean;
+  connection: Connection;
+  client?: string;
 }
 
 export interface PoolConfig {
-  debug?: boolean,
-  client: string,
-  connections: Array<Connection>,
-  [key: string]: any
+  debug?: boolean;
+  client: string;
+  connections: Array<Connection>;
+  [key: string]: any;
 }
 
 export interface ReplicationConfig {
-  debug?: boolean,
-  client: string,
+  debug?: boolean;
+  client: string;
   connections: {
     master?: Array<Connection>,
-    slave?: Array<Connection>
-  },
-  [key: string]: any
+    slave?: Array<Connection>,
+  };
+  [key: string]: any;
 }

@@ -1,4 +1,4 @@
-import {Criteria} from './Criteria';
+import { Criteria } from './Criteria';
 
 export class Where extends Criteria {
 }

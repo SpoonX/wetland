@@ -1,5 +1,5 @@
-import {Mapping} from './Mapping';
-import {EntityInterface, ProxyInterface} from './EntityInterface';
+import { Mapping } from './Mapping';
+import { EntityInterface, ProxyInterface } from './EntityInterface';
 
 export class IdentityMap {
   /**

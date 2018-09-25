@@ -1,9 +1,9 @@
-import {Wetland} from './Wetland';
-import {EntityCtor} from './EntityInterface';
-import {UnitOfWork} from './UnitOfWork';
-import {Mapping} from './Mapping';
-import {ArrayCollection} from './ArrayCollection';
-import {Homefront} from 'homefront';
+import { Wetland } from './Wetland';
+import { EntityCtor } from './EntityInterface';
+import { UnitOfWork } from './UnitOfWork';
+import { Mapping } from './Mapping';
+import { ArrayCollection } from './ArrayCollection';
+import { Homefront } from 'homefront';
 import * as fs from 'fs';
 import * as parse from 'csv-parse';
 import * as path from 'path';
@@ -129,7 +129,7 @@ export class Seeder {
 
     return readFile(path.join(src, file), 'utf8')
       .then(data => {
-        let [entityName, extension] = file.split('.'); // Very naive **might** need better
+        let [ entityName, extension ] = file.split('.'); // Very naive **might** need better
 
         if (extension === 'json') {
           let features = JSON.parse(data);
@@ -140,7 +140,7 @@ export class Seeder {
         if (extension === 'csv') {
           const parseP: any = Bluebird.promisify(parse);
 
-          return parseP(data, {columns: true})
+          return parseP(data, { columns: true })
             .then(features => this.seedFeatures(entityName, features, clean, bypassLifecyclehooks));
         }
 
@@ -161,7 +161,7 @@ export class Seeder {
     const fixturesDirectory = this.config.fetch('fixturesDirectory');
 
     if (!fixturesDirectory) {
-      return Promise.reject(new Error('Seed configuration is not complete.'))
+      return Promise.reject(new Error('Seed configuration is not complete.'));
     }
 
     const bypassLifecyclehooks = this.config.fetchOrPut('bypassLifecyclehooks', false);

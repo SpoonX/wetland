@@ -1,7 +1,7 @@
-import {Wetland} from '../../src/Wetland';
-import {Schema} from '../resource/Schema';
+import { Wetland } from '../../src/Wetland';
+import { Schema } from '../resource/Schema';
 import * as path from 'path';
-import {tmpTestDir, fixturesDir, getType, User, Pet, Post, rmDataDir} from '../resource/Seeder';
+import { tmpTestDir, fixturesDir, getType, User, Pet, Post, rmDataDir } from '../resource/Seeder';
 
 describe('Cleaner', () => {
   beforeEach(() => rmDataDir());
@@ -22,16 +22,16 @@ describe('Cleaner', () => {
             connection: {
               database: 'wetland_test',
               user: 'root',
-              password: ''
-            }
-          }
+              password: '',
+            },
+          },
         },
         seed: {
           fixturesDirectory: path.join(fixturesDir, getType(bypassLifecyclehooks)),
           clean: true,
-          bypassLifecyclehooks
+          bypassLifecyclehooks,
         },
-        entities: [User, Pet, Post]
+        entities: [ User, Pet, Post ],
       });
 
       const seeder   = wetland.getSeeder();
@@ -57,16 +57,16 @@ describe('Cleaner', () => {
             client: 'sqlite3',
             useNullAsDefault: true,
             connection: {
-              filename: `${tmpTestDir}/cleaner.sqlite`
-            }
-          }
+              filename: `${tmpTestDir}/cleaner.sqlite`,
+            },
+          },
         },
         seed: {
           fixturesDirectory: path.join(fixturesDir, getType(bypassLifecyclehooks)),
           clean: true,
-          bypassLifecyclehooks
+          bypassLifecyclehooks,
         },
-        entities: [User, Pet, Post]
+        entities: [ User, Pet, Post ],
       });
 
       const seeder   = wetland.getSeeder();

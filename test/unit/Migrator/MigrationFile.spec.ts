@@ -1,7 +1,7 @@
-import {expect, assert} from 'chai';
+import { expect, assert } from 'chai';
 import * as fs from 'fs';
 import * as path from 'path';
-import {MigrationFile} from '../../../src/Migrator/MigrationFile';
+import { MigrationFile } from '../../../src/Migrator/MigrationFile';
 
 let migrationsDir  = __dirname + '/../../resource/migrations';
 let tmpMigrations  = path.join(migrationsDir, 'tmp');
@@ -23,7 +23,7 @@ let cleanDirectory = directory => {
 describe('MigrationFile', () => {
   describe('.constructor()', () => {
     it('should set the config', () => {
-      let config        = {extension: 'js', tableName: 'wetland_migrations', directory: tmpMigrations};
+      let config        = { extension: 'js', tableName: 'wetland_migrations', directory: tmpMigrations };
       let migrationFile = new MigrationFile(config);
 
       assert.typeOf(migrationFile.getConfig(), 'object');
@@ -32,7 +32,7 @@ describe('MigrationFile', () => {
 
   describe('.getConfig()', () => {
     it('should get the config', () => {
-      let config        = {directory: ''};
+      let config        = { directory: '' };
       let migrationFile = new MigrationFile(config);
 
       assert.typeOf(migrationFile.getConfig(), 'object');
@@ -53,7 +53,7 @@ describe('MigrationFile', () => {
       let migrationFile = new MigrationFile({
         extension: 'js',
         tableName: 'wetland_migrations',
-        directory: tmpMigrations
+        directory: tmpMigrations,
       });
 
       migrationFile.create('created').then(() => {
@@ -73,7 +73,7 @@ describe('MigrationFile', () => {
       let migrationFile = new MigrationFile({
         extension: 'js',
         tableName: 'wetland_migrations',
-        directory: tmpMigrations
+        directory: tmpMigrations,
       });
 
       migrationFile.create('foo/created').catch(error => {
@@ -87,7 +87,7 @@ describe('MigrationFile', () => {
       let migrationFile = new MigrationFile({
         extension: 'js',
         tableName: 'wetland_migrations',
-        directory: tmpMigrations + '/ooooops'
+        directory: tmpMigrations + '/ooooops',
       });
 
       migrationFile.create('foo/created').catch(error => {
@@ -102,14 +102,14 @@ describe('MigrationFile', () => {
       let migrationFile = new MigrationFile({
         extension: 'js',
         tableName: 'wetland_migrations',
-        directory: __dirname + '/../../resource/migrations'
+        directory: __dirname + '/../../resource/migrations',
       });
 
       migrationFile.getMigrations().then(files => {
         expect(files).to.have.same.members([
           '20161004123412_foo',
           '20161004123413_bar',
-          '20161004123411_baz'
+          '20161004123411_baz',
         ]);
 
         done();

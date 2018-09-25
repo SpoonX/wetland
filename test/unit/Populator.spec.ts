@@ -1,12 +1,12 @@
-import {Wetland} from '../../src/Wetland';
-import {Address} from '../resource/entity/postal/Address';
-import {assert} from 'chai';
-import {Delivery} from '../resource/entity/postal/Delivery';
-import {Order} from '../resource/entity/postal/Order';
-import {EntityProxy} from '../../src/EntityProxy';
-import {MetaData} from '../../src/MetaData';
-import {UnitOfWork} from '../../src/UnitOfWork';
-import {ArrayCollection} from '../../src/ArrayCollection';
+import { Wetland } from '../../src/Wetland';
+import { Address } from '../resource/entity/postal/Address';
+import { assert } from 'chai';
+import { Delivery } from '../resource/entity/postal/Delivery';
+import { Order } from '../resource/entity/postal/Order';
+import { EntityProxy } from '../../src/EntityProxy';
+import { MetaData } from '../../src/MetaData';
+import { UnitOfWork } from '../../src/UnitOfWork';
+import { ArrayCollection } from '../../src/ArrayCollection';
 
 describe('Populator', () => {
   describe('.assign()', () => {
@@ -18,7 +18,7 @@ describe('Populator', () => {
         street     : 'I lack imagination',
         houseNumber: 1,
         postcode   : '1234ab',
-        country    : 'Land'
+        country    : 'Land',
       };
 
       wetland.registerEntity(Address);
@@ -32,7 +32,7 @@ describe('Populator', () => {
     });
 
     it('should populate a new entity, but nested! Wooooo, spooky', () => {
-      let wetland        = new Wetland({mapping: {defaults: {cascades: ['persist']}}});
+      let wetland        = new Wetland({ mapping: { defaults: { cascades: [ 'persist' ] } } });
       let manager        = wetland.getManager();
       let populator      = wetland.getPopulator(manager);
       let unitOfWork     = manager.getUnitOfWork();
@@ -42,23 +42,23 @@ describe('Populator', () => {
         postcode   : '1234ab',
         country    : 'Land',
         deliveries : [
-          {id: 1, order: {name: 'an order'}},
-          {created: 'todaaaaaay', order: {id: 10, name: 'changed'}}
-        ]
+          { id: 1, order: { name: 'an order' } },
+          { created: 'todaaaaaay', order: { id: 10, name: 'changed' } },
+        ],
       };
 
-      wetland.registerEntities([Address, Delivery, Order]);
+      wetland.registerEntities([ Address, Delivery, Order ]);
 
       let populatedAddress = populator.assign(Address, dataToPopulate, null, true) as Address;
 
       let changedCollection = new ArrayCollection;
 
-      changedCollection.push({id: 10, name: 'changed'});
+      changedCollection.push({ id: 10, name: 'changed' });
 
       unitOfWork.prepareCascades();
 
       assert.deepEqual(populatedAddress, dataToPopulate);
-      assert.deepEqual(populatedAddress['deliveries'][1], {created: 'todaaaaaay', order: {id: 10, name: 'changed'}});
+      assert.deepEqual(populatedAddress['deliveries'][1], { created: 'todaaaaaay', order: { id: 10, name: 'changed' } });
       assert.instanceOf(populatedAddress, Address);
       assert.strictEqual(unitOfWork.getNewObjects()[0], populatedAddress);
       assert.strictEqual(unitOfWork.getNewObjects().length, 3);
@@ -68,7 +68,7 @@ describe('Populator', () => {
     });
 
     it('should modify base', () => {
-      let wetland        = new Wetland({mapping: {defaults: {cascades: ['persist']}}});
+      let wetland        = new Wetland({ mapping: { defaults: { cascades: [ 'persist' ] } } });
       let manager        = wetland.getManager();
       let populator      = wetland.getPopulator(manager);
       let unitOfWork     = manager.getUnitOfWork();
@@ -82,13 +82,13 @@ describe('Populator', () => {
         postcode   : '1234ab',
         country    : 'Land',
         deliveries : [
-          {id: 1, order: {name: 'an order'}},
-          {created: 'todaaaaaay', order: {id: 10, name: 'changed'}}
-        ]
+          { id: 1, order: { name: 'an order' } },
+          { created: 'todaaaaaay', order: { id: 10, name: 'changed' } },
+        ],
       };
 
       Object.assign(cleanDelivery, {
-        id: 123
+        id: 123,
       });
 
       Object.assign(cleanAddress, {
@@ -97,12 +97,12 @@ describe('Populator', () => {
         houseNumber: 1,
         postcode   : '1234ab',
         country    : 'Country',
-        deliveries : [cleanDelivery]
+        deliveries : [ cleanDelivery ],
       });
 
-      wetland.registerEntities([Address, Delivery, Order]);
+      wetland.registerEntities([ Address, Delivery, Order ]);
 
-      Object.assign(cleanOrder, {id: 10, name: 'changed'});
+      Object.assign(cleanOrder, { id: 10, name: 'changed' });
 
       unitOfWork.registerClean(cleanOrder);
       unitOfWork.registerClean(cleanAddress);
@@ -127,10 +127,10 @@ describe('Populator', () => {
       let addressEntityState = MetaData.forInstance(addressProxy).fetch('entityState');
 
       assert.deepEqual(populatedAddress, dataToPopulate);
-      assert.deepEqual(populatedAddress['deliveries'][1], {created: 'todaaaaaay', order: {id: 10, name: 'changed'}});
+      assert.deepEqual(populatedAddress['deliveries'][1], { created: 'todaaaaaay', order: { id: 10, name: 'changed' } });
       assert.instanceOf(populatedAddress, Address);
       assert.equal(addressEntityState.state, UnitOfWork.STATE_DIRTY);
-      assert.deepEqual(addressEntityState.dirty, ['country']);
+      assert.deepEqual(addressEntityState.dirty, [ 'country' ]);
       assert.strictEqual(populatedAddress, addressProxy);
       assert.strictEqual(unitOfWork.getNewObjects().length, 2);
       assert.deepEqual(unitOfWork.getDirtyObjects(), dataToPopulateCollection);
@@ -139,7 +139,7 @@ describe('Populator', () => {
     });
 
     it('should listen to the recursion level passed in', () => {
-      let wetland        = new Wetland({mapping: {defaults: {cascades: ['persist']}}});
+      let wetland        = new Wetland({ mapping: { defaults: { cascades: [ 'persist' ] } } });
       let manager        = wetland.getManager();
       let populator      = wetland.getPopulator(manager);
       let cleanDelivery  = new Delivery;
@@ -151,9 +151,9 @@ describe('Populator', () => {
         postcode   : '1234ab',
         country    : 'Land',
         deliveries : [
-          {id: 1, order: {name: 'an order'}},
-          {created: 'todaaaaaay', order: {id: 10, name: 'changed'}}
-        ]
+          { id: 1, order: { name: 'an order' } },
+          { created: 'todaaaaaay', order: { id: 10, name: 'changed' } },
+        ],
       };
 
       let expectedData = {
@@ -162,10 +162,10 @@ describe('Populator', () => {
         houseNumber: 1,
         postcode   : '1234ab',
         country    : 'Land',
-        deliveries : [{id: 1}, {created: 'todaaaaaay'}]
+        deliveries : [ { id: 1 }, { created: 'todaaaaaay' } ],
       };
 
-      wetland.registerEntities([Address, Delivery, Order]);
+      wetland.registerEntities([ Address, Delivery, Order ]);
 
       Object.assign(cleanAddress, {
         id         : 1337,
@@ -173,7 +173,7 @@ describe('Populator', () => {
         houseNumber: 1,
         postcode   : '1234ab',
         country    : 'Country',
-        deliveries : [cleanDelivery]
+        deliveries : [ cleanDelivery ],
       });
 
       let populatedAddress     = populator.assign(Address, dataToPopulate, null, 1) as Address;

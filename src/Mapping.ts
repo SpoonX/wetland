@@ -1,9 +1,9 @@
-import {Homefront} from 'homefront';
-import {EntityRepository} from './EntityRepository';
-import {MetaData} from './MetaData';
-import {EntityManager} from './EntityManager';
-import {EntityCtor, EntityInterface, ProxyInterface} from './EntityInterface';
-import {ArrayCollection} from './ArrayCollection';
+import { Homefront } from 'homefront';
+import { EntityRepository } from './EntityRepository';
+import { MetaData } from './MetaData';
+import { EntityManager } from './EntityManager';
+import { EntityCtor, EntityInterface, ProxyInterface } from './EntityInterface';
+import { ArrayCollection } from './ArrayCollection';
 
 export class Mapping<T> {
 
@@ -144,7 +144,7 @@ export class Mapping<T> {
    */
   private stageOrGetManager(method: string, parameters: any): EntityManager {
     if (!this.entityManager) {
-      this.stagedMappings.push({method, parameters});
+      this.stagedMappings.push({ method, parameters });
 
       return;
     }
@@ -167,7 +167,7 @@ export class Mapping<T> {
    * @returns {{}}
    */
   public static now(): {__raw: string} {
-    return {__raw: 'CURRENT_TIMESTAMP'};
+    return { __raw: 'CURRENT_TIMESTAMP' };
   }
 
   /**
@@ -333,7 +333,7 @@ export class Mapping<T> {
       repository: EntityRepository,
       name      : this.target.name,
       tableName : tableName,
-      store     : null
+      store     : null,
     };
 
     Homefront.merge(this.mapping.fetchOrPut(`entity`, defaultMapping), options);
@@ -350,7 +350,7 @@ export class Mapping<T> {
    */
   public getColumnNames(properties: Array<string>): Array<string> {
     if (!Array.isArray(properties)) {
-      properties = [(properties as string)];
+      properties = [ (properties as string) ];
     }
 
     return properties.map(column => this.getColumnName(column));
@@ -378,7 +378,7 @@ export class Mapping<T> {
   public index(indexName: string | Array<string>, fields?: string | Array<string>): this {
     let unprocessed = this.mapping.fetchOrPut(`unprocessed_indexes`, []);
 
-    unprocessed.push({indexName, fields});
+    unprocessed.push({ indexName, fields });
 
     return this;
   }
@@ -400,7 +400,7 @@ export class Mapping<T> {
       let fields    = index.fields;
 
       if (!fields) {
-        fields    = this.getColumnNames(Array.isArray(indexName) ? indexName : [indexName]);
+        fields    = this.getColumnNames(Array.isArray(indexName) ? indexName : [ indexName ]);
         indexName = `idx_${this.getTableName()}_${fields.join('_').toLowerCase()}`;
       } else {
         fields = this.getColumnNames(fields);
@@ -449,7 +449,7 @@ export class Mapping<T> {
   public uniqueConstraint(constraintName: string | Array<string>, fields?: string | Array<string>) {
     let unprocessed = this.mapping.fetchOrPut(`unprocessed_uniques`, []);
 
-    unprocessed.push({constraintName, fields});
+    unprocessed.push({ constraintName, fields });
 
     return this;
   }
@@ -471,7 +471,7 @@ export class Mapping<T> {
       let fields         = constraint.fields;
 
       if (!fields) {
-        fields         = this.getColumnNames(Array.isArray(constraintName) ? constraintName : [constraintName]);
+        fields         = this.getColumnNames(Array.isArray(constraintName) ? constraintName : [ constraintName ]);
         constraintName = `${this.getTableName()}_${fields.join('_').toLowerCase()}_unique`;
       } else {
         fields = this.getColumnNames(fields);
@@ -510,7 +510,7 @@ export class Mapping<T> {
   public primary(property: string): this {
     this.mapping.put('primary', property);
 
-    this.extendField(property, {primary: true});
+    this.extendField(property, { primary: true });
 
     return this;
   }
@@ -635,7 +635,7 @@ export class Mapping<T> {
    * @return {Mapping}
    */
   public generatedValue(property: string, type: string): this {
-    this.extendField(property, {generatedValue: type});
+    this.extendField(property, { generatedValue: type });
 
     return this;
   }
@@ -660,7 +660,7 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public cascade(property: string, cascades: Array<string>): this {
-    return this.extendField(property, {cascades: cascades});
+    return this.extendField(property, { cascades: cascades });
   }
 
   /**
@@ -678,8 +678,8 @@ export class Mapping<T> {
 
     this.setDefaultCascades(property);
 
-    this.extendField(property, {relationship: options});
-    Homefront.merge(this.mapping.fetchOrPut('relations', {}), {[property]: options});
+    this.extendField(property, { relationship: options });
+    Homefront.merge(this.mapping.fetchOrPut('relations', {}), { [property]: options });
 
     return this;
   }
@@ -758,7 +758,7 @@ export class Mapping<T> {
       type        : Mapping.RELATION_ONE_TO_ONE,
       targetEntity: options.targetEntity,
       inversedBy  : options.inversedBy,
-      mappedBy    : options.mappedBy
+      mappedBy    : options.mappedBy,
     });
 
     if (!options.mappedBy) {
@@ -780,7 +780,7 @@ export class Mapping<T> {
     return this.addRelation(property, {
       targetEntity: options.targetEntity,
       type        : Mapping.RELATION_ONE_TO_MANY,
-      mappedBy    : options.mappedBy
+      mappedBy    : options.mappedBy,
     });
   }
 
@@ -796,7 +796,7 @@ export class Mapping<T> {
     this.addRelation(property, {
       targetEntity: options.targetEntity,
       type        : Mapping.RELATION_MANY_TO_ONE,
-      inversedBy  : options.inversedBy
+      inversedBy  : options.inversedBy,
     });
 
     this.ensureJoinColumn(property);
@@ -817,7 +817,7 @@ export class Mapping<T> {
       targetEntity: options.targetEntity,
       type        : Mapping.RELATION_MANY_TO_MANY,
       inversedBy  : options.inversedBy,
-      mappedBy    : options.mappedBy
+      mappedBy    : options.mappedBy,
     });
   }
 
@@ -830,7 +830,7 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public joinTable(property: string, options: JoinTable): this {
-    this.extendField(property, {joinTable: options});
+    this.extendField(property, { joinTable: options });
 
     return this;
   }
@@ -856,12 +856,12 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public ensureJoinColumn(property: string, options?: JoinColumn): this {
-    let field        = this.mapping.fetchOrPut(`fields.${property}`, {joinColumn: {}});
+    let field        = this.mapping.fetchOrPut(`fields.${property}`, { joinColumn: {} });
     field.joinColumn = Homefront.merge({
       name                : `${property}_id`,
       referencedColumnName: 'id',
       unique              : false,
-      nullable            : true
+      nullable            : true,
     }, options || field.joinColumn);
 
     return this;
@@ -879,7 +879,7 @@ export class Mapping<T> {
       throw new Error('EntityManager is required on the mapping. Make sure you registered the entity.');
     }
 
-    let field = this.mapping.fetchOrPut(`fields.${property}`, {joinTable: {name: ''}}) as FieldOptions;
+    let field = this.mapping.fetchOrPut(`fields.${property}`, { joinTable: { name: '' } }) as FieldOptions;
 
     if (field.joinTable && field.joinTable.complete) {
       return field.joinTable;
@@ -893,16 +893,16 @@ export class Mapping<T> {
     field.joinTable     = Homefront.merge({
       complete          : true,
       name              : `${ownTableName}_${withTableName}`,
-      joinColumns       : [{
+      joinColumns       : [ {
         referencedColumnName: ownPrimary,
         name                : `${ownTableName}_id`,
-        type                : 'integer'
-      }],
-      inverseJoinColumns: [{
+        type                : 'integer',
+      } ],
+      inverseJoinColumns: [ {
         referencedColumnName: withPrimary,
         name                : `${withTableName}_id`,
-        type                : 'integer'
-      }]
+        type                : 'integer',
+      } ],
     }, field.joinTable) as JoinTable;
 
     return field.joinTable;
@@ -1234,48 +1234,48 @@ export class Field {
 }
 
 export interface FieldOptions {
-  type: string,
-  primary?: boolean,
-  textType?: string,
-  precision?: number,
-  enumeration?: Array<any>,
-  generatedValue?: string,
-  scale?: number,
-  nullable?: boolean,
-  defaultTo?: any | Object,
-  unsigned?: boolean,
-  comment?: string,
-  size?: number,
-  name?: string,
-  cascades?: Array<string>,
-  relationship?: Relationship,
-  joinColumn?: JoinColumn,
-  joinTable?: JoinTable,
-  [key: string]: any
+  type: string;
+  primary?: boolean;
+  textType?: string;
+  precision?: number;
+  enumeration?: Array<any>;
+  generatedValue?: string;
+  scale?: number;
+  nullable?: boolean;
+  defaultTo?: any | Object;
+  unsigned?: boolean;
+  comment?: string;
+  size?: number;
+  name?: string;
+  cascades?: Array<string>;
+  relationship?: Relationship;
+  joinColumn?: JoinColumn;
+  joinTable?: JoinTable;
+  [key: string]: any;
 }
 
 export interface JoinTable {
-  name: string,
-  complete?: boolean,
-  joinColumns?: Array<JoinColumn>,
-  inverseJoinColumns?: Array<JoinColumn>
+  name: string;
+  complete?: boolean;
+  joinColumns?: Array<JoinColumn>;
+  inverseJoinColumns?: Array<JoinColumn>;
 }
 
 export interface JoinColumn {
-  referencedColumnName?: string,
-  name?: string,
-  type?: string,
-  size?: number,
-  indexName?: string,
-  onDelete?: string,
-  onUpdate?: string,
-  unique?: boolean,
-  nullable?: boolean
+  referencedColumnName?: string;
+  name?: string;
+  type?: string;
+  size?: number;
+  indexName?: string;
+  onDelete?: string;
+  onUpdate?: string;
+  unique?: boolean;
+  nullable?: boolean;
 }
 
 export interface Relationship {
-  targetEntity: string|EntityCtor<EntityInterface>,
-  type?: string,
-  inversedBy?: string,
-  mappedBy?: string
+  targetEntity: string|EntityCtor<EntityInterface>;
+  type?: string;
+  inversedBy?: string;
+  mappedBy?: string;
 }

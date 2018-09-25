@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as mkdirp from 'mkdirp';
 import * as Promise from 'bluebird';
-import {MigratorConfigInterface} from './MigratorConfigInterface';
+import { MigratorConfigInterface } from './MigratorConfigInterface';
 const replace = require('stream-replace');
 
 export class MigrationFile {
@@ -43,7 +43,7 @@ export class MigrationFile {
     let targetFile    = path.join(this.config.directory, migrationName);
     let readStream    = fs.createReadStream(sourceFile);
     let writeStream   = fs.createWriteStream(targetFile);
-    code              = code || {up: null, down: null};
+    code              = code || { up: null, down: null };
 
     if (!code.up) {
       code.up = '    // @todo Implement';

@@ -1,9 +1,9 @@
-import {Wetland} from './Wetland';
-import {Connection, Store} from './Store';
-import {SnapshotManager} from './SnapshotManager';
+import { Wetland } from './Wetland';
+import { Connection, Store } from './Store';
+import { SnapshotManager } from './SnapshotManager';
 import * as rm from 'del';
 import * as path from 'path';
-import {SchemaBuilder} from "./SchemaBuilder";
+import { SchemaBuilder } from './SchemaBuilder';
 
 export class Cleaner {
 
@@ -31,7 +31,7 @@ export class Cleaner {
         }
 
         return Promise.reject(error);
-      })
+      });
   }
 
   /**

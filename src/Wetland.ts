@@ -1,17 +1,17 @@
-import {EntityManager} from './EntityManager';
-import {Store, PoolConfig, ReplicationConfig, SingleConfig} from './Store';
-import {Homefront} from 'homefront';
-import {Scope} from './Scope';
-import {EntityInterface, EntityCtor} from './EntityInterface';
-import {Migrator} from './Migrator/Migrator';
+import { EntityManager } from './EntityManager';
+import { Store, PoolConfig, ReplicationConfig, SingleConfig } from './Store';
+import { Homefront } from 'homefront';
+import { Scope } from './Scope';
+import { EntityInterface, EntityCtor } from './EntityInterface';
+import { Migrator } from './Migrator/Migrator';
 import * as fs from 'fs';
 import * as mkdirp from 'mkdirp';
 import * as path from 'path';
-import {SnapshotManager} from './SnapshotManager';
-import {SchemaManager} from './SchemaManager';
-import {Populate} from './Populate';
-import {Seeder} from './Seeder';
-import {Cleaner} from './Cleaner';
+import { SnapshotManager } from './SnapshotManager';
+import { SchemaManager } from './SchemaManager';
+import { Populate } from './Populate';
+import { Seeder } from './Seeder';
+import { Cleaner } from './Cleaner';
 
 export const entityFilterRegexp = /^.*[^d]\.(js|ts)$/;
 export const entityExtensionRegexp = /\.(js|ts)$/;
@@ -42,12 +42,12 @@ export class Wetland {
     defaultStore  : 'defaultStore',
     mapping       : {
       defaultNamesToUnderscore: false,
-      defaults                : {cascades: []}
+      defaults                : { cascades: [] },
     },
     entityManager : {
       refreshCreated: true,
-      refreshUpdated: true
-    }
+      refreshUpdated: true,
+    },
   });
 
   /**
@@ -218,7 +218,7 @@ export class Wetland {
     let store = this.stores[storeName];
 
     if (!store) {
-      throw new Error(`No store called "${storeName}" found.`)
+      throw new Error(`No store called "${storeName}" found.`);
     }
 
     return store;
@@ -348,14 +348,14 @@ export class Wetland {
     } catch (error) {
       throw new Error(
         'No stores configured and sqlite3 not found as dependency. ' +
-        'Configure a store, or run `npm i --save sqlite3`.'
+        'Configure a store, or run `npm i --save sqlite3`.',
       );
     }
 
     this.registerStore(this.config.fetch('defaultStore'), {
       client          : 'sqlite3',
       useNullAsDefault: true,
-      connection      : {filename: `${this.config.fetch('dataDirectory')}/wetland.sqlite`}
+      connection      : { filename: `${this.config.fetch('dataDirectory')}/wetland.sqlite` },
     });
   }
 

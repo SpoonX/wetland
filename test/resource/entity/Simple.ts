@@ -4,6 +4,6 @@ export class Simple {
   public dateOfBirth: Date;
 
   public static setMapping(mapping) {
-    mapping.field('dateOfBirth', {type: 'datetime'})
+    mapping.field('dateOfBirth', { type: 'datetime' });
   }
 }

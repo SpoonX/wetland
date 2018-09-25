@@ -1,0 +1,45 @@
+{
+  "extends": ["tslint-eslint-rules", "tslint-config-prettier"],
+  "rules": {
+    "quotes": ["error", "single"],
+    "semi": ["error", "always"],
+    "comma-dangle": ["error", {
+      "arrays": "always-multiline",
+      "objects": "always-multiline",
+      "imports": "never",
+      "exports": "never",
+      "functions": "ignore"
+    }],
+    "varspacing/var-spacing": ["error"],
+    "key-spacing": ["error", {"align": "colon"}],
+    "padded-blocks": ["error", "never"],
+    "padding-line-between-statements": [
+      "error",
+      {"blankLine": "always", "prev": ["const", "let", "var"], "next": "*"},
+      {"blankLine": "any", "prev": ["const", "let", "var"], "next": ["const", "let", "var"]},
+      {"blankLine": "always", "prev": "*", "next": "return"}
+    ],
+    "indent": [true, "2"],
+    "function-paren-newline": ["error", "multiline"],
+    "space-before-function-paren": [true, {
+      "anonymous": "always",
+      "named": "always",
+      "asyncArrow": "always"
+    }],
+    "generator-star-spacing": ["error", "after"],
+    "object-curly-spacing": [true, "always"],
+    "array-bracket-spacing": [
+      true,
+      "always"
+    ],
+    "quotemark": [true, "single", "jsx-double", "avoid-escape"],
+    "semicolon": [true, "always"],
+    "trailing-comma": [
+      true,
+      {
+        "multiline": "always",
+        "singleline": "never"
+      }
+    ]
+  }
+}

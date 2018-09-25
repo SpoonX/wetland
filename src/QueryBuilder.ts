@@ -1,11 +1,11 @@
 import * as knex from 'knex';
-import {Query} from './Query';
-import {JoinColumn, Mapping, Relationship} from './Mapping';
-import {Entity, Scope} from './Scope';
-import {Catalogue, Hydrator} from './Hydrator';
-import {Having} from './Criteria/Having';
-import {Where} from './Criteria/Where';
-import {On} from './Criteria/On';
+import { Query } from './Query';
+import { JoinColumn, Mapping, Relationship } from './Mapping';
+import { Entity, Scope } from './Scope';
+import { Catalogue, Hydrator } from './Hydrator';
+import { Having } from './Criteria/Having';
+import { Where } from './Criteria/Where';
+import { On } from './Criteria/On';
 
 export class QueryBuilder<T> {
   /**
@@ -81,12 +81,12 @@ export class QueryBuilder<T> {
   /**
    * @type {string[]}
    */
-  private functions: Array<string> = ['sum', 'count', 'max', 'min', 'avg', 'distinct'];
+  private functions: Array<string> = [ 'sum', 'count', 'max', 'min', 'avg', 'distinct' ];
 
   /**
    * @type {string[]}
    */
-  private singleJoinTypes: Array<string> = [Mapping.RELATION_ONE_TO_ONE, Mapping.RELATION_MANY_TO_ONE];
+  private singleJoinTypes: Array<string> = [ Mapping.RELATION_ONE_TO_ONE, Mapping.RELATION_MANY_TO_ONE ];
 
   /**
    * @type {Hydrator}
@@ -113,7 +113,7 @@ export class QueryBuilder<T> {
    */
   public constructor(entityManager: Scope, statement: knex.QueryBuilder, mapping: Mapping<T>, alias: string) {
     this.alias          = alias;
-    this.mappings       = {[alias]: mapping};
+    this.mappings       = { [alias]: mapping };
     this.statement      = statement;
     this.whereCriteria  = new Where(this.statement, mapping, this.mappings, alias);
     this.havingCriteria = new Having(this.statement, mapping, this.mappings, alias);
@@ -148,7 +148,7 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public makeJoin(joinMethod: string, column: string, targetAlias: string): this {
-    let {owningMapping, join, property, alias} = this.getRelationship(column);
+    let { owningMapping, join, property, alias } = this.getRelationship(column);
     let TargetReference                        = this.entityManager.resolveEntityReference(join.targetEntity);
     this.mappings[targetAlias]                 = this.mappings[targetAlias] || Mapping.forEntity(TargetReference);
     let targetMapping                          = this.mappings[targetAlias];
@@ -203,7 +203,7 @@ export class QueryBuilder<T> {
       inversed   = alias;
     }
 
-    let onCriteria = {[`${owning}.${joinColumn.name}`]: `${inversed}.${joinColumn.referencedColumnName}`};
+    let onCriteria = { [`${owning}.${joinColumn.name}`]: `${inversed}.${joinColumn.referencedColumnName}` };
 
     this.join(joinMethod, targetMapping.getTableName(), targetAlias, onCriteria);
 
@@ -359,7 +359,7 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public quickJoin(column: string, targetAlias?: string): QueryBuilder<{new ()}> {
-    let {join, alias, property} = this.getRelationship(column);
+    let { join, alias, property } = this.getRelationship(column);
     let parentQueryBuilder      = this.getChild(alias) || this;
     targetAlias                 = targetAlias || parentQueryBuilder.createAlias(property);
 
@@ -384,7 +384,7 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder<{new()}>}
    */
   public populate(column: string, queryBuilder?: QueryBuilder<{new ()}>, targetAlias?: string): QueryBuilder<{new ()}> {
-    let {owningMapping, join, property, alias} = this.getRelationship(column);
+    let { owningMapping, join, property, alias } = this.getRelationship(column);
 
     if (join.type !== Mapping.RELATION_MANY_TO_MANY && join.type !== Mapping.RELATION_ONE_TO_MANY) {
       throw new Error(`It's not possible to populate relations with type '${join.type}', target must be a collection.`);
@@ -429,7 +429,7 @@ export class QueryBuilder<T> {
 
       // Join from target to joinTable (treating target as owning side).
       queryBuilder.join('innerJoin', joinTable.name, joinTableAlias, {
-        [`${targetAlias}.${joinColumn.referencedColumnName}`]: `${joinTableAlias}.${joinColumn.name}`
+        [`${targetAlias}.${joinColumn.referencedColumnName}`]: `${joinTableAlias}.${joinColumn.name}`,
       });
     }
 
@@ -454,7 +454,7 @@ export class QueryBuilder<T> {
    */
   private getRelationship(column: string): {owningMapping: Mapping<Entity>, join: Relationship, property: string, alias: string} {
     column                = column.indexOf('.') > -1 ? column : `${this.alias}.${column}`;
-    let [alias, property] = column.split('.');
+    let [ alias, property ] = column.split('.');
     let parent            = this.getChild(alias) || this;
     let owningMapping     = parent.mappings[alias];
     let field;
@@ -471,11 +471,11 @@ export class QueryBuilder<T> {
     if (!field || !field.relationship) {
       throw new Error(
         `Invalid relation supplied for join. Property '${property}' not found on entity, or relation not defined.
-        Are you registering the joins in the wrong order?`
+        Are you registering the joins in the wrong order?`,
       );
     }
 
-    return {owningMapping, join: field.relationship, property, alias};
+    return { owningMapping, join: field.relationship, property, alias };
   }
 
   /**
@@ -490,9 +490,9 @@ export class QueryBuilder<T> {
   public setParent(property: string, column: string, catalogue: Catalogue): this {
     this.statement.select(`${column} as ${column}`);
 
-    this.query.setParent({column, primaries: catalogue.primaries});
+    this.query.setParent({ column, primaries: catalogue.primaries });
 
-    this.hydrator.getRecipe().parent = {entities: catalogue.entities, column, property};
+    this.hydrator.getRecipe().parent = { entities: catalogue.entities, column, property };
 
     return this;
   }
@@ -593,7 +593,7 @@ export class QueryBuilder<T> {
    */
   private applyFrom(): this {
     if (this.derivedFrom) {
-      let {derived, alias} = this.derivedFrom;
+      let { derived, alias } = this.derivedFrom;
 
       this.statement.from(this.statement['client'].raw(`(${this.derivedFrom.derived.getQuery().getSQL()}) as ${alias}`));
 
@@ -694,7 +694,7 @@ export class QueryBuilder<T> {
 
           if (!fieldName) {
             throw new Error(
-              `Trying to query for field without a name for '${mapping.getEntityName()}.${field}'.`
+              `Trying to query for field without a name for '${mapping.getEntityName()}.${field}'.`,
             );
           }
 
@@ -802,7 +802,7 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public groupBy(groupBy: string | Array<string>): this {
-    this.groupBys.push({groupBy});
+    this.groupBys.push({ groupBy });
 
     return this;
   }
@@ -855,7 +855,7 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public orderBy(orderBy: string | Array<string> | Object, direction?): this {
-    this.orderBys.push({orderBy, direction});
+    this.orderBys.push({ orderBy, direction });
 
     return this;
   }
@@ -960,7 +960,7 @@ export class QueryBuilder<T> {
       alias = this.createAlias(derived.getHostMapping().getTableName());
     }
 
-    this.derivedFrom = {alias, derived};
+    this.derivedFrom = { alias, derived };
     this.prepared    = false;
 
     return this;

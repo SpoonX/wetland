@@ -1,9 +1,9 @@
-import {UnitOfWork} from './UnitOfWork';
-import {EntityInterface, ProxyInterface} from './EntityInterface';
-import {ArrayCollection as Collection} from './ArrayCollection';
-import {Mapping} from './Mapping';
-import {Scope} from './Scope';
-import {MetaData} from './MetaData';
+import { UnitOfWork } from './UnitOfWork';
+import { EntityInterface, ProxyInterface } from './EntityInterface';
+import { ArrayCollection as Collection } from './ArrayCollection';
+import { Mapping } from './Mapping';
+import { Scope } from './Scope';
+import { MetaData } from './MetaData';
 
 export class EntityProxy {
   /**
@@ -43,7 +43,7 @@ export class EntityProxy {
     /**
      * @returns {boolean}
      */
-    function isProxyActive() {
+    function isProxyActive () {
       return proxyActive && metaData.fetch('entityState.state') !== UnitOfWork.STATE_UNKNOWN;
     }
 
@@ -54,7 +54,7 @@ export class EntityProxy {
      *
      * @returns {any}
      */
-    function getExpected(property: string): {new ()} {
+    function getExpected (property: string): {new ()} {
       if (!expected[property]) {
         expected[property] = entityManager.resolveEntityReference(relations[property].targetEntity);
       }
@@ -71,8 +71,8 @@ export class EntityProxy {
      *
      * @returns {boolean}
      */
-    function areDifferent(property: string, current: Date, next: Date): Boolean {
-      const isDate = ['date', 'dateTime', 'datetime', 'time'].indexOf(mapping.getType(property)) > -1;
+    function areDifferent (property: string, current: Date, next: Date): Boolean {
+      const isDate = [ 'date', 'dateTime', 'datetime', 'time' ].indexOf(mapping.getType(property)) > -1;
 
       if (!isDate) {
         return current !== next;
@@ -90,7 +90,7 @@ export class EntityProxy {
      *
      * @returns {boolean}
      */
-    function setDirty(target: Object, property: string, value: any): boolean {
+    function setDirty (target: Object, property: string, value: any): boolean {
       if (typeof value === 'object' && value !== null && '_skipDirty' in value) {
         target[property] = value._skipDirty;
 
@@ -108,7 +108,7 @@ export class EntityProxy {
      *
      * @returns {void}
      */
-    function proxyCollection(property: string, forceNew: boolean = false): void {
+    function proxyCollection (property: string, forceNew: boolean = false): void {
       // Define what this collection consists out of.
       let ExpectedEntity = getExpected(property);
       let collection     = (forceNew || !entity[property]) ? new Collection : entity[property];
@@ -145,7 +145,7 @@ export class EntityProxy {
 
           if (typeof relationEntity !== 'object' || !(relationEntity instanceof ExpectedEntity)) {
             throw new TypeError(
-              `Can't add to '${entity.constructor.name}.${property}'. Expected instance of '${ExpectedEntity.name}'.`
+              `Can't add to '${entity.constructor.name}.${property}'. Expected instance of '${ExpectedEntity.name}'.`,
             );
           }
 
@@ -181,7 +181,7 @@ export class EntityProxy {
           unitOfWork.registerCollectionChange(UnitOfWork.RELATIONSHIP_REMOVED, entityProxy, property, previousValue);
 
           return true;
-        }
+        },
       });
     }
 
@@ -205,8 +205,8 @@ export class EntityProxy {
       },
 
       isProxyingActive: () => {
-        return isProxyActive()
-      }
+        return isProxyActive();
+      },
     };
 
     // Return the actual proxy for the entity.
@@ -242,7 +242,7 @@ export class EntityProxy {
 
           if (entity[property].length > 0) {
             throw new Error(
-              `Can't assign to '${target.constructor.name}.${property}'. Collection is not empty.`
+              `Can't assign to '${target.constructor.name}.${property}'. Collection is not empty.`,
             );
           }
 
@@ -258,7 +258,7 @@ export class EntityProxy {
 
         if (!(value instanceof ExpectedEntity)) {
           throw new TypeError(
-            `Can't assign to '${target.constructor.name}.${property}'. Expected instance of '${ExpectedEntity.name}'.`
+            `Can't assign to '${target.constructor.name}.${property}'. Expected instance of '${ExpectedEntity.name}'.`,
           );
         }
 
@@ -293,7 +293,7 @@ export class EntityProxy {
 
         if (relation && (relation.type === Mapping.RELATION_MANY_TO_MANY || relation.type === Mapping.RELATION_ONE_TO_MANY)) {
           throw new Error(
-            `It is not allowed to delete a collection; trying to delete '${target.constructor.name}.${property}'.`
+            `It is not allowed to delete a collection; trying to delete '${target.constructor.name}.${property}'.`,
           );
         }
 
@@ -302,7 +302,7 @@ export class EntityProxy {
         delete target[property];
 
         return true;
-      }
+      },
     });
 
     return entityProxy;

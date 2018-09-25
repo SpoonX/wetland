@@ -1,10 +1,10 @@
-import {assert} from 'chai';
+import { assert } from 'chai';
 import * as Promise from 'bluebird';
-import {Wetland} from '../../src/Wetland';
-import {SchemaBuilder} from '../../src/SchemaBuilder';
-import {Store} from '../../src/Store';
-import {Schema} from '../resource/Schema';
-import {schemas} from '../resource/schemas';
+import { Wetland } from '../../src/Wetland';
+import { SchemaBuilder } from '../../src/SchemaBuilder';
+import { Store } from '../../src/Store';
+import { Schema } from '../resource/Schema';
+import { schemas } from '../resource/schemas';
 
 describe('SchemaBuilder', () => {
   beforeEach(done => {
@@ -17,7 +17,7 @@ describe('SchemaBuilder', () => {
   });
 });
 
-function testEntities(section, done) {
+function testEntities (section, done) {
   let wetland = new Wetland({
     entityPath: __dirname + '/../resource/entity/' + section,
     stores    : {
@@ -26,10 +26,10 @@ function testEntities(section, done) {
         connection: {
           user    : 'root',
           host    : '127.0.0.1',
-          database: 'wetland_test'
-        }
-      }
-    }
+          database: 'wetland_test',
+        },
+      },
+    },
   });
 
   let connection = wetland.getStore().getConnection(Store.ROLE_MASTER);
@@ -43,7 +43,7 @@ function testEntities(section, done) {
   });
 }
 
-function testProperty(connection, section, property, table) {
+function testProperty (connection, section, property, table) {
   return Promise.all(schemas[section][property].map(target => {
     return connection
       .from('information_schema.' + table)

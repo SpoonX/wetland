@@ -4,10 +4,10 @@ export class Media {
     mapping.forProperty('id').increments().primary();
 
     // Fields
-    mapping.forProperty('url').field({type: 'string'});
+    mapping.forProperty('url').field({ type: 'string' });
 
     // Relations
     mapping.forProperty('offer')
-      .manyToOne({targetEntity: 'Offer', inversedBy: 'pictures'});
+      .manyToOne({ targetEntity: 'Offer', inversedBy: 'pictures' });
   }
 }

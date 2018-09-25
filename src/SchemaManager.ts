@@ -1,5 +1,5 @@
-import {Wetland} from './Wetland';
-import {SchemaBuilder} from './SchemaBuilder';
+import { Wetland } from './Wetland';
+import { SchemaBuilder } from './SchemaBuilder';
 
 export class SchemaManager {
   /**

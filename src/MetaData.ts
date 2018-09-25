@@ -1,5 +1,5 @@
-import {Homefront} from 'homefront';
-import {ProxyInterface, EntityInterface, EntityCtor} from './EntityInterface';
+import { Homefront } from 'homefront';
+import { ProxyInterface, EntityInterface, EntityCtor } from './EntityInterface';
 
 export class MetaData {
   /**

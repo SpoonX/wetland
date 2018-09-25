@@ -1,14 +1,14 @@
-import {UnitOfWork} from './UnitOfWork';
-import {EntityManager} from './EntityManager';
-import {EntityInterface, ProxyInterface, EntityCtor} from './EntityInterface';
-import {EntityRepository} from './EntityRepository';
-import {Mapping} from './Mapping';
-import {Store} from './Store';
-import {Wetland} from './Wetland';
-import {Hydrator} from './Hydrator';
-import {Homefront} from 'homefront';
-import {EntityProxy} from './EntityProxy';
-import {IdentityMap} from './IdentityMap';
+import { UnitOfWork } from './UnitOfWork';
+import { EntityManager } from './EntityManager';
+import { EntityInterface, ProxyInterface, EntityCtor } from './EntityInterface';
+import { EntityRepository } from './EntityRepository';
+import { Mapping } from './Mapping';
+import { Store } from './Store';
+import { Wetland } from './Wetland';
+import { Hydrator } from './Hydrator';
+import { Homefront } from 'homefront';
+import { EntityProxy } from './EntityProxy';
+import { IdentityMap } from './IdentityMap';
 
 export class Scope {
 
@@ -145,7 +145,7 @@ export class Scope {
       }
 
       const refresh = this.getRepository(entityCtor).getQueryBuilder()
-        .where({[primaryKeyName]: primaryKey})
+        .where({ [primaryKeyName]: primaryKey })
         .limit(1)
         .getQuery()
         .execute()
@@ -273,7 +273,7 @@ export class Scope {
   public flush(
     skipClean: boolean = false,
     skipLifecycleHooks: boolean = false,
-    config: {refreshCreated?: boolean, refreshUpdated?: boolean} = {refreshCreated: null, refreshUpdated: null}
+    config: {refreshCreated?: boolean, refreshUpdated?: boolean} = { refreshCreated: null, refreshUpdated: null },
   ): Promise<any> {
     return this.unitOfWork.commit(skipClean, skipLifecycleHooks, config);
   }

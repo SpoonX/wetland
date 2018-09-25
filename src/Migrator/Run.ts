@@ -1,7 +1,7 @@
-import {Migrator} from './Migrator';
-import {Scope} from '../Scope';
-import {Store} from '../Store';
-import {Migration} from './Migration';
+import { Migrator } from './Migrator';
+import { Scope } from '../Scope';
+import { Store } from '../Store';
+import { Migration } from './Migration';
 import * as Bluebird from 'bluebird';
 import * as path from 'path';
 import * as Knex from 'knex';
