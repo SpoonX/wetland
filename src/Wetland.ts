@@ -13,6 +13,9 @@ import {Populate} from './Populate';
 import {Seeder} from './Seeder';
 import {Cleaner} from './Cleaner';
 
+export const entityFilterRegexp = /^.*[^d]\.(js|ts)$/;
+export const entityExtensionRegexp = /\.(js|ts)$/;
+
 export class Wetland {
   /**
    * @type {EntityManager}
@@ -103,8 +106,8 @@ export class Wetland {
 
     entityPaths.forEach(entityPath => {
       fs.readdirSync(entityPath)
-        .filter(match => match.search(/^[^.]+\.(ts|js)$/) > -1)
-        .map(entity => entity.replace(/\.(js|ts)$/, ''))
+        .filter(match => match.search(entityFilterRegexp) > -1)
+        .map(entity => entity.replace(entityExtensionRegexp, ''))
         .forEach(entity => {
           let filePath     = path.resolve(entityPath, entity);
           let entityModule = require(filePath);
