@@ -103,8 +103,8 @@ export class Wetland {
 
     entityPaths.forEach(entityPath => {
       fs.readdirSync(entityPath)
-        .filter(match => match.search(/\.js$/) > -1)
-        .map(entity => entity.replace(/\.js$/, ''))
+        .filter(match => match.search(/^[^.]+\.(ts|js)$/) > -1)
+        .map(entity => entity.replace(/\.(js|ts)$/, ''))
         .forEach(entity => {
           let filePath     = path.resolve(entityPath, entity);
           let entityModule = require(filePath);
