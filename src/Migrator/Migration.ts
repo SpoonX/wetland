@@ -1,6 +1,6 @@
-import {Scope} from '../Scope';
-import {Store} from '../Store';
-import {Run} from './Run';
+import { Scope } from '../Scope';
+import { Store } from '../Store';
+import { Run } from './Run';
 import * as Knex from 'knex';
 import * as Bluebird from 'bluebird';
 
@@ -91,9 +91,9 @@ export class Migration {
     let connection    = this.getConnection(store);
     let schemaBuilder = connection.schema;
 
-    this.builders.push({store, schemaBuilder, knex: connection});
+    this.builders.push({ store, schemaBuilder, knex: connection });
 
-    return {schema: schemaBuilder, knex: connection};
+    return { schema: schemaBuilder, knex: connection };
   }
 
   /**

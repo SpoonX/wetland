@@ -1,22 +1,22 @@
-import {assert} from 'chai';
-import {UnitOfWork} from '../../src/UnitOfWork';
-import {Wetland} from '../../src/Wetland';
-import {Scope} from '../../src/Scope';
-import {Parent} from '../resource/entity/Parent';
-import {Simple} from '../resource/entity/Simple';
-import {MetaData} from '../../src/MetaData';
-import {Product} from '../resource/entity/shop/product';
-import {Category} from '../resource/entity/shop/category';
-import {ArrayCollection} from '../../src/ArrayCollection';
-import {Image} from '../resource/entity/shop/image';
-import {Tag} from '../resource/entity/shop/tag';
-import {User} from '../resource/entity/shop/user';
-import {Profile} from '../resource/entity/shop/Profile';
+import { assert } from 'chai';
+import { UnitOfWork } from '../../src/UnitOfWork';
+import { Wetland } from '../../src/Wetland';
+import { Scope } from '../../src/Scope';
+import { Parent } from '../resource/entity/Parent';
+import { Simple } from '../resource/entity/Simple';
+import { MetaData } from '../../src/MetaData';
+import { Product } from '../resource/entity/shop/product';
+import { Category } from '../resource/entity/shop/category';
+import { ArrayCollection } from '../../src/ArrayCollection';
+import { Image } from '../resource/entity/shop/image';
+import { Tag } from '../resource/entity/shop/tag';
+import { User } from '../resource/entity/shop/user';
+import { Profile } from '../resource/entity/shop/Profile';
 import * as path from 'path';
 
 let tmpTestDir = path.join(__dirname, '../.tmp');
 
-function getUnitOfWork(entities?, config = {}): UnitOfWork {
+function getUnitOfWork (entities?, config = {}): UnitOfWork {
   let wetland = new Wetland(config);
 
   if (entities) {
@@ -95,9 +95,9 @@ describe('UnitOfWork', () => {
       assert.lengthOf(Object.keys(relations.added), 2);
       assert.lengthOf(Object.keys(relations.removed), 0);
       unitOfWork.registerCollectionChange(UnitOfWork.RELATIONSHIP_REMOVED, parent, 'simples', simple1);
-      assert.deepEqual(relations, {added: {others: [simple2]}, removed: {}});
+      assert.deepEqual(relations, { added: { others: [ simple2 ] }, removed: {} });
       unitOfWork.registerCollectionChange(UnitOfWork.RELATIONSHIP_REMOVED, parent, 'others', simple2);
-      assert.deepEqual(relations, {added: {}, removed: {}});
+      assert.deepEqual(relations, { added: {}, removed: {} });
       assert.deepEqual(MetaData.forInstance(parent).fetch('entityState'), {});
 
       assert.isFalse(unitOfWork.getRelationshipsChangedObjects().includes(parent));
@@ -236,7 +236,7 @@ describe('UnitOfWork', () => {
 
       unitOfWork.registerDirty(simple, 'cake', 'foo', 'bar');
 
-      assert.deepEqual(MetaData.forInstance(simple).fetch('entityState.dirty'), ['cake', 'foo', 'bar']);
+      assert.deepEqual(MetaData.forInstance(simple).fetch('entityState.dirty'), [ 'cake', 'foo', 'bar' ]);
     });
 
     it('should throw an error when trying to register deleted as dirty (and maintain dirty properties)', () => {
@@ -247,7 +247,7 @@ describe('UnitOfWork', () => {
       unitOfWork.registerDirty(simple, 'cake', 'foo', 'bar');
       unitOfWork.registerDeleted(simple);
 
-      assert.deepEqual(MetaData.forInstance(simple).fetch('entityState.dirty'), ['cake', 'foo', 'bar']);
+      assert.deepEqual(MetaData.forInstance(simple).fetch('entityState.dirty'), [ 'cake', 'foo', 'bar' ]);
 
       assert.throws(() => {
         unitOfWork.registerDirty(simple, 'cake', 'foo', 'bar');
@@ -295,11 +295,11 @@ describe('UnitOfWork', () => {
       unitOfWork.registerClean(simple);
       unitOfWork.registerDirty(simple, 'cake', 'foo', 'bar');
 
-      assert.deepEqual(MetaData.forInstance(simple).fetch('entityState.dirty'), ['cake', 'foo', 'bar']);
+      assert.deepEqual(MetaData.forInstance(simple).fetch('entityState.dirty'), [ 'cake', 'foo', 'bar' ]);
 
       unitOfWork.registerClean(simple, true);
 
-      assert.deepEqual(MetaData.forInstance(simple).fetch('entityState.dirty'), ['cake', 'foo', 'bar']);
+      assert.deepEqual(MetaData.forInstance(simple).fetch('entityState.dirty'), [ 'cake', 'foo', 'bar' ]);
     });
 
     it('should revert changes when not fresh entity', () => {
@@ -310,13 +310,13 @@ describe('UnitOfWork', () => {
       unitOfWork.registerClean(simple);
       unitOfWork.registerDirty(simple, 'cake', 'foo', 'bar');
 
-      assert.deepEqual(MetaData.forInstance(simple).fetch('entityState.dirty'), ['cake', 'foo', 'bar']);
+      assert.deepEqual(MetaData.forInstance(simple).fetch('entityState.dirty'), [ 'cake', 'foo', 'bar' ]);
 
       unitOfWork.registerRelationChange(UnitOfWork.RELATIONSHIP_ADDED, parent, 'single', simple);
 
       assert.deepEqual(MetaData.forInstance(parent).fetch('entityState.relations'), {
-        added  : {single: simple},
-        removed: {}
+        added  : { single: simple },
+        removed: {},
       });
 
       unitOfWork.registerClean(simple);
@@ -350,8 +350,8 @@ describe('UnitOfWork', () => {
     });
 
     it('should prepare cascades for one-sided relationship', function () {
-      let config          = {mapping: {defaults: {cascades: ['persist']}}};
-      let unitOfWork      = getUnitOfWork([Simple, Parent], config);
+      let config          = { mapping: { defaults: { cascades: [ 'persist' ] } } };
+      let unitOfWork      = getUnitOfWork([ Simple, Parent ], config);
       let entityManager   = unitOfWork.getEntityManager();
       let parent          = new Parent;
       let simple1         = new Simple;
@@ -374,11 +374,11 @@ describe('UnitOfWork', () => {
       assert.lengthOf(unitOfWork.getCleanObjects(), 0);
       assert.lengthOf(unitOfWork.getRelationshipsChangedObjects(), 1);
       assert.strictEqual(unitOfWork.getRelationshipsChangedObjects()[0].single, simple1);
-      assert.sameMembers(unitOfWork.getRelationshipsChangedObjects()[0].simples, [simple2, simple3]);
+      assert.sameMembers(unitOfWork.getRelationshipsChangedObjects()[0].simples, [ simple2, simple3 ]);
     });
 
     it('should prepare cascades for persist when new relation', () => {
-      let unitOfWork     = getUnitOfWork([Product, Category]);
+      let unitOfWork     = getUnitOfWork([ Product, Category ]);
       let entityManager  = unitOfWork.getEntityManager();
       let product        = new Product;
       let categoryOne    = new Category;
@@ -403,7 +403,7 @@ describe('UnitOfWork', () => {
 
       assert.deepEqual(MetaData.forInstance(product).fetch('entityState.relations'), {
         removed: {},
-        added  : {categories: [categoryOne, categoryTwo]}
+        added  : { categories: [ categoryOne, categoryTwo ] },
       });
     });
 
@@ -411,7 +411,7 @@ describe('UnitOfWork', () => {
       // Fresh start.
       MetaData.clear(Product, User);
 
-      let unitOfWork    = getUnitOfWork([Product, User]);
+      let unitOfWork    = getUnitOfWork([ Product, User ]);
       let entityManager = unitOfWork.getEntityManager();
       let product       = new Product;
       product.author    = new User;
@@ -424,7 +424,7 @@ describe('UnitOfWork', () => {
     });
 
     it('should throw an error for persist when new relation is marked as deleted', () => {
-      let unitOfWork     = getUnitOfWork([Product, User]);
+      let unitOfWork     = getUnitOfWork([ Product, User ]);
       let entityManager  = unitOfWork.getEntityManager();
       let product        = new Product;
       let category       = new Category;
@@ -442,7 +442,7 @@ describe('UnitOfWork', () => {
     });
 
     it('should prepare cascades for persist when new collection', () => {
-      let unitOfWork     = getUnitOfWork([Product, User]);
+      let unitOfWork     = getUnitOfWork([ Product, User ]);
       let product        = new Product;
       let category       = new Category;
       let category2      = new Category;
@@ -460,7 +460,7 @@ describe('UnitOfWork', () => {
     });
 
     it('should prepare cascades recursively (aka the shit-show test)', () => {
-      let unitOfWork     = getUnitOfWork([Product, Category, Image, Tag, User, Profile]);
+      let unitOfWork     = getUnitOfWork([ Product, Category, Image, Tag, User, Profile ]);
       let entityManager  = unitOfWork.getEntityManager();
       let product        = new Product;
       let profile        = new Profile;
@@ -530,14 +530,14 @@ describe('UnitOfWork', () => {
       assert.deepEqual(MetaData.forInstance(product).fetch('entityState.relations'), {
         removed: {},
         added  : {
-          categories: [categoryOne, categoryTwo, categoryThree],
-          image     : image
-        }
+          categories: [ categoryOne, categoryTwo, categoryThree ],
+          image     : image,
+        },
       });
 
       assert.deepEqual(MetaData.forInstance(image).fetch('entityState.relations'), {
         removed: {},
-        added  : {tags: [tagOne, tagTwo]}
+        added  : { tags: [ tagOne, tagTwo ] },
       });
 
       assert.strictEqual(MetaData.forInstance(categoryOne).fetch('entityState.relations'), null);
@@ -545,18 +545,18 @@ describe('UnitOfWork', () => {
       assert.strictEqual(MetaData.forInstance(categoryTwo).fetch('entityState.relations'), null);
 
       assert.deepEqual(MetaData.forInstance(categoryThree).fetch('entityState.relations'), {
-        removed: {tags: [tagThree]},
-        added  : {tags: [tagFour]}
+        removed: { tags: [ tagThree ] },
+        added  : { tags: [ tagFour ] },
       });
 
       assert.deepEqual(MetaData.forInstance(tagOne).fetch('entityState.relations'), {
         removed: {},
-        added  : {creator: creatorOne}
+        added  : { creator: creatorOne },
       });
 
       assert.deepEqual(MetaData.forInstance(tagTwo).fetch('entityState.relations'), {
         removed: {},
-        added  : {creator: creatorTwo}
+        added  : { creator: creatorTwo },
       });
     });
   });
@@ -569,11 +569,11 @@ describe('UnitOfWork', () => {
             client          : 'sqlite3',
             useNullAsDefault: true,
             connection      : {
-              filename: `${tmpTestDir}/shitshow-persist.sqlite`
-            }
-          }
+              filename: `${tmpTestDir}/shitshow-persist.sqlite`,
+            },
+          },
         },
-        entities: [Product, Category, Image, Tag, User, Profile]
+        entities: [ Product, Category, Image, Tag, User, Profile ],
       });
 
       wetland.getSchemaManager().create().then(() => {
@@ -638,7 +638,7 @@ describe('UnitOfWork', () => {
         assert.lengthOf(unitOfWork.getRelationshipsChangedObjects(), 1);
 
         entityManager.flush().then(() => {
-          entityManager.getRepository(User).findOne({name: 'test tag one creator'}, {populate: {'profile': 'p'}})
+          entityManager.getRepository(User).findOne({ name: 'test tag one creator' }, { populate: { 'profile': 'p' } })
             .then(user => {
               assert.strictEqual(user.profile.slogan, 'No harm, try harder.');
 
@@ -669,7 +669,7 @@ describe('UnitOfWork', () => {
         }
       }
 
-      let wetland = new Wetland({entities: [User]});
+      let wetland = new Wetland({ entities: [ User ] });
 
       let migrator = wetland.getMigrator();
       let manager  = wetland.getManager();

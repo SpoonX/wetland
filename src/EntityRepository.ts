@@ -1,8 +1,8 @@
-import {Mapping} from './Mapping';
-import {QueryBuilder} from './QueryBuilder';
+import { Mapping } from './Mapping';
+import { QueryBuilder } from './QueryBuilder';
 import * as knex from 'knex';
-import {Store} from './Store';
-import {EntityCtor} from './EntityInterface';
+import { Store } from './Store';
+import { EntityCtor } from './EntityInterface';
 import { EntityManager } from './EntityManager';
 import { Scope } from './Scope';
 
@@ -28,7 +28,7 @@ export class EntityRepository<T> {
    *
    * @type { string[] }
    */
-  protected queryOptions: Array<string> = ['orderBy', 'limit', 'offset', 'groupBy', 'select'];
+  protected queryOptions: Array<string> = [ 'orderBy', 'limit', 'offset', 'groupBy', 'select' ];
 
   /**
    * Construct a new EntityRepository.
@@ -158,7 +158,7 @@ export class EntityRepository<T> {
         options.populate = Reflect.ownKeys(relations);
       }
     } else if (typeof options.populate === 'string') {
-      options.populate = [options.populate];
+      options.populate = [ options.populate ];
     }
 
     if (Array.isArray(options.populate) && options.populate.length) {
@@ -204,7 +204,7 @@ export class EntityRepository<T> {
     options.alias = options.alias || this.mapping.getTableName();
 
     if (typeof criteria === 'number' || typeof criteria === 'string') {
-      criteria = {[options.alias + '.' + this.mapping.getPrimaryKeyField()]: criteria}
+      criteria = { [options.alias + '.' + this.mapping.getPrimaryKeyField()]: criteria };
     }
 
     options.limit = 1;
@@ -232,13 +232,13 @@ export class EntityRepository<T> {
 }
 
 export interface FindOptions {
-  select?: Array<string>,
-  orderBy?: any,
-  groupBy?: any,
-  alias?: string,
-  page?: number,
-  limit?: number,
-  offset?: number,
-  debug?: boolean,
-  populate?: string | boolean | {} | Array<string|{}>
+  select?: Array<string>;
+  orderBy?: any;
+  groupBy?: any;
+  alias?: string;
+  page?: number;
+  limit?: number;
+  offset?: number;
+  debug?: boolean;
+  populate?: string | boolean | {} | Array<string|{}>;
 }

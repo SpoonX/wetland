@@ -1,8 +1,8 @@
-import {Scope} from './Scope';
-import {EntityCtor} from './EntityInterface';
-import {ArrayCollection as Collection} from './ArrayCollection';
-import {Mapping} from './Mapping';
-import {UnitOfWork} from './UnitOfWork';
+import { Scope } from './Scope';
+import { EntityCtor } from './EntityInterface';
+import { ArrayCollection as Collection } from './ArrayCollection';
+import { Mapping } from './Mapping';
+import { UnitOfWork } from './UnitOfWork';
 
 export class Populate {
 
@@ -33,7 +33,7 @@ export class Populate {
   public findDataForUpdate(primaryKey: string | number, Entity: EntityCtor<{new ()}>, data: Object): Promise<any> {
     let repository = this.entityManager.getRepository(Entity);
     let mapping    = this.entityManager.getMapping(Entity);
-    let options    = {populate: new Collection(), alias: mapping.getTableName()};
+    let options    = { populate: new Collection(), alias: mapping.getTableName() };
     let relations  = mapping.getRelations();
 
     Reflect.ownKeys(data).forEach((property: string) => {
@@ -46,7 +46,7 @@ export class Populate {
       let type      = relation.type;
 
       if (type === Mapping.RELATION_ONE_TO_MANY || type === Mapping.RELATION_MANY_TO_MANY) {
-        return options.populate.add({[property]: property});
+        return options.populate.add({ [property]: property });
       }
 
       if (typeof data[property] !== 'object' || data[property] === null) {
@@ -57,7 +57,7 @@ export class Populate {
         return;
       }
 
-      options.populate.add({[property]: property});
+      options.populate.add({ [property]: property });
     });
 
     return repository.findOne(primaryKey, options);
@@ -130,7 +130,7 @@ export class Populate {
 
       // Only relationships require special treatment. This isn't one, so just assign and move on.
       if (!field.relationship) {
-        if (['date', 'dateTime', 'datetime', 'time'].indexOf(field.type) > -1 && !(data[property] instanceof Date)) {
+        if ([ 'date', 'dateTime', 'datetime', 'time' ].indexOf(field.type) > -1 && !(data[property] instanceof Date)) {
           data[property] = new Date(data[property]);
         }
 

@@ -1,12 +1,12 @@
-import {assert} from 'chai';
-import {Wetland} from '../../src/Wetland';
-import {MetaData} from '../../src/MetaData';
-import {Mapping} from '../../src/Mapping';
-import {Product} from '../resource/entity/shop/product';
-import {Homefront} from 'homefront';
-import {EntityProxy} from '../../src/EntityProxy';
+import { assert } from 'chai';
+import { Wetland } from '../../src/Wetland';
+import { MetaData } from '../../src/MetaData';
+import { Mapping } from '../../src/Mapping';
+import { Product } from '../resource/entity/shop/product';
+import { Homefront } from 'homefront';
+import { EntityProxy } from '../../src/EntityProxy';
 
-function getUnitOfWork(entity) {
+function getUnitOfWork (entity) {
   let wetland = new Wetland;
 
   if (entity) {

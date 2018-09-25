@@ -1,15 +1,15 @@
-import {Wetland} from '../../src/Wetland';
-import {Scope} from '../../src/Scope';
-import {Hydrator} from '../../src/Hydrator';
-import {User} from '../resource/entity/postal/User';
-import {Tracker} from '../resource/entity/postal/Tracker';
-import {assert} from 'chai';
+import { Wetland } from '../../src/Wetland';
+import { Scope } from '../../src/Scope';
+import { Hydrator } from '../../src/Hydrator';
+import { User } from '../resource/entity/postal/User';
+import { Tracker } from '../resource/entity/postal/Tracker';
+import { assert } from 'chai';
 
-function getHydrator(): Hydrator {
+function getHydrator (): Hydrator {
   return new Hydrator(getManager());
 }
 
-function getManager(): Scope {
+function getManager (): Scope {
   let wetland = new Wetland();
 
   return wetland.getManager();
@@ -29,7 +29,7 @@ describe('Hydrator', () => {
   describe('.fromSchema()', () => {
     it('should map to entities', () => {
       let entity = getHydrator().fromSchema({
-        name: 'foo'
+        name: 'foo',
       }, User);
 
       assert.propertyVal(entity, 'name', 'foo');
@@ -37,7 +37,7 @@ describe('Hydrator', () => {
 
     it('should not map invalid value to entities', () => {
       let entity = getHydrator().fromSchema({
-        bar: 'foo'
+        bar: 'foo',
       }, User);
 
       assert.notProperty(entity, 'bar');
@@ -45,7 +45,7 @@ describe('Hydrator', () => {
 
     it('should map to entities with empty object', () => {
       let entity = getHydrator().fromSchema({
-        name: 'foo'
+        name: 'foo',
       }, {});
 
       assert.notProperty(entity, 'name');
@@ -56,7 +56,7 @@ describe('Hydrator', () => {
     it('should add a recipe', () => {
       let recipe = getHydrator().addRecipe(null, 'foo', getManager().getMapping(User), 'single');
 
-      assert.deepEqual(recipe.primaryKey, {alias: 'foo.id', property: 'id'});
+      assert.deepEqual(recipe.primaryKey, { alias: 'foo.id', property: 'id' });
       assert.isNull(recipe.parent);
       assert.isFalse(recipe.hydrate);
       assert.equal(recipe.type, 'single');

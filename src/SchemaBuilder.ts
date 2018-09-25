@@ -1,7 +1,7 @@
-import {FieldOptions} from './Mapping';
+import { FieldOptions } from './Mapping';
 import * as Knex from 'knex';
-import {Scope} from './Scope';
-import {Store} from './Store';
+import { Scope } from './Scope';
+import { Store } from './Store';
 
 export class SchemaBuilder {
 
@@ -126,8 +126,8 @@ export class SchemaBuilder {
 
         this.builders.push(schemaBuilder);
 
-        return {schema: schemaBuilder, knex: connection};
-      }
+        return { schema: schemaBuilder, knex: connection };
+      },
     };
 
     // Come at me, bro.

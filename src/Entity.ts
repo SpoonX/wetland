@@ -1,4 +1,4 @@
-import {Mapping} from './Mapping';
+import { Mapping } from './Mapping';
 
 export class Entity {
   public static toObject(source: {toJSON?: Function} & Object): Object {

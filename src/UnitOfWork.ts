@@ -1,12 +1,12 @@
 import * as knex from 'knex';
-import {ArrayCollection} from './ArrayCollection';
-import {Store} from './Store';
-import {EntityInterface, ProxyInterface} from './EntityInterface';
-import {Mapping} from './Mapping';
-import {Scope} from './Scope';
-import {QueryBuilder} from './QueryBuilder';
-import {MetaData} from './MetaData';
-import {EntityProxy} from './EntityProxy';
+import { ArrayCollection } from './ArrayCollection';
+import { Store } from './Store';
+import { EntityInterface, ProxyInterface } from './EntityInterface';
+import { Mapping } from './Mapping';
+import { Scope } from './Scope';
+import { QueryBuilder } from './QueryBuilder';
+import { MetaData } from './MetaData';
+import { EntityProxy } from './EntityProxy';
 
 /**
  * Maintains a list of objects affected by a business transaction and -
@@ -223,7 +223,7 @@ export class UnitOfWork {
     let addTo           = change === UnitOfWork.RELATIONSHIP_ADDED ? 'added' : 'removed';
     let removeFrom      = change === UnitOfWork.RELATIONSHIP_ADDED ? 'removed' : 'added';
     let targetMeta      = MetaData.forInstance(targetEntity);
-    let relationChanges = targetMeta.fetchOrPut('entityState.relations', {added: {}, removed: {}});
+    let relationChanges = targetMeta.fetchOrPut('entityState.relations', { added: {}, removed: {} });
     let removeFromList  = relationChanges[removeFrom];
 
     // If given relationEntity was already staged as a change for the other side.
@@ -275,7 +275,7 @@ export class UnitOfWork {
     let addTo           = change === UnitOfWork.RELATIONSHIP_ADDED ? 'added' : 'removed';
     let removeFrom      = change === UnitOfWork.RELATIONSHIP_ADDED ? 'removed' : 'added';
     let targetMeta      = MetaData.forInstance(targetEntity);
-    let relationChanges = targetMeta.fetchOrPut('entityState.relations', {added: {}, removed: {}});
+    let relationChanges = targetMeta.fetchOrPut('entityState.relations', { added: {}, removed: {} });
     let removeFromList  = relationChanges[removeFrom];
 
     // If provided relationEntity was already staged for the other side...
@@ -372,12 +372,12 @@ export class UnitOfWork {
   public registerDirty(dirtyObject: EntityProxy, ...property: Array<string>): UnitOfWork {
     if (!property.length) {
       throw new Error(
-        `Can't mark instance of '${dirtyObject.constructor.name}' as dirty without supplying properties.`
+        `Can't mark instance of '${dirtyObject.constructor.name}' as dirty without supplying properties.`,
       );
     }
 
     let metaData    = MetaData.forInstance(dirtyObject);
-    let entityState = metaData.fetchOrPut('entityState', {state: UnitOfWork.STATE_UNKNOWN});
+    let entityState = metaData.fetchOrPut('entityState', { state: UnitOfWork.STATE_UNKNOWN });
 
     if (entityState.state === UnitOfWork.STATE_NEW || entityState.state === UnitOfWork.STATE_UNKNOWN) {
       return this;
@@ -489,7 +489,7 @@ export class UnitOfWork {
     // Why are you trying to link this entity up with something that will be deleted? Silly.
     if (relationState === UnitOfWork.STATE_DELETED) {
       throw new Error(
-        `Trying to add relation with entity on "${mapping.getEntityName()}.${property}" that has been staged for removal.`
+        `Trying to add relation with entity on "${mapping.getEntityName()}.${property}" that has been staged for removal.`,
       );
     }
 
@@ -565,7 +565,7 @@ export class UnitOfWork {
   public commit(
     skipClean: boolean = false,
     skipLifecycleHooks: boolean = false,
-    config: {refreshCreated?: boolean, refreshUpdated?: boolean} = {refreshCreated: null, refreshUpdated: null}
+    config: {refreshCreated?: boolean, refreshUpdated?: boolean} = { refreshCreated: null, refreshUpdated: null },
   ): Promise<any> {
     this.prepareCascades();
 
@@ -617,7 +617,7 @@ export class UnitOfWork {
     let afterMethod  = 'after' + method[0].toUpperCase() + method.substr(1);
 
     if (typeof entity[afterMethod] === 'function') {
-      this.afterCommit.push({target: entity, method: afterMethod, parameters});
+      this.afterCommit.push({ target: entity, method: afterMethod, parameters });
     }
 
     let callbackResult = typeof entity[beforeMethod] === 'function'
@@ -762,7 +762,7 @@ export class UnitOfWork {
         let connection = store.getConnection(Store.ROLE_MASTER);
 
         connection.transaction(transaction => {
-          this.transactions[storeName] = {connection: connection, transaction: transaction};
+          this.transactions[storeName] = { connection: connection, transaction: transaction };
 
           resolve(this.transactions[storeName]);
         }).catch(error => reject(error));
@@ -834,7 +834,7 @@ export class UnitOfWork {
             }
 
             if (target.isEntityProxy) {
-              target[primaryKey] = {_skipDirty: result[0]};
+              target[primaryKey] = { _skipDirty: result[0] };
 
               target.activateProxying();
             } else {
@@ -873,7 +873,7 @@ export class UnitOfWork {
       }
 
       const executeUpdate = () => {
-        return queryBuilder.update(newValues).where({[primaryKey]: target[primaryKey]}).getQuery().execute();
+        return queryBuilder.update(newValues).where({ [primaryKey]: target[primaryKey] }).getQuery().execute();
       };
 
       if (skipLifecyclehooks) {
@@ -899,7 +899,7 @@ export class UnitOfWork {
       // @todo Use target's mapping to delete relations for non-cascaded properties.
 
       const executeDelete = () => {
-        return queryBuilder.remove().where({[primaryKey]: target[primaryKey]}).getQuery().execute();
+        return queryBuilder.remove().where({ [primaryKey]: target[primaryKey] }).getQuery().execute();
       };
 
       if (skipLifecyclehooks) {
@@ -953,16 +953,16 @@ export class UnitOfWork {
 
           // Update id of property on own side, based on joinColumn.
           return this.persistTarget(owningSide, <T>(queryBuilder: QueryBuilder<T>, target: T) => {
-            let query    = queryBuilder.where({[primaryKey]: target[primaryKey]});
+            let query    = queryBuilder.where({ [primaryKey]: target[primaryKey] });
             let newValue = otherSide[joinColumn.referencedColumnName];
 
             if (action === UnitOfWork.RELATIONSHIP_REMOVED) {
-              query.where({[joinColumn.name]: newValue});
+              query.where({ [joinColumn.name]: newValue });
 
               newValue = null;
             }
 
-            return query.update({[joinColumn.name]: newValue}).getQuery().execute();
+            return query.update({ [joinColumn.name]: newValue }).getQuery().execute();
           });
         }
 

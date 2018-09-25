@@ -1,6 +1,6 @@
-import {assert} from 'chai';
-import {Wetland} from '../../src/Wetland';
-import {Entity} from '../../src/Entity';
+import { assert } from 'chai';
+import { Wetland } from '../../src/Wetland';
+import { Entity } from '../../src/Entity';
 import * as path from 'path';
 import * as Bluebird from 'bluebird';
 import * as rimraf from 'rimraf';
@@ -18,8 +18,8 @@ class User extends Entity {
 
   static setMapping(mapping) {
     mapping.forProperty('id').increments().primary();
-    mapping.forProperty('username').field({type: 'string'});
-    mapping.forProperty('password').field({type: 'string'});
+    mapping.forProperty('username').field({ type: 'string' });
+    mapping.forProperty('password').field({ type: 'string' });
   }
 
   beforeCreate() {
@@ -31,19 +31,19 @@ class User extends Entity {
   }
 }
 
-function getWetland(name) {
+function getWetland (name) {
   return new Wetland({
-    entities     : [User],
+    entities     : [ User ],
     dataDirectory: `${tmpTestDir}/.data`,
     stores       : {
       defaultStore: {
         useNullAsDefault: true,
         client          : 'sqlite3',
         connection      : {
-          filename: `${tmpTestDir}/lifecyclehooks-${name}.sqlite`
-        }
-      }
-    }
+          filename: `${tmpTestDir}/lifecyclehooks-${name}.sqlite`,
+        },
+      },
+    },
   });
 }
 
@@ -51,7 +51,7 @@ describe('Lifecyclehooks', () => {
   beforeEach(() => {
     const rmDir: any = Bluebird.promisify(rimraf);
 
-    return rmDir(dataDir)
+    return rmDir(dataDir);
   });
 
   describe('.beforeCreate()', () => {
@@ -72,13 +72,13 @@ describe('Lifecyclehooks', () => {
             .flush();
         })
         .then(() => {
-          return UserRepository.findOne({username});
+          return UserRepository.findOne({ username });
         })
         .then((user: User) => {
           assert.notEqual(user.password, password);
           assert.equal(user.password, Buffer.from(password).toString('base64'));
         });
-    })
+    });
   });
 
   describe('.beforeUpdate()', () => {
@@ -100,14 +100,14 @@ describe('Lifecyclehooks', () => {
           return manager.persist(newUser).flush();
         })
         .then(() => {
-          return UserRepository.findOne({username});
+          return UserRepository.findOne({ username });
         })
         .then((user: User) => {
           user.password = updatedPassword;
           return manager.flush();
         })
         .then(() => {
-          return UserRepository.findOne({username});
+          return UserRepository.findOne({ username });
         })
         .then((user: User) => {
           assert.notEqual(user.password, updatedPassword);

@@ -1,16 +1,16 @@
-import {Store} from '../../src/Store';
-import {assert, expect} from 'chai';
+import { Store } from '../../src/Store';
+import { assert, expect } from 'chai';
 import * as path from 'path';
 
 let tmpTestDir = path.join(__dirname, '../.tmp');
 
-function storeConnection(name) {
+function storeConnection (name) {
   return {
     client          : 'sqlite3',
     useNullAsDefault: true,
     connection      : {
-      filename: `${tmpTestDir}/${name}.sqlite`
-    }
+      filename: `${tmpTestDir}/${name}.sqlite`,
+    },
   };
 }
 
@@ -37,7 +37,7 @@ describe('Store', () => {
     it('should return the connections', () => {
       let store = new Store('getNameTest');
 
-      assert.deepEqual(store.getConnections(), {[Store.ROLE_SLAVE]: [], [Store.ROLE_MASTER]: []});
+      assert.deepEqual(store.getConnections(), { [Store.ROLE_SLAVE]: [], [Store.ROLE_MASTER]: [] });
     });
   });
 
@@ -48,24 +48,24 @@ describe('Store', () => {
         client          : 'sqlite3',
         useNullAsDefault: true,
         connections     : [
-          {filename: tmpTestDir + '/registerWithPool-1.sqlite'},
-          {filename: tmpTestDir + '/registerWithPool-2.sqlite'}
-        ]
+          { filename: tmpTestDir + '/registerWithPool-1.sqlite' },
+          { filename: tmpTestDir + '/registerWithPool-2.sqlite' },
+        ],
       };
       let replication = {
         client          : 'sqlite3',
         useNullAsDefault: true,
         connections     : {
           master: [
-            {filename: tmpTestDir + '/registerWithReplication-master-1.sqlite'},
-            {filename: tmpTestDir + '/registerWithReplication-master-2.sqlite'}
+            { filename: tmpTestDir + '/registerWithReplication-master-1.sqlite' },
+            { filename: tmpTestDir + '/registerWithReplication-master-2.sqlite' },
           ],
           slave : [
-            {filename: tmpTestDir + '/registerWithReplication-slave-1.sqlite'},
-            {filename: tmpTestDir + '/registerWithReplication-slave-2.sqlite'},
-            {filename: tmpTestDir + '/registerWithReplication-slave-3.sqlite'}
-          ]
-        }
+            { filename: tmpTestDir + '/registerWithReplication-slave-1.sqlite' },
+            { filename: tmpTestDir + '/registerWithReplication-slave-2.sqlite' },
+            { filename: tmpTestDir + '/registerWithReplication-slave-3.sqlite' },
+          ],
+        },
       };
 
       store.register(storeConnection('simple'));
@@ -87,7 +87,7 @@ describe('Store', () => {
       expect(function () {
         let store = new Store('cake');
 
-        store.registerConnection({connection: {}, client: ''}, 'bad');
+        store.registerConnection({ connection: {}, client: '' }, 'bad');
       }).to.throw(Error);
     });
 
@@ -129,9 +129,9 @@ describe('Store', () => {
         client          : 'sqlite3',
         useNullAsDefault: true,
         connections     : [
-          {filename: tmpTestDir + '/registerPool-1.sqlite'},
-          {filename: tmpTestDir + '/registerPool-2.sqlite'}
-        ]
+          { filename: tmpTestDir + '/registerPool-1.sqlite' },
+          { filename: tmpTestDir + '/registerPool-2.sqlite' },
+        ],
       };
 
       store.registerPool(pool);
@@ -152,13 +152,13 @@ describe('Store', () => {
         useNullAsDefault: true,
         connections     : {
           master: [
-            {filename: tmpTestDir + '/registerReplication-master-1.sqlite'}
+            { filename: tmpTestDir + '/registerReplication-master-1.sqlite' },
           ],
           slave : [
-            {filename: tmpTestDir + '/registerReplication-slave-1.sqlite'},
-            {filename: tmpTestDir + '/registerReplication-slave-2.sqlite'}
-          ]
-        }
+            { filename: tmpTestDir + '/registerReplication-slave-1.sqlite' },
+            { filename: tmpTestDir + '/registerReplication-slave-2.sqlite' },
+          ],
+        },
       };
 
       store.registerReplication(replication);

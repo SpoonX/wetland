@@ -1,6 +1,6 @@
-import {ArrayCollection} from '../../../../src/ArrayCollection';
-import {Mapping} from '../../../../src/Mapping';
-import {Book} from './book';
+import { ArrayCollection } from '../../../../src/ArrayCollection';
+import { Mapping } from '../../../../src/Mapping';
+import { Book } from './book';
 
 export class Publisher {
   public id: number;
@@ -11,12 +11,12 @@ export class Publisher {
 
   static setMapping(mapping: Mapping<Publisher>) {
     mapping.forProperty('id')
-      .field({type: 'integer'})
+      .field({ type: 'integer' })
       .generatedValue('autoIncrement')
       .primary();
 
-    mapping.field('name', {type: 'string', size: 24});
+    mapping.field('name', { type: 'string', size: 24 });
 
-    mapping.oneToMany('books', {targetEntity: 'Book', mappedBy: 'publisher'});
+    mapping.oneToMany('books', { targetEntity: 'Book', mappedBy: 'publisher' });
   }
 }

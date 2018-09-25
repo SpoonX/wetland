@@ -1,13 +1,13 @@
-import {assert} from 'chai';
-import {Scope} from '../../src/Scope';
-import {Wetland} from '../../src/Wetland';
+import { assert } from 'chai';
+import { Scope } from '../../src/Scope';
+import { Wetland } from '../../src/Wetland';
 import * as path from 'path';
 import * as Bluebird from 'bluebird';
 import * as fs from 'fs';
 import * as parse from 'csv-parse';
-import {rmDataDir, tmpTestDir, getType, Pet, Post, User, fixturesDir} from '../resource/Seeder';
+import { rmDataDir, tmpTestDir, getType, Pet, Post, User, fixturesDir } from '../resource/Seeder';
 
-function getWetland(clean: boolean, bypassLifecyclehooks: boolean): Wetland {
+function getWetland (clean: boolean, bypassLifecyclehooks: boolean): Wetland {
   const fileName = `${clean ? 'clean' : 'safe'}-${getType(bypassLifecyclehooks)}.sqlite`;
   return new Wetland({
     dataDirectory: `${tmpTestDir}/.data`,
@@ -16,24 +16,24 @@ function getWetland(clean: boolean, bypassLifecyclehooks: boolean): Wetland {
         client          : 'sqlite3',
         useNullAsDefault: true,
         connection      : {
-          filename: `${tmpTestDir}/${fileName}`
-        }
-      }
+          filename: `${tmpTestDir}/${fileName}`,
+        },
+      },
     },
     seed         : {
       fixturesDirectory   : path.join(fixturesDir, getType(bypassLifecyclehooks)), // Each filename is an entity
       bypassLifecyclehooks: bypassLifecyclehooks,
-      clean               : clean
+      clean               : clean,
     },
-    entities     : [User, Pet, Post]
+    entities     : [ User, Pet, Post ],
   });
 }
 
-function testUsers(manager: Scope, bypassLifecyclehooks: boolean): Promise<any> {
+function testUsers (manager: Scope, bypassLifecyclehooks: boolean): Promise<any> {
   let usersFromFile = require(path.join(fixturesDir, getType(bypassLifecyclehooks), 'User.json'));
 
   return manager.getRepository(User)
-    .find(null, {populate: ['posts']})
+    .find(null, { populate: [ 'posts' ] })
     .then(users => {
       assert.lengthOf(users, usersFromFile.length);
 
@@ -45,11 +45,11 @@ function testUsers(manager: Scope, bypassLifecyclehooks: boolean): Promise<any> 
     });
 }
 
-function testPosts(manager: Scope, bypassLifecyclehooks: boolean): Promise<any> {
+function testPosts (manager: Scope, bypassLifecyclehooks: boolean): Promise<any> {
   let postsFromFile = require(path.join(fixturesDir, getType(bypassLifecyclehooks), 'Post.json'));
 
   return manager.getRepository(Post)
-    .find(null, {populate: ['author']})
+    .find(null, { populate: [ 'author' ] })
     .then(posts => {
       assert.lengthOf(posts, postsFromFile.length);
 
@@ -61,13 +61,13 @@ function testPosts(manager: Scope, bypassLifecyclehooks: boolean): Promise<any> 
     });
 }
 
-function testPets(manager: Scope, bypassLifecyclehooks: boolean): Promise<any> {
+function testPets (manager: Scope, bypassLifecyclehooks: boolean): Promise<any> {
   const readFile: any = Bluebird.promisify(fs.readFile);
 
   return readFile(path.join(fixturesDir, getType(bypassLifecyclehooks), 'Pet.csv'))
     .then(data => {
       const parseP: any = Bluebird.promisify(parse);
-      return parseP(data, {columns: true});
+      return parseP(data, { columns: true });
     })
     .then(petsFromFile => {
       return manager.getRepository(Pet)

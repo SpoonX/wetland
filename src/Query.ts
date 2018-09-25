@@ -1,6 +1,6 @@
 import * as knex from 'knex';
-import {Hydrator} from './Hydrator';
-import {QueryBuilder} from './QueryBuilder';
+import { Hydrator } from './Hydrator';
+import { QueryBuilder } from './QueryBuilder';
 
 export class Query {
 

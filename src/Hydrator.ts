@@ -1,10 +1,10 @@
-import {IdentityMap} from './IdentityMap';
-import {Mapping} from './Mapping';
-import {ArrayCollection} from './ArrayCollection';
-import {EntityProxy} from './EntityProxy';
-import {UnitOfWork} from './UnitOfWork';
-import {EntityInterface, ProxyInterface, EntityCtor} from './EntityInterface';
-import {Scope, Entity} from './Scope';
+import { IdentityMap } from './IdentityMap';
+import { Mapping } from './Mapping';
+import { ArrayCollection } from './ArrayCollection';
+import { EntityProxy } from './EntityProxy';
+import { UnitOfWork } from './UnitOfWork';
+import { EntityInterface, ProxyInterface, EntityCtor } from './EntityInterface';
+import { Scope, Entity } from './Scope';
 
 export class Hydrator {
   /**
@@ -73,7 +73,7 @@ export class Hydrator {
         return;
       }
 
-      entity[property] = {_skipDirty: values[column]};
+      entity[property] = { _skipDirty: values[column] };
     });
 
     return entity;
@@ -111,7 +111,7 @@ export class Hydrator {
       hydrate   : false,
       parent    : null,
       entity    : mapping.getTarget() as EntityCtor<EntityInterface>,
-      primaryKey: {alias: primaryKeyAliased, property: primaryKey},
+      primaryKey: { alias: primaryKeyAliased, property: primaryKey },
       type      : joinType,
       columns   : {},
       property,
@@ -191,7 +191,7 @@ export class Hydrator {
 
     if (recipe.parent) {
       // Assign self to parent (only for many).
-      recipe.parent.entities[row[recipe.parent.column]][recipe.parent.property].add({_skipDirty: entity});
+      recipe.parent.entities[row[recipe.parent.column]][recipe.parent.property].add({ _skipDirty: entity });
     }
 
     if (recipe.joins) {
@@ -235,7 +235,7 @@ export class Hydrator {
       }
 
       if (joinRecipe.type === 'single') {
-        entity[joinRecipe.property] = {_skipDirty: hydrated};
+        entity[joinRecipe.property] = { _skipDirty: hydrated };
 
         return;
       }
@@ -245,7 +245,7 @@ export class Hydrator {
         return;
       }
 
-      entity[joinRecipe.property].add({_skipDirty: hydrated});
+      entity[joinRecipe.property].add({ _skipDirty: hydrated });
     });
   }
 
@@ -298,7 +298,7 @@ export class Hydrator {
    */
   public getCatalogue(alias: string): Catalogue {
     let recipe       = this.getRecipe(alias);
-    recipe.catalogue = recipe.catalogue || {entities: {}, primaries: new ArrayCollection()};
+    recipe.catalogue = recipe.catalogue || { entities: {}, primaries: new ArrayCollection() };
 
     return recipe.catalogue;
   }
@@ -338,19 +338,19 @@ export class Hydrator {
 }
 
 export interface Catalogue {
-  entities: Object,
-  primaries: ArrayCollection<string|number>
+  entities: Object;
+  primaries: ArrayCollection<string|number>;
 }
 
 export interface Recipe {
-  hydrate: boolean,
-  alias: string,
-  entity: EntityCtor<EntityInterface>,
-  primaryKey: {alias: string, property: string},
-  columns: {},
-  catalogue?: Catalogue,
-  parent?: {property: string, column: string, entities: Object},
-  joins?: {[key: string]: Recipe},
-  property?: string,
-  type?: string,
+  hydrate: boolean;
+  alias: string;
+  entity: EntityCtor<EntityInterface>;
+  primaryKey: {alias: string, property: string};
+  columns: {};
+  catalogue?: Catalogue;
+  parent?: {property: string, column: string, entities: Object};
+  joins?: {[key: string]: Recipe};
+  property?: string;
+  type?: string;
 }

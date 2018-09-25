@@ -1,6 +1,6 @@
 import * as Knex from 'knex';
 import * as Bluebird from 'bluebird';
-import {Migrator} from './Migrator';
+import { Migrator } from './Migrator';
 
 export class MigrationTable {
   /**
@@ -54,7 +54,7 @@ export class MigrationTable {
    * @returns {QueryBuilder}
    */
   private lockMigrations(transaction): Promise<any> {
-    return this.connection(this.lockTableName).transacting(transaction).update({locked: 1});
+    return this.connection(this.lockTableName).transacting(transaction).update({ locked: 1 });
   }
 
   /**
@@ -68,7 +68,7 @@ export class MigrationTable {
         return this.isLocked(transaction)
           .then(isLocked => {
             if (isLocked) {
-              throw new Error("Migration table is already locked");
+              throw new Error('Migration table is already locked');
             }
           })
           .then(() => this.lockMigrations(transaction));
@@ -82,7 +82,7 @@ export class MigrationTable {
    * @returns {QueryBuilder}
    */
   public freeLock(): Promise<any> {
-    return this.connection(this.lockTableName).update({locked: 0});
+    return this.connection(this.lockTableName).update({ locked: 0 });
   }
 
   /**
@@ -104,8 +104,8 @@ export class MigrationTable {
           t.string('name');
           t.integer('run');
           t.timestamp('migration_time').defaultTo(this.connection.fn.now());
-          t.index(['run']);
-          t.index(['migration_time']);
+          t.index([ 'run' ]);
+          t.index([ 'migration_time' ]);
         });
 
         schemaBuilder.createTableIfNotExists(this.lockTableName, t => t.boolean('locked'));
@@ -189,7 +189,7 @@ export class MigrationTable {
 
     return this.getLastRunId().then(lastRun => {
       return this.connection(this.tableName).insert(migrations.map(name => {
-        return {name, run: (lastRun + 1)};
+        return { name, run: (lastRun + 1) };
       }));
     });
   }

@@ -1,6 +1,6 @@
-import {ArrayCollection} from '../../../../src/ArrayCollection';
-import {Tag} from './tag';
-import {Mapping} from '../../../../src/Mapping';
+import { ArrayCollection } from '../../../../src/ArrayCollection';
+import { Tag } from './tag';
+import { Mapping } from '../../../../src/Mapping';
 
 export class Category {
   public id: number;
@@ -11,16 +11,16 @@ export class Category {
 
   static setMapping(mapping: Mapping<Category>) {
     mapping.forProperty('id')
-      .field({type: 'integer'})
+      .field({ type: 'integer' })
       .generatedValue('autoIncrement')
       .primary();
 
-    mapping.field('name', {type: 'string', size: 24});
+    mapping.field('name', { type: 'string', size: 24 });
 
-    mapping.manyToMany('products', {targetEntity: 'Product', mappedBy: 'categories'});
+    mapping.manyToMany('products', { targetEntity: 'Product', mappedBy: 'categories' });
 
     mapping.forProperty('tags')
-      .cascade(['persist'])
-      .manyToMany({targetEntity: 'Tag', inversedBy: 'categories'});
+      .cascade([ 'persist' ])
+      .manyToMany({ targetEntity: 'Tag', inversedBy: 'categories' });
   }
 }

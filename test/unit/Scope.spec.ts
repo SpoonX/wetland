@@ -1,15 +1,15 @@
-import {assert} from 'chai';
-import {Wetland} from '../../src/Wetland';
-import {Scope} from '../../src/Scope';
-import {UnitOfWork} from '../../src/UnitOfWork';
-import {Simple} from '../resource/entity/Simple';
-import {EntityRepository} from '../../src/EntityRepository';
-import {WithCustomRepository} from '../resource/entity/WithCustomRepository';
-import {CustomRepository} from '../resource/repository/CustomRepository';
-import {NoAutoIncrement} from "../resource/entity/NoAutoIncrement";
-import {Schema} from "../resource/Schema";
+import { assert } from 'chai';
+import { Wetland } from '../../src/Wetland';
+import { Scope } from '../../src/Scope';
+import { UnitOfWork } from '../../src/UnitOfWork';
+import { Simple } from '../resource/entity/Simple';
+import { EntityRepository } from '../../src/EntityRepository';
+import { WithCustomRepository } from '../resource/entity/WithCustomRepository';
+import { CustomRepository } from '../resource/repository/CustomRepository';
+import { NoAutoIncrement } from '../resource/entity/NoAutoIncrement';
+import { Schema } from '../resource/Schema';
 
-function entityManager(entities?): Scope {
+function entityManager (entities?): Scope {
   let wetland = new Wetland({});
 
   if (entities) {
@@ -22,13 +22,13 @@ function entityManager(entities?): Scope {
 describe('Scope', () => {
   describe('.getRepository()', () => {
     it('should return a default repository', () => {
-      let scope = entityManager([Simple]);
+      let scope = entityManager([ Simple ]);
 
       assert.instanceOf(scope.getRepository(Simple), EntityRepository);
     });
 
     it('should return a custom repository', () => {
-      let scope = entityManager([WithCustomRepository]);
+      let scope = entityManager([ WithCustomRepository ]);
 
       assert.instanceOf(scope.getRepository(WithCustomRepository), EntityRepository);
       assert.instanceOf(scope.getRepository(WithCustomRepository), CustomRepository);
@@ -45,7 +45,7 @@ describe('Scope', () => {
 
   describe('.persist()', () => {
     it('should add the entity to the unitOfWork', () => {
-      let scope  = entityManager([Simple]);
+      let scope  = entityManager([ Simple ]);
       let simple = new Simple;
 
       scope.persist(simple);
@@ -54,7 +54,7 @@ describe('Scope', () => {
     });
 
     it('should return Scope', () => {
-      let scope = entityManager([Simple]);
+      let scope = entityManager([ Simple ]);
 
       assert.strictEqual(scope.persist(new Simple), scope);
     });
@@ -62,7 +62,7 @@ describe('Scope', () => {
 
   describe('.remove()', () => {
     it('should add the entity to the unitOfWork as "deleted"', () => {
-      let scope  = entityManager([Simple]);
+      let scope  = entityManager([ Simple ]);
       let simple = new Simple;
 
       scope.remove(simple);
@@ -71,7 +71,7 @@ describe('Scope', () => {
     });
 
     it('should return Scope', () => {
-      let scope = entityManager([Simple]);
+      let scope = entityManager([ Simple ]);
 
       assert.strictEqual(scope.remove(new Simple), scope);
     });
@@ -92,11 +92,11 @@ describe('Scope', () => {
           connection: {
             user: 'root',
             host: '127.0.0.1',
-            database: 'wetland_test'
-          }
-        }
+            database: 'wetland_test',
+          },
+        },
       },
-      entities: [NoAutoIncrement]
+      entities: [ NoAutoIncrement ],
     });
 
     before((done) => {
@@ -106,7 +106,7 @@ describe('Scope', () => {
     it('should throw an error on refresh without AI if refresh is enabled.', done => {
       const scope = wetland.getManager();
 
-      scope.persist(Object.assign(new NoAutoIncrement, {id: 123, foo: 'foo'}));
+      scope.persist(Object.assign(new NoAutoIncrement, { id: 123, foo: 'foo' }));
 
       // Flush with default (refresh enabled).
       scope.flush(false, false)
@@ -121,10 +121,10 @@ describe('Scope', () => {
     it('should not throw an error on refresh without PK if refresh is disabled', done => {
       const scope = wetland.getManager();
 
-      scope.persist(Object.assign(new NoAutoIncrement, {id: 456, foo: 'foo'}));
+      scope.persist(Object.assign(new NoAutoIncrement, { id: 456, foo: 'foo' }));
 
       // Flush with refresh disabled.
-      scope.flush(false, false, {refreshCreated: false})
+      scope.flush(false, false, { refreshCreated: false })
         .then(() => done())
         .catch(() => done('Flush should have succeeded.'));
     });
@@ -132,7 +132,7 @@ describe('Scope', () => {
 
   describe('.clear()', () => {
     it('should reset the unit of work', () => {
-      let scope  = entityManager([Simple]);
+      let scope  = entityManager([ Simple ]);
       let simple = new Simple;
 
       scope.remove(simple);

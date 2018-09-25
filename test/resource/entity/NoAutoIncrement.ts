@@ -4,7 +4,7 @@ export class NoAutoIncrement {
   public dateOfBirth: Date;
 
   public static setMapping(mapping) {
-    mapping.field('id', {type: 'integer'}).primary('id');
-    mapping.field('foo', {type: 'string'})
+    mapping.field('id', { type: 'integer' }).primary('id');
+    mapping.field('foo', { type: 'string' });
   }
 }

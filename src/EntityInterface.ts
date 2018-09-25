@@ -1,5 +1,5 @@
-import {Mapping} from './Mapping';
-import {Scope} from './Scope';
+import { Mapping } from './Mapping';
+import { Scope } from './Scope';
 
 export interface EntityInterface {
   /**
@@ -21,7 +21,7 @@ export interface EntityInterface {
 
   afterRemove?(entityManager: Scope): Promise<any> | void;
 
-  [key: string]: any
+  [key: string]: any;
 }
 
 export interface ProxyInterface extends EntityInterface {
@@ -35,7 +35,7 @@ export interface ProxyInterface extends EntityInterface {
 
   isProxyingActive?(): boolean;
 
-  [key: string]: any
+  [key: string]: any;
 }
 
 export type EntityCtor<T> = new (...args: any[]) => T;

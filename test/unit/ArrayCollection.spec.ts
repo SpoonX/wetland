@@ -1,5 +1,5 @@
-import {ArrayCollection} from '../../src/ArrayCollection';
-import {assert} from 'chai';
+import { ArrayCollection } from '../../src/ArrayCollection';
+import { assert } from 'chai';
 
 
 describe('ArrayCollection', () => {

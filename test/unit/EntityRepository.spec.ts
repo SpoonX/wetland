@@ -1,34 +1,34 @@
-import {Wetland} from '../../src/Wetland';
-import {EntityRepository} from '../../src/EntityRepository';
-import {Scope} from '../../src/Scope';
-import {User} from '../resource/entity/postal/User';
-import {Tracker} from '../resource/entity/postal/Tracker';
-import {assert} from 'chai';
+import { Wetland } from '../../src/Wetland';
+import { EntityRepository } from '../../src/EntityRepository';
+import { Scope } from '../../src/Scope';
+import { User } from '../resource/entity/postal/User';
+import { Tracker } from '../resource/entity/postal/Tracker';
+import { assert } from 'chai';
 import * as path from 'path';
-import {ArrayCollection} from '../../src/ArrayCollection';
+import { ArrayCollection } from '../../src/ArrayCollection';
 
 let tmpTestDir = path.join(__dirname, '../.tmp');
 
-function wetland(): Wetland {
+function wetland (): Wetland {
   return new Wetland({
     stores  : {
       defaultStore: {
         client          : 'sqlite3',
         useNullAsDefault: true,
         connection      : {
-          filename: `${tmpTestDir}/entity-repository.sqlite`
-        }
-      }
+          filename: `${tmpTestDir}/entity-repository.sqlite`,
+        },
+      },
     },
-    entities: [User, Tracker]
+    entities: [ User, Tracker ],
   });
 }
 
-function getManager(): Scope {
+function getManager (): Scope {
   return wetland().getManager();
 }
 
-function getRepository(): EntityRepository<User> {
+function getRepository (): EntityRepository<User> {
   return getManager().getRepository(User);
 }
 
@@ -37,7 +37,7 @@ let trackers = new ArrayCollection;
 trackers.push({
   id       : 1,
   observers: [],
-  status   : 2
+  status   : 2,
 });
 
 describe('EntityRepository', () => {
@@ -83,33 +83,33 @@ describe('EntityRepository', () => {
         .then(() => getRepository().find())
         .then(users => {
           assert.lengthOf(users, 2);
-          assert.oneOf(users[0].name, ['foo', 'bar']);
-          assert.oneOf(users[1].name, ['foo', 'bar']);
+          assert.oneOf(users[0].name, [ 'foo', 'bar' ]);
+          assert.oneOf(users[1].name, [ 'foo', 'bar' ]);
         });
     });
 
     it('should not find entities based on criteria', () => {
-      return getRepository().find({name: 'foobar'})
+      return getRepository().find({ name: 'foobar' })
         .then(users => assert.isNull(users));
     });
 
     it('should find entities based on criteria', () => {
-      return getRepository().find({name: 'foo'})
+      return getRepository().find({ name: 'foo' })
         .then(users => {
           assert.propertyVal(users[0], 'name', 'foo');
-          assert.oneOf(users[0].id, [1, 2]);
+          assert.oneOf(users[0].id, [ 1, 2 ]);
         });
     });
 
     it('should find entities with alias option', () => {
-      return getRepository().find(null, {alias: 'foo'})
+      return getRepository().find(null, { alias: 'foo' })
         .then(users => {
-          assert.lengthOf(users, 2)
+          assert.lengthOf(users, 2);
         });
     });
 
     it('should find entities with populateAll option', () => {
-      return getRepository().find(null, {populate: true})
+      return getRepository().find(null, { populate: true })
         .then(users => users.forEach(user => {
           assert.lengthOf(user.trackers, 1);
           assert.deepEqual(user.trackers, trackers);
@@ -117,7 +117,7 @@ describe('EntityRepository', () => {
     });
 
     it('should find entities with specific populate option', () => {
-      return getRepository().find(null, {populate: 'trackers'})
+      return getRepository().find(null, { populate: 'trackers' })
         .then(users => users.forEach(user => {
           assert.lengthOf(user.trackers, 1);
           assert.deepEqual(user.trackers, trackers);
@@ -125,11 +125,11 @@ describe('EntityRepository', () => {
     });
 
     it('should find entities with deep populate option', () => {
-      return getRepository().find(null, {populate: ['trackers', 'trackers.observers']})
+      return getRepository().find(null, { populate: [ 'trackers', 'trackers.observers' ] })
         .then(users => {
           assert.typeOf(users[0].trackers[0].observers[0].id, 'number');
-          assert.oneOf(users[0].trackers[0].observers[0].id, [1, 2]);
-          assert.oneOf(users[0].trackers[0].observers[0].name, ['foo', 'bar']);
+          assert.oneOf(users[0].trackers[0].observers[0].id, [ 1, 2 ]);
+          assert.oneOf(users[0].trackers[0].observers[0].name, [ 'foo', 'bar' ]);
           assert.property(users[0].trackers[0].observers[0], 'trackers');
         });
     });
@@ -140,15 +140,15 @@ describe('EntityRepository', () => {
       return getRepository().findOne()
         .then(user => {
           assert.propertyVal(user, 'id', 1);
-          assert.oneOf(user.name, ['foo', 'bar']);
+          assert.oneOf(user.name, [ 'foo', 'bar' ]);
         });
     });
 
     it('should find a entity with alias option', () => {
-      return getRepository().findOne(null, {alias: 'foo'})
+      return getRepository().findOne(null, { alias: 'foo' })
         .then(user => {
           assert.propertyVal(user, 'id', 1);
-          assert.oneOf(user.name, ['foo', 'bar']);
+          assert.oneOf(user.name, [ 'foo', 'bar' ]);
         });
     });
 
@@ -156,7 +156,7 @@ describe('EntityRepository', () => {
       return getRepository().findOne(2)
         .then(user => {
           assert.propertyVal(user, 'id', 2);
-          assert.oneOf(user.name, ['foo', 'bar']);
+          assert.oneOf(user.name, [ 'foo', 'bar' ]);
         });
     });
 
@@ -169,15 +169,15 @@ describe('EntityRepository', () => {
       return getRepository().findOne('1')
         .then(user => {
           assert.propertyVal(user, 'id', 1);
-          assert.oneOf(user.name, ['foo', 'bar']);
+          assert.oneOf(user.name, [ 'foo', 'bar' ]);
         });
     });
 
     it('should find a entity with an object as criteria', () => {
-      return getRepository().findOne({name: 'foo'})
+      return getRepository().findOne({ name: 'foo' })
         .then(user => {
           assert.propertyVal(user, 'name', 'foo');
-          assert.oneOf(user.id, [1, 2]);
+          assert.oneOf(user.id, [ 1, 2 ]);
         });
     });
   });
@@ -185,7 +185,7 @@ describe('EntityRepository', () => {
   describe('.applyOptions()', () => {
     it('should apply options', () => {
       let appliedOptions = getRepository().applyOptions(getRepository().getQueryBuilder(), {
-        select: 'name'
+        select: 'name',
       });
 
       assert.notDeepEqual(appliedOptions, getRepository().getQueryBuilder());

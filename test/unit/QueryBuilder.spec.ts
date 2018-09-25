@@ -1,10 +1,10 @@
-import {QueryBuilder} from '../../src/QueryBuilder';
-import {Query} from '../../src/Query';
-import {Wetland} from '../../src/Wetland';
-import {queries} from '../resource/queries';
-import {Todo} from '../resource/entity/todo/Todo';
-import {List} from '../resource/entity/todo/List';
-import {assert} from 'chai';
+import { QueryBuilder } from '../../src/QueryBuilder';
+import { Query } from '../../src/Query';
+import { Wetland } from '../../src/Wetland';
+import { queries } from '../resource/queries';
+import { Todo } from '../resource/entity/todo/Todo';
+import { List } from '../resource/entity/todo/List';
+import { assert } from 'chai';
 
 let wetland = new Wetland({
   stores  : {
@@ -13,14 +13,14 @@ let wetland = new Wetland({
       connection: {
         user    : 'root',
         host    : '127.0.0.1',
-        database: 'wetland_test'
-      }
-    }
+        database: 'wetland_test',
+      },
+    },
   },
-  entities: [Todo, List]
+  entities: [ Todo, List ],
 });
 
-function getQueryBuilder() {
+function getQueryBuilder () {
   return wetland.getManager().getRepository(Todo).getQueryBuilder('t');
 }
 
@@ -29,7 +29,7 @@ describe('QueryBuilder', () => {
     it('should create the alias when none was supplied', () => {
       let repository = wetland.getManager().getRepository(Todo);
       let derived    = repository.getQueryBuilder('t');
-      let qb         = repository.getDerivedQueryBuilder(derived).select({distinct: '*'});
+      let qb         = repository.getDerivedQueryBuilder(derived).select({ distinct: '*' });
 
       assert.strictEqual(qb.getQuery().getSQL(), queries.queryBuilder.derivedCreatesAlias);
     });
@@ -39,7 +39,7 @@ describe('QueryBuilder', () => {
       let todoRepository = manager.getRepository(Todo);
       let listRepository = manager.getRepository(List);
       let derived        = todoRepository.getQueryBuilder('t');
-      let qb             = listRepository.getDerivedQueryBuilder(derived, 'alias_derived').select({distinct: '*'});
+      let qb             = listRepository.getDerivedQueryBuilder(derived, 'alias_derived').select({ distinct: '*' });
 
       assert.strictEqual(qb.getQuery().getSQL(), queries.queryBuilder.derivedRegular);
     });
@@ -95,7 +95,7 @@ describe('QueryBuilder', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
         .select('t')
-        .join('leftJoin', 'list', 'l', {'t.list_id': 'l.id'})
+        .join('leftJoin', 'list', 'l', { 't.list_id': 'l.id' })
         .getQuery()
         .getSQL();
 
@@ -106,7 +106,7 @@ describe('QueryBuilder', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
         .select('t')
-        .join('leftJoin', 'list', 'l', {or: [{'t.list_id': 'l.id'}, {'t.task': 'l.name'}]})
+        .join('leftJoin', 'list', 'l', { or: [ { 't.list_id': 'l.id' }, { 't.task': 'l.name' } ] })
         .getQuery()
         .getSQL();
 
@@ -235,7 +235,7 @@ describe('QueryBuilder', () => {
     it('should create a query by passing one array of strings as argument', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
-        .select(['t.task', 't.done'])
+        .select([ 't.task', 't.done' ])
         .getQuery()
         .getSQL();
 
@@ -245,7 +245,7 @@ describe('QueryBuilder', () => {
     it('should create a `sum()` query', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
-        .select({sum: 'id'})
+        .select({ sum: 'id' })
         .getQuery()
         .getSQL();
 
@@ -256,9 +256,9 @@ describe('QueryBuilder', () => {
   describe('.insert()', () => {
     it('should create an insert query', () => {
       let queryBuilder = getQueryBuilder();
-      let keys         = ['task', 'done'];
+      let keys         = [ 'task', 'done' ];
       let query        = queryBuilder
-        .insert({'task': 'Bake cake', 'done': true})
+        .insert({ 'task': 'Bake cake', 'done': true })
         .getQuery()
         .getSQL();
 
@@ -272,8 +272,8 @@ describe('QueryBuilder', () => {
     it('should created an update query', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
-        .update({'done': true})
-        .where({'id': 1})
+        .update({ 'done': true })
+        .where({ 'id': 1 })
         .getQuery()
         .getSQL();
 
@@ -324,7 +324,7 @@ describe('QueryBuilder', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
         .select('t.task')
-        .groupBy(['t.list'])
+        .groupBy([ 't.list' ])
         .getQuery()
         .getSQL();
 
@@ -335,7 +335,7 @@ describe('QueryBuilder', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
         .select('t')
-        .groupBy(['t.list', 't.done'])
+        .groupBy([ 't.list', 't.done' ])
         .getQuery()
         .getSQL();
 
@@ -370,7 +370,7 @@ describe('QueryBuilder', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
         .select('t')
-        .orderBy({'t.task': 'desc'})
+        .orderBy({ 't.task': 'desc' })
         .getQuery()
         .getSQL();
 
@@ -381,7 +381,7 @@ describe('QueryBuilder', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
         .select('t')
-        .orderBy(['t.task', {'t.done': 'desc'}])
+        .orderBy([ 't.task', { 't.done': 'desc' } ])
         .getQuery()
         .getSQL();
 
@@ -394,7 +394,7 @@ describe('QueryBuilder', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
         .remove()
-        .where({'id': 1})
+        .where({ 'id': 1 })
         .getQuery()
         .getSQL();
 
@@ -407,7 +407,7 @@ describe('QueryBuilder', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
         .select('t')
-        .where({'t.done': true})
+        .where({ 't.done': true })
         .getQuery()
         .getSQL();
 
@@ -418,7 +418,7 @@ describe('QueryBuilder', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
         .select('t')
-        .where({'t.task': ['Pet cat', 'Pet cat again']})
+        .where({ 't.task': [ 'Pet cat', 'Pet cat again' ] })
         .getQuery()
         .getSQL();
 
@@ -429,7 +429,7 @@ describe('QueryBuilder', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
         .select('t')
-        .where({'t.task': 'Rob bank', 't.done': false})
+        .where({ 't.task': 'Rob bank', 't.done': false })
         .getQuery()
         .getSQL();
 
@@ -440,7 +440,7 @@ describe('QueryBuilder', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
         .select('t.task')
-        .where({'t.id': {lte: 13}})
+        .where({ 't.id': { lte: 13 } })
         .getQuery()
         .getSQL();
 
@@ -451,7 +451,7 @@ describe('QueryBuilder', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
         .select('t.task')
-        .where({or: [{'id': {gte: 50, lte: 20}}], 'done': true})
+        .where({ or: [ { 'id': { gte: 50, lte: 20 } } ], 'done': true })
         .getQuery()
         .getSQL();
 
@@ -462,7 +462,7 @@ describe('QueryBuilder', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
         .select('t.task')
-        .where({'task': ['buy cake', 'rob bank'], or: [{'id': {lt: 100}, 'done': false}]})
+        .where({ 'task': [ 'buy cake', 'rob bank' ], or: [ { 'id': { lt: 100 }, 'done': false } ] })
         .getQuery()
         .getSQL();
 
@@ -473,8 +473,8 @@ describe('QueryBuilder', () => {
   describe('.having()', () => {
     it('should create a select query with a `having` clause.', () => {
       let queryBuilder = getQueryBuilder();
-      let query        = queryBuilder.select({count: 't.task', alias: 'tasks'})
-        .having({'tasks': {lte: 13}}).getQuery().getSQL();
+      let query        = queryBuilder.select({ count: 't.task', alias: 'tasks' })
+        .having({ 'tasks': { lte: 13 } }).getQuery().getSQL();
 
       assert.strictEqual(query, queries.queryBuilder.having);
     });
@@ -482,10 +482,10 @@ describe('QueryBuilder', () => {
     it('should create a select query with `where`, `groupBy` and `having` clauses.', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
-        .select({count: 't.task', alias: 'tasks'})
-        .where({'t.id': {gte: 10}})
+        .select({ count: 't.task', alias: 'tasks' })
+        .where({ 't.id': { gte: 10 } })
         .groupBy('t.done')
-        .having({'tasks': {lte: 4}})
+        .having({ 'tasks': { lte: 4 } })
         .getQuery().getSQL();
 
       assert.strictEqual(query, queries.queryBuilder.havingGroupBy);
@@ -494,9 +494,9 @@ describe('QueryBuilder', () => {
     it('should create a select query with `groupBy` and multiple `having` clauses.', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
-        .select({count: 't.task', alias: 'tasks'})
+        .select({ count: 't.task', alias: 'tasks' })
         .groupBy('t.done')
-        .having({'tasks': {gt: 5, lte: 100}})
+        .having({ 'tasks': { gt: 5, lte: 100 } })
         .getQuery()
         .getSQL();
 
@@ -507,11 +507,11 @@ describe('QueryBuilder', () => {
       let queryBuilder = getQueryBuilder();
       let query        = queryBuilder
         .select('t')
-        .select({sum: 't.id', alias: 'sum_id'})
+        .select({ sum: 't.id', alias: 'sum_id' })
         .innerJoin('list', 'l')
-        .where({'t.done': false})
+        .where({ 't.done': false })
         .groupBy('t.id')
-        .having({'sum_id': {lte: 200}})
+        .having({ 'sum_id': { lte: 200 } })
         .getQuery()
         .getSQL();
 
