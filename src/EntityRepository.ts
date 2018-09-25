@@ -240,5 +240,5 @@ export interface FindOptions {
   limit?: number,
   offset?: number,
   debug?: boolean,
-  populate?: boolean | {} | Array<string|{}>
+  populate?: string | boolean | {} | Array<string|{}>
 }
