@@ -1,3 +1,13 @@
+<a name="4.1.1"></a>
+## [4.1.1](https://github.com/SpoonX/wetland/compare/v4.1.0...v4.1.1) (2018-09-25)
+
+
+### Features
+
+* **Wetland:** add support for running in ts-node ([1cf8a30](https://github.com/SpoonX/wetland/commit/1cf8a30))
+
+
+
 <a name="4.1.0"></a>
 # [4.1.0](https://github.com/SpoonX/wetland/compare/v4.0.2...v4.1.0) (2018-09-23)
 
