@@ -13,7 +13,7 @@ import { Populate } from './Populate';
 import { Seeder } from './Seeder';
 import { Cleaner } from './Cleaner';
 
-export const entityFilterRegexp = /^.*[^d]\.(js|ts)$/;
+export const entityFilterRegexp = /^(?!.*index\.(js|ts)$).*(^.?|\.[^d]|[^.]d|[^.][^d])\.(js|ts)$/;
 export const entityExtensionRegexp = /\.(js|ts)$/;
 
 export class Wetland {
