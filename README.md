@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/SpoonX/wetland.svg?branch=master)](https://travis-ci.org/SpoonX/wetland)
 [![npm version](https://badge.fury.io/js/wetland.svg)](https://badge.fury.io/js/wetland)
-[![Gitter chat](https://badges.gitter.im/SpoonX/Dev.svg)](https://gitter.im/SpoonX/Dev)
+[![Slack Status](https://spoonx-slack.herokuapp.com/badge.svg)](https://spoonx-slack.herokuapp.com)
 
 Wetland is a modern object-relational mapper (ORM) for node.js.
 It allows you to get started quickly, without losing flexibility or features.
