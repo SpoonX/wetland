@@ -506,17 +506,17 @@ export class SnapshotManager {
       if ((relation.type === Mapping.RELATION_MANY_TO_ONE) || (relation.type === Mapping.RELATION_ONE_TO_ONE && !relation.mappedBy)) {
         // We own the fk.
         let joinColumn = mapping.fields[property].joinColumn;
-        let changes    = {
-          field  : { name: joinColumn.name, type: 'integer', unsigned: true, nullable: (typeof joinColumn.nullable === 'boolean' ? joinColumn.nullable : true) },
-          foreign: createForeign(mapping, property, targetMapping),
-        };
-
         if (!targetMapping.columns[joinColumn.referencedColumnName]) {
           throw new Error(
             `Cannot create foreign key for '${tableName}', ` +
             `column '${joinColumn.referencedColumnName}' not found on target entity '${targetMapping.entity.tableName}'.`,
           );
         }
+        let foreignColumn = targetMapping.fields[joinColumn.referencedColumnName]
+        let changes    = {
+          field  : { name: joinColumn.name, type: foreignColumn.type, unsigned: foreignColumn.unsigned, nullable: (typeof joinColumn.nullable === 'boolean' ? joinColumn.nullable : true) },
+          foreign: createForeign(mapping, property, targetMapping),
+        };
 
         if (create) {
           return changes;
