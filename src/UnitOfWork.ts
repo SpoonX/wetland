@@ -833,6 +833,11 @@ export class UnitOfWork {
               return;
             }
 
+            let isAutoIncrement = mapping.getField(primaryKey).generatedValue === 'autoIncrement'
+            if(!isAutoIncrement) {
+              return;
+            }
+
             if (target.isEntityProxy) {
               target[primaryKey] = { _skipDirty: result[0] };
 
