@@ -15,7 +15,7 @@ It strikes a balance between ease and structure, allowing you to get started qui
 
 ## Features
 
-Wetland is based on the [JPA-spec](http://download.oracle.com/otndocs/jcp/persistence-2_1-fr-eval-spec/index.html) and therefor has some similairties to Hibernate and Doctrine. While some aspects of the ORM have been adapted to perform better in the Node.js environment and don't follow the specification to the letter for that reason, the JPA specification is a stable and well written specification that makes wetland structured and performant.
+Wetland is based on the [JPA-spec](http://download.oracle.com/otndocs/jcp/persistence-2_1-fr-eval-spec/index.html) and therefore has some similairties to Hibernate and Doctrine. While some aspects of the ORM have been adapted to perform better in the Node.js environment and don't follow the specification to the letter for that reason, the JPA specification is a stable and well written specification that makes wetland structured and performant.
 
 Some of the major features provided include:
 
