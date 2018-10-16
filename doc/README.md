@@ -8,6 +8,8 @@ Wetland is a modern object-relational mapper (ORM) for node.js.
 
 ## Features
 
+Wetland is based on the [JPA-spec](http://download.oracle.com/otndocs/jcp/persistence-2_1-fr-eval-spec/index.html) and therefore has some similairties to Hibernate and Doctrine. While some aspects of the ORM have been adapted to perform better in the Node.js environment and don't follow the specification to the letter for that reason, the JPA specification is a stable and well written specification that makes wetland structured and performant.
+
 **New!** Take a look at our [wetland tutorial](https://wetland.spoonx.org/Tutorial/setting-up.html).
 
 **New!** Wetland CLI now has its [own repository](https://github.com/SpoonX/wetland-cli). `npm i -g wetland-cli`.
