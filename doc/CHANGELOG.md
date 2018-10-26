@@ -1,3 +1,13 @@
+<a name="4.1.3"></a>
+## [4.1.3](https://github.com/SpoonX/wetland/compare/v4.1.2...v4.1.3) (2018-10-26)
+
+
+### Bug Fixes
+
+* **Wetland:** fix regex to also import entities ending with "d" ([15fb17b](https://github.com/SpoonX/wetland/commit/15fb17b))
+
+
+
 <a name="4.1.2"></a>
 ## [4.1.2](https://github.com/SpoonX/wetland/compare/v4.1.1...v4.1.2) (2018-09-25)
 
