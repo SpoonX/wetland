@@ -90,7 +90,15 @@ export class EntityManager {
     const entityReference = this.resolveEntityReference(entity) as EntityCtor<T>;
 
     if (!this.repositories.has(entityReference) || scope) {
-      const Repository = Mapping.forEntity(entityReference).getRepository();
+      const entityMapping = Mapping.forEntity(entityReference);
+      const Repository = entityMapping.getRepository();
+
+      if (!Repository) {
+        throw new Error([
+          `Unable to find Repository for entity "${entityMapping.getEntityName() || entityReference.name}".`,
+          `Did you forget to register your entity or set entityPath(s)?`,
+        ].join(' '));
+      }
 
       if (scope) {
         return new Repository(scope, entityReference);
