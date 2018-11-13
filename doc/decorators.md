@@ -250,7 +250,7 @@ Create a many to one relationship. The decorated property will be populated with
 ```js
 @entity()
 class Foo {
-  @manyToOne({targetEntity: 'Bar', mapped: 'foo'})
+  @manyToOne({targetEntity: 'Bar', mappedBy: 'foo'})
   bar;
 }
 ```
