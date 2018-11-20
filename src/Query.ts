@@ -94,7 +94,7 @@ export class Query {
     parent.primaries.forEach(primary => {
       let toUnion = statement.clone().where(parent.column, primary);
 
-      if (client.config.client === 'sqlite3') {
+      if (client.config.client === 'sqlite3' || client.config.client === 'sqlite') {
         unionized.union(client.queryBuilder().select('*').from(client.raw(toUnion).wrap('(', ')')));
 
         return unionized;

@@ -1,9 +1,9 @@
 import { Mapping } from './Mapping';
 
 export class Entity {
-  public static toObject(source: {toJSON?: Function} & Object): Object {
+  public static toObject<T>(source: T): Partial<T> | Partial<T>[] {
     if (Array.isArray(source)) {
-      return source.map(target => Entity.toObject(target));
+      return source.map(target => Entity.toObject(target)) as Partial<T>[];
     }
 
     let mapping = Mapping.forEntity(source);
@@ -12,13 +12,13 @@ export class Entity {
       return source;
     }
 
-    let object = mapping.getFieldNames().reduce((asObject, fieldName) => {
+    const object = mapping.getFieldNames().reduce((asObject, fieldName) => {
       asObject[fieldName] = source[fieldName];
 
       return asObject;
-    }, {}) as Object;
+    }, {});
 
-    let relations = mapping.getRelations();
+    const relations = mapping.getRelations();
 
     if (relations) {
       Reflect.ownKeys(relations).forEach(fieldName => {
@@ -31,7 +31,7 @@ export class Entity {
     return object;
   }
 
-  public toObject(): Object {
-    return Entity.toObject(this);
+  public toObject(): Partial<this> {
+    return Entity.toObject(this) as Partial<this>;
   }
 }
