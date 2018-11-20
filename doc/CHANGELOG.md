@@ -1,3 +1,13 @@
+<a name="4.1.5"></a>
+## [4.1.5](https://github.com/SpoonX/wetland/compare/v4.1.4...v4.1.5) (2018-11-20)
+
+
+### Bug Fixes
+
+* **Query:** fix for sqlite adapter ([20b3a02](https://github.com/SpoonX/wetland/commit/20b3a02))
+
+
+
 <a name="4.1.4"></a>
 ## [4.1.4](https://github.com/SpoonX/wetland/compare/v4.1.3...v4.1.4) (2018-11-03)
 
