@@ -20,8 +20,8 @@ let wetland = new Wetland({
   entities: [ Todo, List ],
 });
 
-function getQueryBuilder () {
-  return wetland.getManager().getRepository(Todo).getQueryBuilder('t');
+function getQueryBuilder (managed?: boolean) {
+  return wetland.getManager().getRepository(Todo).getQueryBuilder('t', null, managed);
 }
 
 describe('QueryBuilder', () => {
@@ -220,6 +220,26 @@ describe('QueryBuilder', () => {
         .getSQL();
 
       assert.strictEqual(query, queries.queryBuilder.selectAll);
+    });
+
+    it('should not try to fetch the PK when unmanaged', () => {
+      let queryBuilder = getQueryBuilder(false);
+      let query        = queryBuilder
+        .select('t.task')
+        .getQuery()
+        .getSQL();
+
+      assert.strictEqual(query, queries.queryBuilder.selectUnManaged);
+    });
+
+    it('should try to fetch the PK when managed', () => {
+      let queryBuilder = getQueryBuilder(true);
+      let query        = queryBuilder
+        .select('t.task')
+        .getQuery()
+        .getSQL();
+
+      assert.strictEqual(query, queries.queryBuilder.selectManaged);
     });
 
     it('should create a query by passing one string as argument', () => {

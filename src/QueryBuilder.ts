@@ -67,17 +67,24 @@ export class QueryBuilder<T> {
   /**
    * @type {string[]}
    */
-  private functions: Array<string> = ['sum', 'count', 'max', 'min', 'avg', 'distinct'];
+  private functions: Array<string> = [ 'sum', 'count', 'max', 'min', 'avg', 'distinct' ];
 
   /**
    * @type {string[]}
    */
-  private singleJoinTypes: Array<string> = [Mapping.RELATION_ONE_TO_ONE, Mapping.RELATION_MANY_TO_ONE];
+  private singleJoinTypes: Array<string> = [ Mapping.RELATION_ONE_TO_ONE, Mapping.RELATION_MANY_TO_ONE ];
 
   /**
    * @type {Hydrator}
    */
-  private hydrator: Hydrator;
+  private readonly hydrator: Hydrator;
+
+  /**
+   * Will the entities that pass through this hydrator be managed by the unit of work?
+   *
+   * @type { boolean }
+   */
+  private readonly managed: boolean = true;
 
   /**
    * @type {{}}
@@ -96,16 +103,18 @@ export class QueryBuilder<T> {
    * @param {knex.QueryBuilder} statement
    * @param {Mapping}           mapping
    * @param {string}            alias
+   * @param {boolean}           managed
    */
-  public constructor(entityManager: Scope, statement: knex.QueryBuilder, mapping: Mapping<T>, alias: string) {
+  public constructor(entityManager: Scope, statement: knex.QueryBuilder, mapping: Mapping<T>, alias: string, managed: boolean = true) {
     this.alias = alias;
     this.mappings = { [alias]: mapping };
     this.statement = statement;
+    this.managed = managed;
     this.whereCriteria = new Where(this.statement, mapping, this.mappings, alias);
     this.havingCriteria = new Having(this.statement, mapping, this.mappings, alias);
     this.onCriteria = new On(this.statement, mapping, this.mappings, alias);
     this.entityManager = entityManager;
-    this.hydrator = new Hydrator(entityManager);
+    this.hydrator = new Hydrator(entityManager, managed);
     this.query = new Query(statement, this.hydrator, this.children);
 
     this.hydrator.addRecipe(null, alias, this.mappings[alias]);
@@ -733,7 +742,7 @@ export class QueryBuilder<T> {
    */
   private getRelationship(column: string): { owningMapping: Mapping<Entity>, join: Relationship, property: string, alias: string } {
     column = column.indexOf('.') > -1 ? column : `${this.alias}.${column}`;
-    const [alias, property] = column.split('.');
+    const [ alias, property ] = column.split('.');
     const parent = this.getChild(alias) || this;
     const owningMapping = parent.mappings[alias];
     let field;
@@ -892,6 +901,10 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   private applyPrimaryKeySelect(alias: string): this {
+    if (!this.managed) {
+      return this;
+    }
+
     if (!this.appliedPrimaryKeys[alias]) {
       const aliasRecipe = this.hydrator.getRecipe(alias);
       this.appliedPrimaryKeys[alias] = `${aliasRecipe.primaryKey.alias} as ${aliasRecipe.primaryKey.alias}`;

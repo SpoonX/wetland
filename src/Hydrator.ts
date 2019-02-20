@@ -40,14 +40,23 @@ export class Hydrator {
    *
    * @type {Scope}
    */
-  private entityManager: Scope;
+  private readonly entityManager: Scope;
+
+  /**
+   * Will the entities that pass through this hydrator be managed by the unit of work?
+   *
+   * @type { boolean }
+   */
+  private readonly managed: boolean = true;
 
   /**
    * Construct a new hydrator.
    *
-   * @param {Scope} entityManager
+   * @param {Scope}   entityManager
+   * @param {boolean} managed
    */
-  public constructor(entityManager: Scope) {
+  public constructor(entityManager: Scope, managed: boolean = true) {
+    this.managed = managed;
     this.unitOfWork = entityManager.getUnitOfWork();
     this.entityManager = entityManager;
     this.identityMap = entityManager.getIdentityMap();
@@ -198,7 +207,9 @@ export class Hydrator {
       this.hydrateJoins(recipe, row, entity);
     }
 
-    entity.activateProxying();
+    if (this.managed) {
+      entity.activateProxying();
+    }
 
     return entity;
   }
@@ -323,17 +334,19 @@ export class Hydrator {
       entity[recipe.columns[alias]] = row[alias];
     });
 
-    this.unitOfWork.registerClean(entity, true);
+    const workingEntity = this.managed ? EntityProxy.patchEntity(entity, this.entityManager) : entity;
 
-    const patched = EntityProxy.patchEntity(entity, this.entityManager);
-
-    this.identityMap.register(entity, patched);
-
-    if (recipe.catalogue) {
-      this.addToCatalogue(recipe, patched);
+    if (this.managed) {
+      this.unitOfWork.registerClean(entity, true);
     }
 
-    return patched;
+    this.identityMap.register(entity, workingEntity);
+
+    if (recipe.catalogue) {
+      this.addToCatalogue(recipe, workingEntity);
+    }
+
+    return workingEntity;
   }
 }
 
