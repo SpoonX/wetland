@@ -1,6 +1,6 @@
 import { UnitOfWork } from './UnitOfWork';
 import { EntityManager } from './EntityManager';
-import { EntityInterface, ProxyInterface, EntityCtor } from './EntityInterface';
+import { EntityCtor, EntityInterface, ProxyInterface } from './EntityInterface';
 import { EntityRepository } from './EntityRepository';
 import { Mapping } from './Mapping';
 import { Store } from './Store';
@@ -41,8 +41,8 @@ export class Scope {
    * @param {Wetland}       wetland
    */
   public constructor(manager: EntityManager, wetland: Wetland) {
-    this.manager    = manager;
-    this.wetland    = wetland;
+    this.manager = manager;
+    this.wetland = wetland;
     this.unitOfWork = new UnitOfWork(this);
   }
 
@@ -85,21 +85,21 @@ export class Scope {
    * @returns {EntityInterface}
    */
   public getReference(entity: Entity, primaryKeyValue: any, proxy: boolean = true): ProxyInterface {
-    let ReferenceClass = this.resolveEntityReference(entity);
-    let fromMap        = this.identityMap.fetch(ReferenceClass, primaryKeyValue);
+    const ReferenceClass = this.resolveEntityReference(entity);
+    const fromMap = this.identityMap.fetch(ReferenceClass, primaryKeyValue);
 
     if (fromMap) {
       return fromMap;
     }
 
-    let reference         = new ReferenceClass;
-    let primaryKey        = Mapping.forEntity(ReferenceClass).getPrimaryKey();
+    const reference = new ReferenceClass;
+    const primaryKey = Mapping.forEntity(ReferenceClass).getPrimaryKey();
     reference[primaryKey] = primaryKeyValue;
 
     this.unitOfWork.registerClean(reference);
 
     if (proxy) {
-      let proxied = this.attach(reference);
+      const proxied = this.attach(reference);
 
       this.identityMap.register(ReferenceClass, proxied);
 
@@ -116,7 +116,7 @@ export class Scope {
    *
    * @returns {EntityInterface|null}
    */
-  public resolveEntityReference(hint: Entity): { new () } {
+  public resolveEntityReference(hint: Entity): { new() } {
     return this.manager.resolveEntityReference(hint);
   }
 
@@ -128,17 +128,17 @@ export class Scope {
    * @returns {Promise<any>}
    */
   public refresh(...entity: Array<EntityInterface>): Promise<any> {
-    let refreshes = [];
-    let hydrator  = new Hydrator(this);
+    const refreshes = [];
+    const hydrator = new Hydrator(this);
 
     if (!Array.isArray(entity) || !entity.length) {
       return Promise.resolve(null);
     }
 
     entity.forEach(toRefresh => {
-      const entityCtor     = this.resolveEntityReference(toRefresh);
+      const entityCtor = this.resolveEntityReference(toRefresh);
       const primaryKeyName = Mapping.forEntity(entityCtor).getPrimaryKey();
-      const primaryKey     = toRefresh[primaryKeyName];
+      const primaryKey = toRefresh[primaryKeyName];
 
       if (!primaryKey) {
         return refreshes.push(Promise.reject(new Error('Cannot refresh entity without a PK value.')));
@@ -273,7 +273,7 @@ export class Scope {
   public flush(
     skipClean: boolean = false,
     skipLifecycleHooks: boolean = false,
-    config: {refreshCreated?: boolean, refreshUpdated?: boolean} = { refreshCreated: null, refreshUpdated: null },
+    config: { refreshCreated?: boolean, refreshUpdated?: boolean } = { refreshCreated: null, refreshUpdated: null },
   ): Promise<any> {
     return this.unitOfWork.commit(skipClean, skipLifecycleHooks, config);
   }
@@ -290,4 +290,4 @@ export class Scope {
   }
 }
 
-export type Entity = string | { new () } | EntityInterface;
+export type Entity = string | { new() } | EntityInterface;

@@ -3,6 +3,8 @@ export let queries = {
     derivedRegular     : 'select distinct * from (select * from `todo` as `t`) as alias_derived',
     derivedCreatesAlias: 'select distinct * from (select * from `todo` as `t`) as todo0',
     selectAll          : 'select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t`',
+    selectManaged      : 'select `t`.`id` as `t.id`, `t`.`task` as `t.task` from `todo` as `t`',
+    selectUnManaged    : 'select `t`.`task` as `t.task` from `todo` as `t`',
     selectOne          : 'select `t`.`id` as `t.id`, `t`.`task` as `t.task` from `todo` as `t`',
     selectArray        : 'select `t`.`id` as `t.id`, `t`.`task` as `t.task`, `t`.`done` as `t.done` from `todo` as `t`',
     selectSum          : 'select sum(`t`.`id`) from `todo` as `t`',

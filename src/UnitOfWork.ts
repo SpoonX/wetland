@@ -100,7 +100,7 @@ export class UnitOfWork {
   /**
    * @type {Array}
    */
-  private afterCommit: Array<{target: EntityInterface, method: string, parameters: Array<any>}> = [];
+  private afterCommit: Array<{ target: EntityInterface, method: string, parameters: Array<any> }> = [];
 
   /**
    * Create a new UnitOfWork.
@@ -109,6 +109,61 @@ export class UnitOfWork {
    */
   public constructor(entityManager: Scope) {
     this.entityManager = entityManager;
+  }
+
+  /**
+   * Get the state for provided entity.
+   *
+   * @param {ProxyInterface} entity
+   *
+   * @returns {string}
+   */
+  public static getObjectState(entity: ProxyInterface): string {
+    return MetaData.forInstance(entity).fetch('entityState.state', UnitOfWork.STATE_UNKNOWN);
+  }
+
+  /**
+   * Returns if provided entity has relationship changes.
+   *
+   * @param {EntityInterface} entity
+   *
+   * @returns {boolean}
+   */
+  public static hasRelationChanges(entity: EntityInterface): boolean {
+    return !!MetaData.forInstance(entity).fetch('entityState.relations');
+  }
+
+  /**
+   * Returns as provided entity is clean
+   *
+   * @param {EntityInterface} entity
+   *
+   * @returns {boolean}
+   */
+  public static isClean(entity: EntityInterface): boolean {
+    return UnitOfWork.getObjectState(entity) === UnitOfWork.STATE_CLEAN && !UnitOfWork.hasRelationChanges(entity);
+  }
+
+  /**
+   * Returns if provided entity is dirty.
+   *
+   * @param {EntityInterface} entity
+   *
+   * @returns {boolean}
+   */
+  public static isDirty(entity: EntityInterface): boolean {
+    return !UnitOfWork.isClean(entity);
+  }
+
+  /**
+   * Log a query.
+   *
+   * @param {knex.QueryBuilder} query
+   */
+  static logQuery(query: knex.QueryBuilder): void {
+    if (process.env.LOG_QUERIES) {
+      console.log('Executing query:', query.toString());
+    }
   }
 
   /**
@@ -166,50 +221,6 @@ export class UnitOfWork {
   }
 
   /**
-   * Get the state for provided entity.
-   *
-   * @param {ProxyInterface} entity
-   *
-   * @returns {string}
-   */
-  public static getObjectState(entity: ProxyInterface): string {
-    return MetaData.forInstance(entity).fetch('entityState.state', UnitOfWork.STATE_UNKNOWN);
-  }
-
-  /**
-   * Returns if provided entity has relationship changes.
-   *
-   * @param {EntityInterface} entity
-   *
-   * @returns {boolean}
-   */
-  public static hasRelationChanges(entity: EntityInterface): boolean {
-    return !!MetaData.forInstance(entity).fetch('entityState.relations');
-  }
-
-  /**
-   * Returns as provided entity is clean
-   *
-   * @param {EntityInterface} entity
-   *
-   * @returns {boolean}
-   */
-  public static isClean(entity: EntityInterface): boolean {
-    return UnitOfWork.getObjectState(entity) === UnitOfWork.STATE_CLEAN && !UnitOfWork.hasRelationChanges(entity);
-  }
-
-  /**
-   * Returns if provided entity is dirty.
-   *
-   * @param {EntityInterface} entity
-   *
-   * @returns {boolean}
-   */
-  public static isDirty(entity: EntityInterface): boolean {
-    return !UnitOfWork.isClean(entity);
-  }
-
-  /**
    * Register a collection change between `targetEntity` and `relationEntity`
    *
    * @param {string} change
@@ -220,11 +231,11 @@ export class UnitOfWork {
    * @returns {UnitOfWork}
    */
   public registerCollectionChange(change: string, targetEntity: Object, property: string, relationEntity: Object): UnitOfWork {
-    let addTo           = change === UnitOfWork.RELATIONSHIP_ADDED ? 'added' : 'removed';
-    let removeFrom      = change === UnitOfWork.RELATIONSHIP_ADDED ? 'removed' : 'added';
-    let targetMeta      = MetaData.forInstance(targetEntity);
-    let relationChanges = targetMeta.fetchOrPut('entityState.relations', { added: {}, removed: {} });
-    let removeFromList  = relationChanges[removeFrom];
+    const addTo = change === UnitOfWork.RELATIONSHIP_ADDED ? 'added' : 'removed';
+    const removeFrom = change === UnitOfWork.RELATIONSHIP_ADDED ? 'removed' : 'added';
+    const targetMeta = MetaData.forInstance(targetEntity);
+    const relationChanges = targetMeta.fetchOrPut('entityState.relations', { added: {}, removed: {} });
+    const removeFromList = relationChanges[removeFrom];
 
     // If given relationEntity was already staged as a change for the other side.
     if (removeFromList[property] && removeFromList[property].includes(relationEntity)) {
@@ -251,8 +262,8 @@ export class UnitOfWork {
       return this;
     }
 
-    let addToList       = relationChanges[addTo];
-    let addToCollection = addToList[property] ? addToList[property] : addToList[property] = new ArrayCollection;
+    const addToList = relationChanges[addTo];
+    const addToCollection = addToList[property] ? addToList[property] : addToList[property] = new ArrayCollection;
 
     addToCollection.add(relationEntity);
 
@@ -272,11 +283,11 @@ export class UnitOfWork {
    * @returns {UnitOfWork}
    */
   public registerRelationChange(change: string, targetEntity: Object, property: string, relationEntity: EntityInterface): UnitOfWork {
-    let addTo           = change === UnitOfWork.RELATIONSHIP_ADDED ? 'added' : 'removed';
-    let removeFrom      = change === UnitOfWork.RELATIONSHIP_ADDED ? 'removed' : 'added';
-    let targetMeta      = MetaData.forInstance(targetEntity);
-    let relationChanges = targetMeta.fetchOrPut('entityState.relations', { added: {}, removed: {} });
-    let removeFromList  = relationChanges[removeFrom];
+    const addTo = change === UnitOfWork.RELATIONSHIP_ADDED ? 'added' : 'removed';
+    const removeFrom = change === UnitOfWork.RELATIONSHIP_ADDED ? 'removed' : 'added';
+    const targetMeta = MetaData.forInstance(targetEntity);
+    const relationChanges = targetMeta.fetchOrPut('entityState.relations', { added: {}, removed: {} });
+    const removeFromList = relationChanges[removeFrom];
 
     // If provided relationEntity was already staged for the other side...
     if (removeFromList[property] === relationEntity) {
@@ -314,9 +325,9 @@ export class UnitOfWork {
    * @returns {UnitOfWork}
    */
   public setEntityState(entity: ProxyInterface, state: string): UnitOfWork {
-    let target        = entity.isEntityProxy ? entity.getTarget() : entity;
-    let metaData      = MetaData.forInstance(target);
-    let previousState = metaData.fetch('entityState.state', UnitOfWork.STATE_UNKNOWN);
+    const target = entity.isEntityProxy ? entity.getTarget() : entity;
+    const metaData = MetaData.forInstance(target);
+    const previousState = metaData.fetch('entityState.state', UnitOfWork.STATE_UNKNOWN);
 
     if (previousState === state) {
       return this;
@@ -346,7 +357,7 @@ export class UnitOfWork {
    * @returns {UnitOfWork} Fluent interface
    */
   public registerNew(newObject: Object): UnitOfWork {
-    let objectState = UnitOfWork.getObjectState(newObject);
+    const objectState = UnitOfWork.getObjectState(newObject);
 
     if (objectState === UnitOfWork.STATE_NEW) {
       return this;
@@ -376,8 +387,8 @@ export class UnitOfWork {
       );
     }
 
-    let metaData    = MetaData.forInstance(dirtyObject);
-    let entityState = metaData.fetchOrPut('entityState', { state: UnitOfWork.STATE_UNKNOWN });
+    const metaData = MetaData.forInstance(dirtyObject);
+    const entityState = metaData.fetchOrPut('entityState', { state: UnitOfWork.STATE_UNKNOWN });
 
     if (entityState.state === UnitOfWork.STATE_NEW || entityState.state === UnitOfWork.STATE_UNKNOWN) {
       return this;
@@ -433,8 +444,8 @@ export class UnitOfWork {
    * @returns {UnitOfWork}
    */
   public prepareCascadesFor(entity: EntityInterface, cascadingParent: EntityInterface = null): UnitOfWork {
-    let mapping   = Mapping.forEntity(entity);
-    let relations = mapping.getRelations();
+    const mapping = Mapping.forEntity(entity);
+    const relations = mapping.getRelations();
 
     // If no relations, no need to check for cascade operations.
     if (null === relations) {
@@ -474,45 +485,6 @@ export class UnitOfWork {
   }
 
   /**
-   * Prepare cascades for a single entity.
-   *
-   * @param {EntityInterface} entity
-   * @param {string}          property
-   * @param {EntityInterface} relation
-   * @param {Mapping}         mapping
-   *
-   * @returns {UnitOfWork}
-   */
-  private cascadeSingle<T>(entity: T, property: string, relation: EntityInterface, mapping: Mapping<T>): UnitOfWork {
-    let relationState = UnitOfWork.getObjectState(relation);
-
-    // Why are you trying to link this entity up with something that will be deleted? Silly.
-    if (relationState === UnitOfWork.STATE_DELETED) {
-      throw new Error(
-        `Trying to add relation with entity on "${mapping.getEntityName()}.${property}" that has been staged for removal.`,
-      );
-    }
-
-    // Is the entity we're trying to set up a relationship with un-persisted?
-    if (relationState === UnitOfWork.STATE_UNKNOWN) {
-      let cascades = mapping.getField(property).cascades;
-
-      // No cascades? Then throw an error. We can't cascade-persist something we don't have.
-      if (!Array.isArray(cascades) || !cascades.includes(Mapping.CASCADE_PERSIST)) {
-        throw new Error(`Un-persisted relation found on "${mapping.getEntityName()}.${property}". Either persist the entity, or use the cascade persist option.`);
-      }
-
-      // Woo, cascade persist. Cascade child as well.
-      this.prepareCascadesFor(relation, entity);
-
-      // And register relation as new.
-      this.registerNew(relation);
-    }
-
-    return this;
-  }
-
-  /**
    * Prepare cascades for all staged changes.
    *
    * @returns {UnitOfWork}
@@ -527,12 +499,12 @@ export class UnitOfWork {
     }
 
     this.relationshipsChangedObjects.forEach(changed => {
-      let relationChanges = MetaData.forInstance(changed).fetch('entityState.relations');
-      let mapping         = Mapping.forEntity(changed);
-      let relations       = mapping.getRelations();
-      let processChanged  = changedType => {
+      const relationChanges = MetaData.forInstance(changed).fetch('entityState.relations');
+      const mapping = Mapping.forEntity(changed);
+      const relations = mapping.getRelations();
+      const processChanged = changedType => {
         Object.getOwnPropertyNames(relationChanges[changedType]).forEach(property => {
-          let changes = relationChanges[changedType];
+          const changes = relationChanges[changedType];
 
           if (!(changes[property] instanceof Array)) {
             this.cascadeSingle(changed, property, changes[property], mapping);
@@ -565,13 +537,13 @@ export class UnitOfWork {
   public commit(
     skipClean: boolean = false,
     skipLifecycleHooks: boolean = false,
-    config: {refreshCreated?: boolean, refreshUpdated?: boolean} = { refreshCreated: null, refreshUpdated: null },
+    config: { refreshCreated?: boolean, refreshUpdated?: boolean } = { refreshCreated: null, refreshUpdated: null },
   ): Promise<any> {
     this.prepareCascades();
 
-    const defaultConfig       = this.entityManager.getConfig();
-    const refreshCreated      = defaultConfig.fetch('entityManager.refreshCreated');
-    const refreshUpdated      = defaultConfig.fetch('entityManager.refreshUpdated');
+    const defaultConfig = this.entityManager.getConfig();
+    const refreshCreated = defaultConfig.fetch('entityManager.refreshCreated');
+    const refreshUpdated = defaultConfig.fetch('entityManager.refreshUpdated');
     const shouldRefreshUpdate = typeof config.refreshUpdated === 'boolean' ? config.refreshUpdated : refreshUpdated;
     const shouldRefreshCreate = typeof config.refreshCreated === 'boolean' ? config.refreshCreated : refreshCreated;
 
@@ -589,12 +561,119 @@ export class UnitOfWork {
   }
 
   /**
+   * Clear the state for provided entity.
+   *
+   * @param {EntityInterface} entity
+   * EntityInterface
+   * @returns {UnitOfWork}
+   */
+  public clearEntityState(entity: EntityInterface): UnitOfWork {
+    MetaData.forInstance(entity).remove('entityState');
+
+    return this;
+  }
+
+  /**
+   * Roll back all affected objects.
+   *
+   * - Revert changes in dirty entities.
+   * - Un-persist new entities.
+   * - Unstage deleted entities.
+   * - Refresh persisted entities.
+   *
+   * @param {EntityInterface[]} entities
+   *
+   * @returns {UnitOfWork}
+   */
+  public clear(...entities: Array<EntityInterface | ProxyInterface>): UnitOfWork {
+    (<Array<EntityInterface | ProxyInterface>>(entities.length ? entities : this.newObjects))
+      .forEach((created: EntityProxy) => this.clearEntityState(created));
+
+    (<Array<EntityInterface | ProxyInterface>>(entities.length ? entities : this.deletedObjects))
+      .forEach(deleted => this.clearEntityState(deleted));
+
+    (<Array<EntityInterface | ProxyInterface>>(entities.length ? entities : this.cleanObjects))
+      .forEach(clean => this.clearEntityState(clean));
+
+    (<Array<EntityInterface | ProxyInterface>>(entities.length ? entities : this.relationshipsChangedObjects))
+      .forEach(changed => this.clearEntityState(changed));
+
+    if (entities.length) {
+      this.relationshipsChangedObjects.remove(...entities);
+      this.dirtyObjects.remove(...entities);
+      this.deletedObjects.remove(...entities);
+      this.newObjects.remove(...entities);
+      this.cleanObjects.remove(...entities);
+    } else {
+      this.relationshipsChangedObjects = new ArrayCollection;
+      this.dirtyObjects = new ArrayCollection;
+      this.deletedObjects = new ArrayCollection;
+      this.newObjects = new ArrayCollection;
+      this.cleanObjects = new ArrayCollection;
+    }
+
+    this.transactions = {};
+    this.afterCommit = [];
+
+    return this;
+  }
+
+  /**
+   * Mark everything as clean, empty transactions and empty after commits.
+   *
+   * @returns {UnitOfWork}
+   */
+  public clean(): Promise<void> {
+    return this.cleanObjectsAndTransactions()
+      .then(() => this.cleanAfterCommit());
+  }
+
+  /**
+   * Prepare cascades for a single entity.
+   *
+   * @param {EntityInterface} entity
+   * @param {string}          property
+   * @param {EntityInterface} relation
+   * @param {Mapping}         mapping
+   *
+   * @returns {UnitOfWork}
+   */
+  private cascadeSingle<T>(entity: T, property: string, relation: EntityInterface, mapping: Mapping<T>): UnitOfWork {
+    const relationState = UnitOfWork.getObjectState(relation);
+
+    // Why are you trying to link this entity up with something that will be deleted? Silly.
+    if (relationState === UnitOfWork.STATE_DELETED) {
+      throw new Error(
+        `Trying to add relation with entity on "${mapping.getEntityName()}.${property}" that has been staged for removal.`,
+      );
+    }
+
+    // Is the entity we're trying to set up a relationship with un-persisted?
+    if (relationState === UnitOfWork.STATE_UNKNOWN) {
+      const cascades = mapping.getField(property).cascades;
+
+      // No cascades? Then throw an error. We can't cascade-persist something we don't have.
+      if (!Array.isArray(cascades) || !cascades.includes(Mapping.CASCADE_PERSIST)) {
+        throw new Error(`Un-persisted relation found on "${mapping.getEntityName()}.${property}". Either persist the entity, or use the cascade persist option.`);
+      }
+
+      // Woo, cascade persist. Cascade child as well.
+      this.prepareCascadesFor(relation, entity);
+
+      // And register relation as new.
+      this.registerNew(relation);
+    }
+
+    return this;
+  }
+
+  /**
    * Execute post commit lifecyle callbacks.
    *
    * @return {Promise<Array<Function>>}
    */
   private processAfterCommit(): Promise<Array<Function>> {
-    let methods = [];
+    const methods = [];
 
     this.afterCommit.forEach(action => {
       methods.push(action.target[action.method](...action.parameters, this.entityManager));
@@ -613,14 +692,14 @@ export class UnitOfWork {
    * @returns {Promise<any>}
    */
   private lifecycleCallback(method: string, entity: EntityInterface, ...parameters: Array<any>): Promise<any> {
-    let beforeMethod = 'before' + method[0].toUpperCase() + method.substr(1);
-    let afterMethod  = 'after' + method[0].toUpperCase() + method.substr(1);
+    const beforeMethod = 'before' + method[0].toUpperCase() + method.substr(1);
+    const afterMethod = 'after' + method[0].toUpperCase() + method.substr(1);
 
     if (typeof entity[afterMethod] === 'function') {
       this.afterCommit.push({ target: entity, method: afterMethod, parameters });
     }
 
-    let callbackResult = typeof entity[beforeMethod] === 'function'
+    const callbackResult = typeof entity[beforeMethod] === 'function'
       ? entity[beforeMethod](...parameters, this.entityManager)
       : null;
 
@@ -636,8 +715,8 @@ export class UnitOfWork {
    * @returns {Promise}
    */
   private commitOrRollback(commit: boolean = true, error?: Error): Promise<any> {
-    let resolves = [];
-    let method   = commit ? 'commit' : 'rollback';
+    const resolves = [];
+    const method = commit ? 'commit' : 'rollback';
 
     Object.getOwnPropertyNames(this.transactions).forEach(store => {
       resolves.push(this.transactions[store].transaction[method]());
@@ -716,19 +795,6 @@ export class UnitOfWork {
   }
 
   /**
-   * Clear the state for provided entity.
-   *
-   * @param {EntityInterface} entity
-   * EntityInterface
-   * @returns {UnitOfWork}
-   */
-  public clearEntityState(entity: EntityInterface): UnitOfWork {
-    MetaData.forInstance(entity).remove('entityState');
-
-    return this;
-  }
-
-  /**
    * Refresh all dirty entities.
    *
    * @returns {Promise<any>}
@@ -754,12 +820,12 @@ export class UnitOfWork {
    * @returns {Promise}
    */
   private getTransaction(target: EntityInterface): Promise<any> {
-    let store     = this.entityManager.getStore(target);
-    let storeName = store.getName();
+    const store = this.entityManager.getStore(target);
+    const storeName = store.getName();
 
     if (!this.transactions[storeName]) {
       this.transactions[storeName] = new Promise((resolve, reject) => {
-        let connection = store.getConnection(Store.ROLE_MASTER);
+        const connection = store.getConnection(Store.ROLE_MASTER);
 
         connection.transaction(transaction => {
           this.transactions[storeName] = { connection: connection, transaction: transaction };
@@ -785,7 +851,7 @@ export class UnitOfWork {
    * @returns {Promise<any>}
    */
   private persist(targets: Array<EntityInterface>, handler: Function): Promise<any> {
-    let statementHandlers = [];
+    const statementHandlers = [];
 
     targets.forEach(target => statementHandlers.push(this.persistTarget(target, handler)));
 
@@ -803,8 +869,8 @@ export class UnitOfWork {
   private persistTarget(target: ProxyInterface, handler: Function): Promise<any> {
     return this.getTransaction(target)
       .then(transaction => {
-        let tableName    = Mapping.forEntity(target).getTableName();
-        let queryBuilder = this.entityManager
+        const tableName = Mapping.forEntity(target).getTableName();
+        const queryBuilder = this.entityManager
           .getRepository(this.entityManager.resolveEntityReference(target))
           .getQueryBuilder(null, transaction.connection(tableName));
 
@@ -823,8 +889,8 @@ export class UnitOfWork {
    */
   private insertNew(skipLifecyclehooks: boolean = false): Promise<any> {
     return this.persist(this.newObjects, <T>(queryBuilder: QueryBuilder<T>, target: T & ProxyInterface) => {
-      let mapping    = Mapping.forEntity(target);
-      let primaryKey = mapping.getPrimaryKey();
+      const mapping = Mapping.forEntity(target);
+      const primaryKey = mapping.getPrimaryKey();
 
       const executeInsertion = () => {
         return queryBuilder.insert(target, primaryKey).getQuery().execute()
@@ -861,10 +927,10 @@ export class UnitOfWork {
    */
   private updateDirty(skipLifecyclehooks: boolean = false): Promise<any> {
     return this.persist(this.dirtyObjects, <T>(queryBuilder: QueryBuilder<T>, target: T) => {
-      let dirtyProperties = MetaData.forInstance(target).fetch(`entityState.dirty`, []);
-      let targetMapping   = Mapping.forEntity(target);
-      let primaryKey      = targetMapping.getPrimaryKeyField();
-      let newValues       = {};
+      const dirtyProperties = MetaData.forInstance(target).fetch(`entityState.dirty`, []);
+      const targetMapping = Mapping.forEntity(target);
+      const primaryKey = targetMapping.getPrimaryKeyField();
+      const newValues = {};
 
       if (dirtyProperties.length > 0) {
         dirtyProperties.forEach(dirtyProperty => {
@@ -894,7 +960,7 @@ export class UnitOfWork {
    */
   private deleteDeleted(skipLifecyclehooks: boolean = false): Promise<any> {
     return this.persist(this.deletedObjects, <T>(queryBuilder: QueryBuilder<T>, target: T & EntityProxy) => {
-      let primaryKey = Mapping.forEntity(target).getPrimaryKeyField();
+      const primaryKey = Mapping.forEntity(target).getPrimaryKeyField();
 
       // @todo Use target's mapping to delete relations for non-cascaded properties.
 
@@ -918,17 +984,17 @@ export class UnitOfWork {
    */
   private updateRelationships(): Promise<Object> {
     // Whoa boy! This is going to be fun!
-    let relationshipUpdates = [];
+    const relationshipUpdates = [];
 
     this.relationshipsChangedObjects.forEach(changed => {
-      let changedMapping = Mapping.forEntity(changed);
-      let changedMeta    = MetaData.forInstance(changed).fetch('entityState.relations');
-      let relations      = changedMapping.getRelations();
+      const changedMapping = Mapping.forEntity(changed);
+      const changedMeta = MetaData.forInstance(changed).fetch('entityState.relations');
+      const relations = changedMapping.getRelations();
 
       // Apply changes (remove or add)
-      let applyChanges = (from, action) => {
+      const applyChanges = (from, action) => {
         Object.getOwnPropertyNames(changedMeta[from]).forEach(property => {
-          let newRelations = changedMeta[from][property];
+          const newRelations = changedMeta[from][property];
 
           if (!(newRelations instanceof ArrayCollection)) {
             return relationshipUpdates.push(persistRelationChange(action, changed, property, newRelations));
@@ -941,19 +1007,19 @@ export class UnitOfWork {
       };
 
       // Persist the relation change
-      let persistRelationChange = (action, owning, property, other) => {
-        let relation = relations[property];
+      const persistRelationChange = (action, owning, property, other) => {
+        const relation = relations[property];
 
         if (relation.type !== Mapping.RELATION_MANY_TO_MANY) {
-          let mapping    = relation.mappedBy ? Mapping.forEntity(other) : changedMapping;
-          let owningSide = relation.mappedBy ? other : changed;
-          let otherSide  = relation.mappedBy ? changed : other;
-          let joinColumn = mapping.getJoinColumn(relation.mappedBy ? relation.mappedBy : property);
-          let primaryKey = mapping.getPrimaryKey();
+          const mapping = relation.mappedBy ? Mapping.forEntity(other) : changedMapping;
+          const owningSide = relation.mappedBy ? other : changed;
+          const otherSide = relation.mappedBy ? changed : other;
+          const joinColumn = mapping.getJoinColumn(relation.mappedBy ? relation.mappedBy : property);
+          const primaryKey = mapping.getPrimaryKey();
 
           // Update id of property on own side, based on joinColumn.
           return this.persistTarget(owningSide, <T>(queryBuilder: QueryBuilder<T>, target: T) => {
-            let query    = queryBuilder.where({ [primaryKey]: target[primaryKey] });
+            const query = queryBuilder.where({ [primaryKey]: target[primaryKey] });
             let newValue = otherSide[joinColumn.referencedColumnName];
 
             if (action === UnitOfWork.RELATIONSHIP_REMOVED) {
@@ -966,17 +1032,17 @@ export class UnitOfWork {
           });
         }
 
-        let owningSide = relation.mappedBy ? other : owning;
-        let otherSide  = relation.mappedBy ? owning : other;
-        let joinTable  = relation.mappedBy
+        const owningSide = relation.mappedBy ? other : owning;
+        const otherSide = relation.mappedBy ? owning : other;
+        const joinTable = relation.mappedBy
           ? Mapping.forEntity(other).getJoinTable(relation.mappedBy)
           : changedMapping.getJoinTable(property);
 
         // Create a new row in join table.
         return this.getTransaction(owningSide)
           .then(transaction => {
-            let queryBuilder = transaction.connection(joinTable.name);
-            let values       = {};
+            const queryBuilder = transaction.connection(joinTable.name);
+            const values = {};
 
             joinTable.joinColumns.forEach(column => {
               values[column.name] = owningSide[column.referencedColumnName];
@@ -987,14 +1053,14 @@ export class UnitOfWork {
             });
 
             if (action === UnitOfWork.RELATIONSHIP_ADDED) {
-              let query = queryBuilder.insert(values).transacting(transaction.transaction);
+              const query = queryBuilder.insert(values).transacting(transaction.transaction);
 
               UnitOfWork.logQuery(query);
 
               return query.then();
             }
 
-            let query = queryBuilder.where(values).del().transacting(transaction.transaction).then();
+            const query = queryBuilder.where(values).del().transacting(transaction.transaction).then();
 
             UnitOfWork.logQuery(query);
 
@@ -1007,62 +1073,6 @@ export class UnitOfWork {
     });
 
     return Promise.all(relationshipUpdates);
-  }
-
-  /**
-   * Log a query.
-   *
-   * @param {knex.QueryBuilder} query
-   */
-  static logQuery(query: knex.QueryBuilder): void {
-    if (process.env.LOG_QUERIES) {
-      console.log('Executing query:', query.toString());
-    }
-  }
-
-  /**
-   * Roll back all affected objects.
-   *
-   * - Revert changes in dirty entities.
-   * - Un-persist new entities.
-   * - Unstage deleted entities.
-   * - Refresh persisted entities.
-   *
-   * @param {EntityInterface[]} entities
-   *
-   * @returns {UnitOfWork}
-   */
-  public clear(...entities: Array<EntityInterface | ProxyInterface>): UnitOfWork {
-    (<Array<EntityInterface | ProxyInterface>>(entities.length ? entities : this.newObjects))
-      .forEach((created: EntityProxy) => this.clearEntityState(created));
-
-    (<Array<EntityInterface | ProxyInterface>>(entities.length ? entities : this.deletedObjects))
-      .forEach(deleted => this.clearEntityState(deleted));
-
-    (<Array<EntityInterface | ProxyInterface>>(entities.length ? entities : this.cleanObjects))
-      .forEach(clean => this.clearEntityState(clean));
-
-    (<Array<EntityInterface | ProxyInterface>>(entities.length ? entities : this.relationshipsChangedObjects))
-      .forEach(changed => this.clearEntityState(changed));
-
-    if (entities.length) {
-      this.relationshipsChangedObjects.remove(...entities);
-      this.dirtyObjects.remove(...entities);
-      this.deletedObjects.remove(...entities);
-      this.newObjects.remove(...entities);
-      this.cleanObjects.remove(...entities);
-    } else {
-      this.relationshipsChangedObjects = new ArrayCollection;
-      this.dirtyObjects                = new ArrayCollection;
-      this.deletedObjects              = new ArrayCollection;
-      this.newObjects                  = new ArrayCollection;
-      this.cleanObjects                = new ArrayCollection;
-    }
-
-    this.transactions = {};
-    this.afterCommit  = [];
-
-    return this;
   }
 
   /**
@@ -1088,18 +1098,8 @@ export class UnitOfWork {
     this.deletedObjects.each(deleted => this.clearEntityState(deleted));
 
     this.deletedObjects = new ArrayCollection;
-    this.transactions   = {};
+    this.transactions = {};
 
     return Promise.resolve();
-  }
-
-  /**
-   * Mark everything as clean, empty transactions and empty after commits.
-   *
-   * @returns {UnitOfWork}
-   */
-  public clean(): Promise<void> {
-    return this.cleanObjectsAndTransactions()
-      .then(() => this.cleanAfterCommit());
   }
 }

@@ -1,5 +1,5 @@
 import { Homefront } from 'homefront';
-import { ProxyInterface, EntityInterface, EntityCtor } from './EntityInterface';
+import { ProxyInterface } from './EntityInterface';
 
 export class MetaData {
   /**
@@ -53,7 +53,7 @@ export class MetaData {
    */
   static forInstance(instance: ProxyInterface): Homefront {
     if (typeof instance !== 'object') {
-      throw new Error("Can't get metadata, provided instance isn't of type Object.");
+      throw new Error('Can\'t get metadata, provided instance isn\'t of type Object.');
     }
 
     return MetaData.ensure(instance.isEntityProxy ? instance.getTarget() : instance);

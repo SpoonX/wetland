@@ -17,7 +17,40 @@ export class Seeder {
 
   constructor(wetland: Wetland) {
     this.wetland = wetland;
-    this.config  = this.config.merge(wetland.getConfig().fetch('seed'));
+    this.config = this.config.merge(wetland.getConfig().fetch('seed'));
+  }
+
+  /**
+   * Seed files contained in the fixtures directory.
+   *
+   * @return {Promise}
+   */
+  public seed(): Promise<any> {
+    if (!this.config) {
+      return Promise.reject(new Error('Seed configuration is not valid.'));
+    }
+
+    const fixturesDirectory = this.config.fetch('fixturesDirectory');
+
+    if (!fixturesDirectory) {
+      return Promise.reject(new Error('Seed configuration is not complete.'));
+    }
+
+    const bypassLifecyclehooks = this.config.fetchOrPut('bypassLifecyclehooks', false);
+    const clean = this.config.fetchOrPut('clean', false);
+
+    const readDir: any = Bluebird.promisify(fs.readdir);
+
+    return readDir(fixturesDirectory)
+      .then(files => {
+        const readers = [];
+
+        files.forEach(file => {
+          readers.push(this.seedFile(fixturesDirectory, file, clean, bypassLifecyclehooks));
+        });
+
+        return Promise.all(readers);
+      });
   }
 
   /**
@@ -29,14 +62,14 @@ export class Seeder {
    * @return {Promise<any>}
    */
   private cleanlyInsertFeatures(entityName: string, features: Array<Object>, bypassLifecyclehooks: boolean): Promise<any> {
-    const manager    = this.wetland.getManager();
+    const manager = this.wetland.getManager();
     const unitOfWork = manager.getUnitOfWork();
-    const populator  = this.wetland.getPopulator(manager);
-    const Entity     = manager.getEntity(entityName) as EntityCtor<Function>;
-    const entities   = new ArrayCollection();
+    const populator = this.wetland.getPopulator(manager);
+    const Entity = manager.getEntity(entityName) as EntityCtor<Function>;
+    const entities = new ArrayCollection();
 
     features.forEach(feature => {
-      let entity = populator.assign(Entity, feature);
+      const entity = populator.assign(Entity, feature);
 
       unitOfWork.setEntityState(entity, UnitOfWork.STATE_NEW);
 
@@ -55,18 +88,18 @@ export class Seeder {
    * @return {Promise<any>}
    */
   private safelyInsertFeatures(entityName: string, features: Array<Object>, bypassLifecyclehooks: boolean): Promise<any> {
-    const manager          = this.wetland.getManager();
-    const unitOfWork       = manager.getUnitOfWork();
-    const populator        = this.wetland.getPopulator(manager);
-    const Entity           = manager.getEntity(entityName) as EntityCtor<Function>;
-    const correctFields    = Mapping.forEntity(Entity).getFieldNames();
+    const manager = this.wetland.getManager();
+    const unitOfWork = manager.getUnitOfWork();
+    const populator = this.wetland.getPopulator(manager);
+    const Entity = manager.getEntity(entityName) as EntityCtor<Function>;
+    const correctFields = Mapping.forEntity(Entity).getFieldNames();
     const entityRepository = manager.getRepository(Entity);
 
     const queries = [];
 
     features.forEach(feature => {
 
-      let target = {};
+      const target = {};
 
       Reflect.ownKeys(feature).forEach((field: string) => {
         if (correctFields.includes(field)) {
@@ -76,7 +109,7 @@ export class Seeder {
 
       queries.push(entityRepository.findOne(target).then(response => {
         if (!response) {
-          let populated = populator.assign(Entity, feature);
+          const populated = populator.assign(Entity, feature);
 
           unitOfWork.setEntityState(populated, UnitOfWork.STATE_NEW);
 
@@ -129,10 +162,10 @@ export class Seeder {
 
     return readFile(path.join(src, file), 'utf8')
       .then(data => {
-        let [ entityName, extension ] = file.split('.'); // Very naive **might** need better
+        const [ entityName, extension ] = file.split('.'); // Very naive **might** need better
 
         if (extension === 'json') {
-          let features = JSON.parse(data);
+          const features = JSON.parse(data);
 
           return this.seedFeatures(entityName, features, clean, bypassLifecyclehooks);
         }
@@ -145,39 +178,6 @@ export class Seeder {
         }
 
         return Promise.resolve();
-      });
-  }
-
-  /**
-   * Seed files contained in the fixtures directory.
-   *
-   * @return {Promise}
-   */
-  public seed(): Promise<any> {
-    if (!this.config) {
-      return Promise.reject(new Error('Seed configuration is not valid.'));
-    }
-
-    const fixturesDirectory = this.config.fetch('fixturesDirectory');
-
-    if (!fixturesDirectory) {
-      return Promise.reject(new Error('Seed configuration is not complete.'));
-    }
-
-    const bypassLifecyclehooks = this.config.fetchOrPut('bypassLifecyclehooks', false);
-    const clean                = this.config.fetchOrPut('clean', false);
-
-    const readDir: any = Bluebird.promisify(fs.readdir);
-
-    return readDir(fixturesDirectory)
-      .then(files => {
-        const readers = [];
-
-        files.forEach(file => {
-          readers.push(this.seedFile(fixturesDirectory, file, clean, bypassLifecyclehooks));
-        });
-
-        return Promise.all(readers);
       });
   }
 }

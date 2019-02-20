@@ -19,23 +19,23 @@ export class SchemaBuilder {
    * @type {{}}
    */
   private types = {
-    integer    : field => `.integer('${field.name}')`,
-    bigInteger : field => `.bigInteger('${field.name}')`,
-    text       : field => `.text('${field.name}', '${field.textType || 'text'}')`,
-    string     : field => `.string('${field.name}', ${field.size || 255})`,
-    float      : field => `.float('${field.name}', ${field.precision || 8}, ${field.scale || 2})`,
-    decimal    : field => `.decimal('${field.name}', ${field.precision || 8}, ${field.scale || 2})`,
-    boolean    : field => `.boolean('${field.name}')`,
-    date       : field => `.date('${field.name}')`,
-    dateTime   : field => `.dateTime('${field.name}')`,
-    datetime   : field => `.datetime('${field.name}')`,
-    time       : field => `.time('${field.name}')`,
-    timestamp  : field => `.timestamp('${field.name}')`,
-    binary     : field => `.binary('${field.name}')`,
-    json       : field => `.json('${field.name}')`,
-    jsonb      : field => `.jsonb('${field.name}')`,
-    uuid       : field => `.uuid('${field.name}')`,
-    enumeration: field => `.enu('${field.name}', ${JSON.stringify(field.enumeration).replace(/"/g, "'")})`,
+    integer: field => `.integer('${field.name}')`,
+    bigInteger: field => `.bigInteger('${field.name}')`,
+    text: field => `.text('${field.name}', '${field.textType || 'text'}')`,
+    string: field => `.string('${field.name}', ${field.size || 255})`,
+    float: field => `.float('${field.name}', ${field.precision || 8}, ${field.scale || 2})`,
+    decimal: field => `.decimal('${field.name}', ${field.precision || 8}, ${field.scale || 2})`,
+    boolean: field => `.boolean('${field.name}')`,
+    date: field => `.date('${field.name}')`,
+    dateTime: field => `.dateTime('${field.name}')`,
+    datetime: field => `.datetime('${field.name}')`,
+    time: field => `.time('${field.name}')`,
+    timestamp: field => `.timestamp('${field.name}')`,
+    binary: field => `.binary('${field.name}')`,
+    json: field => `.json('${field.name}')`,
+    jsonb: field => `.jsonb('${field.name}')`,
+    uuid: field => `.uuid('${field.name}')`,
+    enumeration: field => `.enu('${field.name}', ${JSON.stringify(field.enumeration).replace(/"/g, '\'')})`,
   };
 
   /**
@@ -61,23 +61,6 @@ export class SchemaBuilder {
   }
 
   /**
-   * Returns if foreign keys should be used.
-   *
-   * @param {string} store
-   *
-   * @returns {boolean}
-   */
-  private useForeignKeys(store: string): boolean {
-    let manager = this.entityManager;
-
-    if (!this.useForeignKeysGlobal) {
-      this.useForeignKeysGlobal = manager.getConfig().fetch('useForeignKeys');
-    }
-
-    return this.useForeignKeysGlobal && manager.getStore(store).getClient() !== 'sqlite3';
-  }
-
-  /**
    * Get the schema queries.
    *
    * @returns {string}
@@ -91,10 +74,10 @@ export class SchemaBuilder {
       this.runCode();
     }
 
-    let queries = [];
+    const queries = [];
 
     this.builders.forEach(builder => {
-      let query = builder.toString();
+      const query = builder.toString();
 
       if (query) {
         queries.push(query);
@@ -114,29 +97,6 @@ export class SchemaBuilder {
   }
 
   /**
-   * Run the built code.
-   *
-   * @returns {SchemaBuilder}
-   */
-  private runCode(): this {
-    let migration = {
-      getBuilder: store => {
-        let connection    = this.entityManager.getStore(store).getConnection(Store.ROLE_MASTER);
-        let schemaBuilder = connection.schema;
-
-        this.builders.push(schemaBuilder);
-
-        return { schema: schemaBuilder, knex: connection };
-      },
-    };
-
-    // Come at me, bro.
-    eval(this.code);
-
-    return this;
-  }
-
-  /**
    * Persist the schema to the database.
    *
    * @returns {Promise<any[]>}
@@ -146,7 +106,7 @@ export class SchemaBuilder {
       this.runCode();
     }
 
-    let queries = [];
+    const queries = [];
 
     this.builders.forEach(query => {
       queries.push(query.then());
@@ -164,17 +124,17 @@ export class SchemaBuilder {
    */
   public process(instructionSets): this {
     let spaceCount = 4;
-    let allCode    = [];
-    let spacing    = (change = 0): string => {
+    let allCode = [];
+    const spacing = (change = 0): string => {
       spaceCount += change;
 
       return ' '.repeat(spaceCount - change);
     };
 
     Reflect.ownKeys(instructionSets).forEach((store: string) => {
-      let useForeignKeys = this.useForeignKeys(store);
-      let instructions   = instructionSets[store];
-      let code           = [];
+      const useForeignKeys = this.useForeignKeys(store);
+      const instructions = instructionSets[store];
+      const code = [];
 
       // Drop foreign keys
       useForeignKeys && this.buildDropForeignKeys(instructions.foreign.drop, code, spacing);
@@ -203,14 +163,54 @@ export class SchemaBuilder {
       useForeignKeys && this.buildCreateForeignKeys(instructions.foreign.create, code, spacing);
 
       if (code.length) {
-        allCode.push(`${spacing()}let builder = migration.getBuilder(${`'${store}'` || ''});`);
+        allCode.push(`${spacing()}const builder = migration.getBuilder(${`'${store}'` || ''});`);
 
         allCode = allCode.concat(code);
       }
     });
 
-    this.code     = allCode.length ? allCode.join('\n') : null;
+    this.code = allCode.length ? allCode.join('\n') : null;
     this.builders = [];
+
+    return this;
+  }
+
+  /**
+   * Returns if foreign keys should be used.
+   *
+   * @param {string} store
+   *
+   * @returns {boolean}
+   */
+  private useForeignKeys(store: string): boolean {
+    const manager = this.entityManager;
+
+    if (!this.useForeignKeysGlobal) {
+      this.useForeignKeysGlobal = manager.getConfig().fetch('useForeignKeys');
+    }
+
+    return this.useForeignKeysGlobal && manager.getStore(store).getClient() !== 'sqlite3';
+  }
+
+  /**
+   * Run the built code.
+   *
+   * @returns {SchemaBuilder}
+   */
+  private runCode(): this {
+    const migration = {
+      getBuilder: store => {
+        const connection = this.entityManager.getStore(store).getConnection(Store.ROLE_MASTER);
+        const schemaBuilder = connection.schema;
+
+        this.builders.push(schemaBuilder);
+
+        return { schema: schemaBuilder, knex: connection };
+      },
+    };
+
+    // Come at me, bro.
+    eval(this.code);
 
     return this;
   }
@@ -222,7 +222,7 @@ export class SchemaBuilder {
    * @param {string[]}  code
    * @param {function}  spacing
    */
-  private buildDropForeignKeys(drop: Object, code: Array<string>, spacing: (change?: number)=>string) {
+  private buildDropForeignKeys(drop: Object, code: Array<string>, spacing: (change?: number) => string) {
     const tableNames = Reflect.ownKeys(drop);
 
     if (!tableNames.length) {
@@ -250,7 +250,7 @@ export class SchemaBuilder {
    * @param {string[]}  code
    * @param {function}  spacing
    */
-  private buildCreateForeignKeys(create: Object, code: Array<string>, spacing: (change?: number)=>string) {
+  private buildCreateForeignKeys(create: Object, code: Array<string>, spacing: (change?: number) => string) {
     const tableNames = Reflect.ownKeys(create);
 
     if (!tableNames.length) {
@@ -266,7 +266,7 @@ export class SchemaBuilder {
       // Create foreign keys.
       toCreate.forEach(foreign => {
         let foreignCode = spacing();
-        foreignCode += `table.foreign(${JSON.stringify(foreign.columns).replace(/"/g, "'")})`;
+        foreignCode += `table.foreign(${JSON.stringify(foreign.columns).replace(/"/g, '\'')})`;
         foreignCode += `.references('${foreign.references}').inTable('${foreign.inTable}')`;
 
         if (foreign.onDelete) {
@@ -300,13 +300,13 @@ export class SchemaBuilder {
                      createForeign: boolean,
                      instructions: any,
                      code: Array<string>,
-                     spacing: (change?: number)=>string) {
+                     spacing: (change?: number) => string) {
     instructions[action].forEach(actionData => {
-      let tableName      = actionData.tableName;
-      let table          = actionData.info;
-      let hasDropColumns = Array.isArray(table.dropColumn) && table.dropColumn.length;
-      let pushedBuilder  = false;
-      let ensureBuilder  = () => {
+      const tableName = actionData.tableName;
+      const table = actionData.info;
+      const hasDropColumns = Array.isArray(table.dropColumn) && table.dropColumn.length;
+      let pushedBuilder = false;
+      const ensureBuilder = () => {
         if (pushedBuilder) {
           return;
         }
@@ -315,7 +315,7 @@ export class SchemaBuilder {
         spacing(2);
 
         if (action === 'create' && actionData.info.meta) {
-          let meta = actionData.info.meta;
+          const meta = actionData.info.meta;
 
           if (meta.charset) {
             code.push(`${spacing()}table.charset('${meta.charset}');`);
@@ -385,7 +385,7 @@ export class SchemaBuilder {
         Reflect.ownKeys(table.index).forEach((index: string) => {
           ensureBuilder();
 
-          code.push(`${spacing()}table.index(${JSON.stringify(table.index[index]).replace(/"/g, "'")}, '${index}');`);
+          code.push(`${spacing()}table.index(${JSON.stringify(table.index[index]).replace(/"/g, '\'')}, '${index}');`);
         });
       }
 
@@ -394,7 +394,7 @@ export class SchemaBuilder {
         Reflect.ownKeys(table.unique).forEach((uniqueConstraint: string) => {
           ensureBuilder();
 
-          code.push(`${spacing()}table.unique(${JSON.stringify(table.unique[uniqueConstraint]).replace(/"/g, "'")}, '${uniqueConstraint}');`);
+          code.push(`${spacing()}table.unique(${JSON.stringify(table.unique[uniqueConstraint]).replace(/"/g, '\'')}, '${uniqueConstraint}');`);
         });
       }
 

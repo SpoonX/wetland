@@ -1,4 +1,4 @@
-import { Mapping, JoinColumn, Relationship, JoinTable, FieldOptions } from '../Mapping';
+import { FieldOptions, JoinColumn, JoinTable, Mapping, Relationship } from '../Mapping';
 import { EntityRepository } from '../EntityRepository';
 
 /**
@@ -16,7 +16,7 @@ import { EntityRepository } from '../EntityRepository';
  *
  * @return {Mapping}
  */
-export function entity (options?: {repository?: typeof EntityRepository, name?: string, [key: string]: any}) {
+export function entity (options?: { repository?: typeof EntityRepository, name?: string, [key: string]: any }) {
   return (target: Object) => {
     Mapping.forEntity(target).entity(options);
   };

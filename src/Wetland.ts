@@ -1,8 +1,8 @@
 import { EntityManager } from './EntityManager';
-import { Store, PoolConfig, ReplicationConfig, SingleConfig } from './Store';
+import { PoolConfig, ReplicationConfig, SingleConfig, Store } from './Store';
 import { Homefront } from 'homefront';
 import { Scope } from './Scope';
-import { EntityInterface, EntityCtor } from './EntityInterface';
+import { EntityCtor, EntityInterface } from './EntityInterface';
 import { Migrator } from './Migrator/Migrator';
 import * as fs from 'fs';
 import * as mkdirp from 'mkdirp';
@@ -36,15 +36,15 @@ export class Wetland {
    * @type {Homefront}
    */
   private config: Homefront = new Homefront({
-    debug         : false,
+    debug: false,
     useForeignKeys: true,
-    dataDirectory : path.resolve(process.cwd(), '.data'),
-    defaultStore  : 'defaultStore',
-    mapping       : {
+    dataDirectory: path.resolve(process.cwd(), '.data'),
+    defaultStore: 'defaultStore',
+    mapping: {
       defaultNamesToUnderscore: false,
-      defaults                : { cascades: [] },
+      defaults: { cascades: [] },
     },
-    entityManager : {
+    entityManager: {
       refreshCreated: true,
       refreshUpdated: true,
     },
@@ -69,65 +69,6 @@ export class Wetland {
     this.ensureDataDirectory(this.config.fetch('dataDirectory'));
     this.setupExitListeners();
     this.initializeConfig(config);
-  }
-
-  /**
-   * Initialize the config.
-   *
-   * @param {{}} config
-   */
-  private initializeConfig(config: Object) {
-    if (config) {
-      this.config.merge(config);
-    }
-
-    let stores      = this.config.fetch('stores');
-    let entities    = this.config.fetch('entities');
-    let entityPaths = this.config.fetch('entityPaths', []);
-    let entityPath  = this.config.fetch('entityPath');
-
-    if (stores) {
-      this.registerStores(stores);
-    } else {
-      this.registerDefaultStore();
-    }
-
-    if (entities) {
-      this.registerEntities(entities);
-    }
-
-    if (entityPath) {
-      entityPaths.push(entityPath);
-    }
-
-    if (!entityPaths.length) {
-      return;
-    }
-
-    entityPaths.forEach(entityPath => {
-      fs.readdirSync(entityPath)
-        .filter(match => match.search(entityFilterRegexp) > -1)
-        .map(entity => entity.replace(entityExtensionRegexp, ''))
-        .forEach(entity => {
-          let filePath     = path.resolve(entityPath, entity);
-          let entityModule = require(filePath);
-          let ToRegister   = entityModule;
-
-          if (typeof ToRegister !== 'function') {
-            ToRegister = entityModule.default;
-          }
-
-          if (typeof ToRegister !== 'function') {
-            ToRegister = entityModule[entity];
-          }
-
-          if (typeof ToRegister !== 'function') {
-            throw new Error(`Error loading entity '${entity}'. No constructor exported.`);
-          }
-
-          this.registerEntity(ToRegister);
-        });
-    });
   }
 
   /**
@@ -173,7 +114,7 @@ export class Wetland {
    * @returns {Wetland}
    */
   public registerStores(stores: Object): Wetland {
-    for (let store in stores) {
+    for (const store in stores) {
       this.registerStore(store, stores[store]);
     }
 
@@ -215,7 +156,7 @@ export class Wetland {
       throw new Error('No store name supplied, and no default store found.');
     }
 
-    let store = this.stores[storeName];
+    const store = this.stores[storeName];
 
     if (!store) {
       throw new Error(`No store called "${storeName}" found.`);
@@ -245,7 +186,7 @@ export class Wetland {
   /**
    * Get a scoped entityManager. Example:
    *
-   *  let wet = new Wetland();
+   *  const wet = new Wetland();
    *  wet.getManager();
    *
    * @returns {Scope}
@@ -315,10 +256,10 @@ export class Wetland {
    * @returns {Promise<any>}
    */
   public destroyConnections(): Promise<any> {
-    let destroys = [];
+    const destroys = [];
 
     Object.getOwnPropertyNames(this.stores).forEach(storeName => {
-      let connections = this.stores[storeName].getConnections();
+      const connections = this.stores[storeName].getConnections();
 
       connections[Store.ROLE_SLAVE].forEach(connection => {
         destroys.push(connection.destroy().then());
@@ -330,6 +271,65 @@ export class Wetland {
     });
 
     return Promise.all(destroys);
+  }
+
+  /**
+   * Initialize the config.
+   *
+   * @param {{}} config
+   */
+  private initializeConfig(config: Object) {
+    if (config) {
+      this.config.merge(config);
+    }
+
+    const stores = this.config.fetch('stores');
+    const entities = this.config.fetch('entities');
+    const entityPaths = this.config.fetch('entityPaths', []);
+    const entityPath = this.config.fetch('entityPath');
+
+    if (stores) {
+      this.registerStores(stores);
+    } else {
+      this.registerDefaultStore();
+    }
+
+    if (entities) {
+      this.registerEntities(entities);
+    }
+
+    if (entityPath) {
+      entityPaths.push(entityPath);
+    }
+
+    if (!entityPaths.length) {
+      return;
+    }
+
+    entityPaths.forEach(entityPath => {
+      fs.readdirSync(entityPath)
+        .filter(match => match.search(entityFilterRegexp) > -1)
+        .map(entity => entity.replace(entityExtensionRegexp, ''))
+        .forEach(entity => {
+          const filePath = path.resolve(entityPath, entity);
+          const entityModule = require(filePath);
+          let ToRegister = entityModule;
+
+          if (typeof ToRegister !== 'function') {
+            ToRegister = entityModule.default;
+          }
+
+          if (typeof ToRegister !== 'function') {
+            ToRegister = entityModule[entity];
+          }
+
+          if (typeof ToRegister !== 'function') {
+            throw new Error(`Error loading entity '${entity}'. No constructor exported.`);
+          }
+
+          this.registerEntity(ToRegister);
+        });
+    });
   }
 
   /**
@@ -353,9 +353,9 @@ export class Wetland {
     }
 
     this.registerStore(this.config.fetch('defaultStore'), {
-      client          : 'sqlite3',
+      client: 'sqlite3',
       useNullAsDefault: true,
-      connection      : { filename: `${this.config.fetch('dataDirectory')}/wetland.sqlite` },
+      connection: { filename: `${this.config.fetch('dataDirectory')}/wetland.sqlite` },
     });
   }
 

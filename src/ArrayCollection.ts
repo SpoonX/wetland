@@ -46,7 +46,7 @@ export class ArrayCollection<T> extends Array {
    */
   remove(...items: Array<any>): ArrayCollection<T> {
     items.forEach(item => {
-      let itemIndex = this.indexOf(item);
+      const itemIndex = this.indexOf(item);
 
       if (itemIndex > -1) {
         this.splice(itemIndex, 1);

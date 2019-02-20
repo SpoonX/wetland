@@ -7,53 +7,50 @@ import { QueryBuilder } from 'knex';
 export class Criteria {
 
   /**
+   * Maps operators to knex methods.
+   *
+   * @type {{}}
+   */
+  protected conditions: { and: string, or: string } = { and: 'where', or: 'orWhere' };
+  /**
+   * @type {string}
+   */
+  protected defaultCondition: string = 'and';
+  /**
    * Available operators and the handlers.
    *
    * @type {{}}
    */
   private operators = {
-    '<'                 : { operator: '<', value: value => value },
-    'lt'                : { operator: '<', value: value => value },
-    'lessThan'          : { operator: '<', value: value => value },
-    '<='                : { operator: '<=', value: value => value },
-    'lte'               : { operator: '<=', value: value => value },
-    'lessThanOrEqual'   : { operator: '<=', value: value => value },
-    '>'                 : { operator: '>', value: value => value },
-    'gt'                : { operator: '>', value: value => value },
-    'greaterThan'       : { operator: '>', value: value => value },
-    '>='                : { operator: '>=', value: value => value },
+    '<': { operator: '<', value: value => value },
+    'lt': { operator: '<', value: value => value },
+    'lessThan': { operator: '<', value: value => value },
+    '<=': { operator: '<=', value: value => value },
+    'lte': { operator: '<=', value: value => value },
+    'lessThanOrEqual': { operator: '<=', value: value => value },
+    '>': { operator: '>', value: value => value },
+    'gt': { operator: '>', value: value => value },
+    'greaterThan': { operator: '>', value: value => value },
+    '>=': { operator: '>=', value: value => value },
     'greaterThanOrEqual': { operator: '>=', value: value => value },
-    'gte'               : { operator: '>=', value: value => value },
-    '!'                 : { operator: '<>', value: value => value },
-    'not'               : { operator: '<>', value: value => value },
-    'between'           : { operator: 'between', value: value => value },
-    'notBetween'        : { operator: 'not between', value: value => value },
-    'in'                : { operator: 'in', value: value => value },
-    'notIn'             : { operator: 'not in', value: value => value },
-    'is'                : { operator: 'is', value: value => value },
-    'isNot'             : { operator: 'is not', value: value => value },
-    'like'              : { operator: 'like', value: value => `%${value}%` },
-    'notLike'           : { operator: 'not like', value: value => `%${value}%` },
-    'contains'          : { operator: 'like', value: value => `%${value}%` },
-    'notContains'       : { operator: 'not like', value: value => `%${value}%` },
-    'startsWith'        : { operator: 'like', value: value => `${value}%` },
-    'notStartsWith'     : { operator: 'not like', value: value => `${value}%` },
-    'endsWith'          : { operator: 'like', value: value => `%${value}` },
-    'notEndsWith'       : { operator: 'not like', value: value => `%${value}` },
+    'gte': { operator: '>=', value: value => value },
+    '!': { operator: '<>', value: value => value },
+    'not': { operator: '<>', value: value => value },
+    'between': { operator: 'between', value: value => value },
+    'notBetween': { operator: 'not between', value: value => value },
+    'in': { operator: 'in', value: value => value },
+    'notIn': { operator: 'not in', value: value => value },
+    'is': { operator: 'is', value: value => value },
+    'isNot': { operator: 'is not', value: value => value },
+    'like': { operator: 'like', value: value => `%${value}%` },
+    'notLike': { operator: 'not like', value: value => `%${value}%` },
+    'contains': { operator: 'like', value: value => `%${value}%` },
+    'notContains': { operator: 'not like', value: value => `%${value}%` },
+    'startsWith': { operator: 'like', value: value => `${value}%` },
+    'notStartsWith': { operator: 'not like', value: value => `${value}%` },
+    'endsWith': { operator: 'like', value: value => `%${value}` },
+    'notEndsWith': { operator: 'not like', value: value => `%${value}` },
   };
-
-  /**
-   * Maps operators to knex methods.
-   *
-   * @type {{}}
-   */
-  protected conditions: {and: string, or: string} = { and: 'where', or: 'orWhere' };
-
-  /**
-   * @type {string}
-   */
-  protected defaultCondition: string = 'and';
-
   /**
    * Mapping for the host entity.
    *
@@ -73,7 +70,7 @@ export class Criteria {
    *
    * @type {{}}
    */
-  private mappings: {[key: string]: Mapping<any>};
+  private mappings: { [key: string]: Mapping<any> };
 
   /**
    * Statement to apply criteria to.
@@ -87,7 +84,7 @@ export class Criteria {
    *
    * @type {Array}
    */
-  private staged: Array<{criteria: Object, condition?: string, statement?: QueryBuilder}> = [];
+  private staged: Array<{ criteria: Object, condition?: string, statement?: QueryBuilder }> = [];
 
   /**
    * Construct a new Criteria parser.
@@ -98,11 +95,11 @@ export class Criteria {
    * @param {{}}           [mappings]
    * @param {string}       [hostAlias]
    */
-  public constructor(statement: QueryBuilder, hostMapping: Mapping<any>, mappings?: {[key: string]: Mapping<any>}, hostAlias?: string) {
-    this.statement   = statement;
-    this.mappings    = mappings || {};
+  public constructor(statement: QueryBuilder, hostMapping: Mapping<any>, mappings?: { [key: string]: Mapping<any> }, hostAlias?: string) {
+    this.statement = statement;
+    this.mappings = mappings || {};
     this.hostMapping = hostMapping;
-    this.hostAlias   = hostAlias;
+    this.hostAlias = hostAlias;
   }
 
   /**
@@ -159,7 +156,7 @@ export class Criteria {
     statement = statement || this.statement;
 
     Reflect.ownKeys(criteria).forEach((key: string) => {
-      let value    = criteria[key];
+      let value = criteria[key];
       let operator = '=';
 
       if (this.conditions[key]) {
@@ -174,7 +171,7 @@ export class Criteria {
 
       // Apply operator logic
       if (this.operators[key]) {
-        value    = this.operators[key].value(value);
+        value = this.operators[key].value(value);
         operator = this.operators[key].operator;
       } else {
         property = key;
@@ -185,6 +182,39 @@ export class Criteria {
 
       statement[this.conditions[condition || this.defaultCondition]](this.mapToColumn(property), operator, value);
     });
+  }
+
+  /**
+   * Map a property to a column name.
+   *
+   * @param {string} property
+   *
+   * @returns {string}
+   */
+  public mapToColumn(property: string): string {
+    if (property.indexOf('.') === -1 && this.mappings[property]) {
+      return `${property}.${this.mappings[property].getPrimaryKeyField()}`;
+    }
+
+    if (property.indexOf('.') > -1) {
+      const parts = property.split('.');
+
+      if (!this.mappings[parts[0]]) {
+        return property;
+      }
+
+      parts[1] = this.mappings[parts[0]].getFieldName(parts[1], parts[1]);
+
+      return parts.join('.');
+    }
+
+    const columnName = this.hostMapping.getFieldName(property, property);
+
+    if (this.hostAlias && this.hostMapping.getField(property, true)) {
+      return this.hostAlias + '.' + columnName;
+    }
+
+    return columnName;
   }
 
   /**
@@ -231,38 +261,5 @@ export class Criteria {
     }
 
     return operator;
-  }
-
-  /**
-   * Map a property to a column name.
-   *
-   * @param {string} property
-   *
-   * @returns {string}
-   */
-  public mapToColumn(property: string): string {
-    if (property.indexOf('.') === -1 && this.mappings[property]) {
-      return `${property}.${this.mappings[property].getPrimaryKeyField()}`;
-    }
-
-    if (property.indexOf('.') > -1) {
-      let parts = property.split('.');
-
-      if (!this.mappings[parts[0]]) {
-        return property;
-      }
-
-      parts[1] = this.mappings[parts[0]].getFieldName(parts[1], parts[1]);
-
-      return parts.join('.');
-    }
-
-    let columnName = this.hostMapping.getFieldName(property, property);
-
-    if (this.hostAlias && this.hostMapping.getField(property, true)) {
-      columnName = this.hostAlias + '.' + columnName;
-    }
-
-    return columnName;
   }
 }

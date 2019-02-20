@@ -21,18 +21,18 @@ export class EntityProxy {
       return entity;
     }
 
+    const metaData = MetaData.forInstance(entity);
+    const mapping = Mapping.forEntity(entity);
+    const unitOfWork = entityManager.getUnitOfWork();
+    const relations = mapping.getRelations();
+    const expected = {};
     let proxyActive = active;
-    let metaData    = MetaData.forInstance(entity);
-    let mapping     = Mapping.forEntity(entity);
-    let unitOfWork  = entityManager.getUnitOfWork();
-    let relations   = mapping.getRelations();
-    let expected    = {};
     let entityProxy;
 
     // Create collection observers
     if (relations) {
       Object.getOwnPropertyNames(relations).forEach(property => {
-        let type = relations[property].type;
+        const type = relations[property].type;
 
         if (type === Mapping.RELATION_ONE_TO_MANY || type === Mapping.RELATION_MANY_TO_MANY) {
           proxyCollection(property);
@@ -54,7 +54,7 @@ export class EntityProxy {
      *
      * @returns {any}
      */
-    function getExpected (property: string): {new ()} {
+    function getExpected (property: string): { new() } {
       if (!expected[property]) {
         expected[property] = entityManager.resolveEntityReference(relations[property].targetEntity);
       }
@@ -110,11 +110,11 @@ export class EntityProxy {
      */
     function proxyCollection (property: string, forceNew: boolean = false): void {
       // Define what this collection consists out of.
-      let ExpectedEntity = getExpected(property);
-      let collection     = (forceNew || !entity[property]) ? new Collection : entity[property];
+      const ExpectedEntity = getExpected(property);
+      const collection = (forceNew || !entity[property]) ? new Collection : entity[property];
 
       // Create a new proxy, and ensure there's an existing collection.
-      entity[property] = new Proxy<Object>(collection, <Object> {
+      entity[property] = new Proxy<Object>(collection, <Object>{
         set: (collection: Collection<Object>, key: string | number, relationEntity: any) => {
 
           // Check if this is a set _skipDirty, if so return.
@@ -129,9 +129,9 @@ export class EntityProxy {
             return true;
           }
 
-          let entityIndex   = collection.indexOf(relationEntity);
-          let previousValue = collection[key];
-          collection[key]   = relationEntity;
+          const entityIndex = collection.indexOf(relationEntity);
+          const previousValue = collection[key];
+          collection[key] = relationEntity;
 
           // Unique removed. Mark as removed.
           if (typeof previousValue !== 'undefined' && collection.indexOf(previousValue) === -1) {
@@ -170,7 +170,7 @@ export class EntityProxy {
             return true;
           }
 
-          let previousValue = collection[key];
+          const previousValue = collection[key];
 
           collection.splice(parseInt(key, 10), 1);
 
@@ -185,7 +185,7 @@ export class EntityProxy {
       });
     }
 
-    let proxyMethods = {
+    const proxyMethods = {
       isEntityProxy: true,
 
       activateProxying: () => {
@@ -210,7 +210,7 @@ export class EntityProxy {
     };
 
     // Return the actual proxy for the entity.
-    entityProxy = new Proxy<T & ProxyInterface>(entity, <Object> {
+    entityProxy = new Proxy<T & ProxyInterface>(entity, <Object>{
       set: (target: Object, property: string, value: any) => {
         if (typeof value === 'undefined') {
           value = null;
@@ -254,7 +254,7 @@ export class EntityProxy {
         }
 
         // Ensure provided value is of the type we expect for the relationship.
-        let ExpectedEntity = getExpected(property);
+        const ExpectedEntity = getExpected(property);
 
         if (!(value instanceof ExpectedEntity)) {
           throw new TypeError(
@@ -289,7 +289,7 @@ export class EntityProxy {
       },
 
       deleteProperty: (target: Object, property: string) => {
-        let relation = relations[property];
+        const relation = relations[property];
 
         if (relation && (relation.type === Mapping.RELATION_MANY_TO_MANY || relation.type === Mapping.RELATION_ONE_TO_MANY)) {
           throw new Error(

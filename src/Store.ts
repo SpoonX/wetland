@@ -46,7 +46,7 @@ export class Store {
    */
   private connections: Object = {
     [Store.ROLE_MASTER]: [],
-    [Store.ROLE_SLAVE] : [],
+    [Store.ROLE_SLAVE]: [],
   };
 
   /**
@@ -54,7 +54,7 @@ export class Store {
    */
   private pointers: Object = {
     [Store.ROLE_MASTER]: 0,
-    [Store.ROLE_SLAVE] : 0,
+    [Store.ROLE_SLAVE]: 0,
   };
 
   /**
@@ -114,7 +114,7 @@ export class Store {
       );
     }
 
-    let connection = knex(config);
+    const connection = knex(config);
 
     if (role === Store.ROLE_MASTER || role === null) {
       this.connections[Store.ROLE_MASTER].push(connection);
@@ -159,36 +159,13 @@ export class Store {
       return this.connections[role][0];
     }
 
-    let connection = this.connections[role][this.pointers[role]++];
+    const connection = this.connections[role][this.pointers[role]++];
 
     if (this.pointers[role] >= this.connections[role].length) {
       this.pointers[role] = 0;
     }
 
     return connection;
-  }
-
-  /**
-   * Makes the config needed for knex.
-   * This method is needed because (for example) postgres accepts extra arguments such as a searchPath.
-   *
-   * @param {{}} config
-   * @param {{}} connection
-   *
-   * @returns {SingleConfig}
-   */
-  private makeConnectionConfig(config: Object, connection: Object): SingleConfig {
-    let connectionConfig = { connection };
-
-    Object.getOwnPropertyNames(config).forEach(key => {
-      if (key === 'connection' || key === 'connections') {
-        return;
-      }
-
-      connectionConfig[key] = config[key];
-    });
-
-    return connectionConfig;
   }
 
   /**
@@ -241,6 +218,29 @@ export class Store {
 
     return this;
   }
+
+  /**
+   * Makes the config needed for knex.
+   * This method is needed because (for example) postgres accepts extra arguments such as a searchPath.
+   *
+   * @param {{}} config
+   * @param {{}} connection
+   *
+   * @returns {SingleConfig}
+   */
+  private makeConnectionConfig(config: Object, connection: Object): SingleConfig {
+    const connectionConfig = { connection };
+
+    Object.getOwnPropertyNames(config).forEach(key => {
+      if (key === 'connection' || key === 'connections') {
+        return;
+      }
+
+      connectionConfig[key] = config[key];
+    });
+
+    return connectionConfig;
+  }
 }
 
 export interface Connection {
@@ -257,6 +257,7 @@ export interface PoolConfig {
   debug?: boolean;
   client: string;
   connections: Array<Connection>;
+
   [key: string]: any;
 }
 
@@ -267,5 +268,6 @@ export interface ReplicationConfig {
     master?: Array<Connection>,
     slave?: Array<Connection>,
   };
+
   [key: string]: any;
 }

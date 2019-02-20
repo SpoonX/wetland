@@ -67,17 +67,17 @@ export class Migrator {
    * @param {Wetland} wetland
    */
   public constructor(wetland: Wetland) {
-    this.config         = wetland.getConfig().applyDefaults('migrator', {
-      store        : null,
-      extension    : 'js',
-      tableName    : 'wetland_migrations',
+    this.config = wetland.getConfig().applyDefaults('migrator', {
+      store: null,
+      extension: 'js',
+      tableName: 'wetland_migrations',
       lockTableName: 'wetland_migrations_lock',
-      directory    : path.resolve(process.cwd(), './migrations'),
+      directory: path.resolve(process.cwd(), './migrations'),
     }).fetch('migrator');
-    this.wetland        = wetland;
-    this.manager        = wetland.getManager();
-    this.migrationFile  = new MigrationFile(this.config);
-    this.connection     = this.manager.getStore(this.config.store).getConnection(Store.ROLE_MASTER);
+    this.wetland = wetland;
+    this.manager = wetland.getManager();
+    this.migrationFile = new MigrationFile(this.config);
+    this.connection = this.manager.getStore(this.config.store).getConnection(Store.ROLE_MASTER);
     this.migrationTable = new MigrationTable(this.connection, this.config.tableName, this.config.lockTableName);
   }
 
@@ -95,7 +95,7 @@ export class Migrator {
    *
    * @returns {Promise<Array<string>>}
    */
-  public allMigrations(): Bluebird<Array<string>|null> {
+  public allMigrations(): Bluebird<Array<string> | null> {
     return this.migrationFile.getMigrations();
   }
 
@@ -107,7 +107,7 @@ export class Migrator {
    * @returns {Bluebird<any>}
    */
   public devMigrations(revert: boolean = false): Bluebird<any> {
-    let snapshot = this.wetland.getSnapshotManager();
+    const snapshot = this.wetland.getSnapshotManager();
 
     return snapshot
       .fetch()
@@ -127,7 +127,7 @@ export class Migrator {
    *
    * @returns {Promise<Array<Object>|null>}
    */
-  public appliedMigrations(): Promise<Array<Object>|null> {
+  public appliedMigrations(): Promise<Array<Object> | null> {
     return this.migrationTable.getAllRun();
   }
 
@@ -139,7 +139,7 @@ export class Migrator {
    *
    * @returns {Promise<any>}
    */
-  public create(name: string, code?: {up: string, down: string}): Bluebird<any> {
+  public create(name: string, code?: { up: string, down: string }): Bluebird<any> {
     return this.migrationFile.create(name, code);
   }
 
@@ -200,7 +200,7 @@ export class Migrator {
    *
    * @returns {Promise}
    */
-  public run(direction: string, action: string, migrations: string | Array<string>): Bluebird<string|any>|Promise<any> {
+  public run(direction: string, action: string, migrations: string | Array<string>): Bluebird<string | any> | Promise<any> {
     if (!migrations || (Array.isArray(migrations) && migrations.length === 0)) {
       return Promise.resolve(null);
     }
@@ -209,7 +209,7 @@ export class Migrator {
       migrations = [ migrations as string ];
     }
 
-    let run = new Run(direction, this.manager, migrations as Array<string>, this.config.directory);
+    const run = new Run(direction, this.manager, migrations as Array<string>, this.config.directory);
 
     if (action === Migrator.ACTION_RUN) {
       return this.migrationTable.getLock()

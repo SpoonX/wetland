@@ -16,7 +16,7 @@ export class SchemaManager {
    * @param {Wetland} wetland
    */
   constructor(wetland: Wetland) {
-    this.wetland       = wetland;
+    this.wetland = wetland;
     this.schemaBuilder = new SchemaBuilder(wetland.getManager());
   }
 
@@ -74,8 +74,8 @@ export class SchemaManager {
    * @returns {SchemaBuilder}
    */
   private prepare(previous: Object, revert: boolean = false) {
-    let snapshot     = this.wetland.getSnapshotManager();
-    let serializable = snapshot.getSerializable();
+    const snapshot = this.wetland.getSnapshotManager();
+    const serializable = snapshot.getSerializable();
     let instructions;
 
     if (revert) {

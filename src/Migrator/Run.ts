@@ -35,7 +35,7 @@ export class Run {
   /**
    * @type {{}}}
    */
-  private transactions: {[key: string]: Knex.Transaction | Bluebird<Knex.Transaction>} = {};
+  private transactions: { [key: string]: Knex.Transaction | Bluebird<Knex.Transaction> } = {};
 
   /**
    * Construct a runner.
@@ -46,8 +46,8 @@ export class Run {
    * @param {string}    directory
    */
   public constructor(direction: string, entityManager: Scope, migrations: Array<string>, directory: string) {
-    this.direction     = direction;
-    this.directory     = directory;
+    this.direction = direction;
+    this.directory = directory;
     this.entityManager = entityManager;
 
     this.loadMigrations(migrations);
@@ -89,7 +89,7 @@ export class Run {
    * @returns {Bluebird<Knex.Transaction>}
    */
   public getTransaction(storeName?: string): Bluebird<Knex.Transaction> {
-    let store = this.entityManager.getStore(storeName);
+    const store = this.entityManager.getStore(storeName);
 
     if (this.transactions[storeName]) {
       if (this.transactions[storeName] instanceof Bluebird) {
@@ -100,7 +100,7 @@ export class Run {
     }
 
     return this.transactions[storeName] = new Bluebird<Knex.Transaction>(resolve => {
-      let connection = store.getConnection(Store.ROLE_MASTER);
+      const connection = store.getConnection(Store.ROLE_MASTER);
 
       connection.transaction(transaction => {
         this.transactions[storeName] = transaction;
@@ -108,6 +108,15 @@ export class Run {
         resolve(this.transactions[storeName]);
       });
     });
+  }
+
+  /**
+   * Get the entity manager scope.
+   *
+   * @returns {Scope}
+   */
+  public getEntityManager(): Scope {
+    return this.entityManager;
   }
 
   /**
@@ -128,7 +137,7 @@ export class Run {
       }
 
       let migrationClass = require(path.join(this.directory, migration));
-      migrationClass     = typeof migrationClass === 'function' ? migrationClass : migrationClass.Migration;
+      migrationClass = typeof migrationClass === 'function' ? migrationClass : migrationClass.Migration;
 
       this.validateMigration(migrationClass);
 
@@ -155,14 +164,5 @@ export class Run {
     if (!Reflect.has(migration, Migrator.DIRECTION_UP) || typeof migration[Migrator.DIRECTION_UP] !== 'function') {
       throw new Error(`Migration is missing a '${Migrator.DIRECTION_UP}' method.`);
     }
-  }
-
-  /**
-   * Get the entity manager scope.
-   *
-   * @returns {Scope}
-   */
-  public getEntityManager(): Scope {
-    return this.entityManager;
   }
 }

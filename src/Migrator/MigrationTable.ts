@@ -1,5 +1,4 @@
 import * as Knex from 'knex';
-import * as Bluebird from 'bluebird';
 import { Migrator } from './Migrator';
 
 export class MigrationTable {
@@ -26,35 +25,9 @@ export class MigrationTable {
    * @param {string} lockTableName
    */
   public constructor(connection: Knex, tableName: string, lockTableName: string) {
-    this.connection    = connection;
-    this.tableName     = tableName;
+    this.connection = connection;
+    this.tableName = tableName;
     this.lockTableName = lockTableName;
-  }
-
-  /**
-   * Check if migrations is locked.
-   *
-   * @param {Knex.Transaction} transaction
-   *
-   * @returns {Promise<boolean>}
-   */
-  private isLocked(transaction: Knex.Transaction): Promise<boolean> {
-    return this.connection(this.lockTableName)
-      .transacting(transaction)
-      .forUpdate()
-      .select('*')
-      .then(data => !!data[0] && !!data[0].locked);
-  }
-
-  /**
-   * Lock migrations.
-   *
-   * @param {Knex.Transaction} transaction
-   *
-   * @returns {QueryBuilder}
-   */
-  private lockMigrations(transaction): Promise<any> {
-    return this.connection(this.lockTableName).transacting(transaction).update({ locked: 1 });
   }
 
   /**
@@ -82,36 +55,7 @@ export class MigrationTable {
    * @returns {QueryBuilder}
    */
   public freeLock(): Promise<any> {
-    return this.connection(this.lockTableName).update({ locked: 0 });
-  }
-
-  /**
-   * Ensure the migration tables exist.
-   *
-   * @returns {Promise<any>}
-   */
-  private ensureMigrationTables(): Promise<any> {
-    let schemaBuilder = this.connection.schema;
-
-    return schemaBuilder.hasTable(this.tableName)
-      .then(exists => {
-        if (exists) {
-          return Bluebird.resolve();
-        }
-
-        schemaBuilder.createTableIfNotExists(this.tableName, t => {
-          t.increments();
-          t.string('name');
-          t.integer('run');
-          t.timestamp('migration_time').defaultTo(this.connection.fn.now());
-          t.index([ 'run' ]);
-          t.index([ 'migration_time' ]);
-        });
-
-        schemaBuilder.createTableIfNotExists(this.lockTableName, t => t.boolean('locked'));
-
-        return schemaBuilder;
-      });
+    return Promise.resolve(this.connection(this.lockTableName).update({ locked: 0 }));
   }
 
   /**
@@ -119,12 +63,14 @@ export class MigrationTable {
    *
    * @returns {Promise<number|null>}
    */
-  public getLastRunId(): Promise<number|null> {
-    return this.connection(this.tableName)
+  public getLastRunId(): Promise<number | null> {
+    const lastRunId = this.connection(this.tableName)
       .select('run')
       .limit(1)
       .orderBy('run', 'desc')
       .then(result => result[0] ? result[0].run : null);
+
+    return Promise.resolve(lastRunId);
   }
 
   /**
@@ -132,7 +78,7 @@ export class MigrationTable {
    *
    * @returns {Promise<string|null>}
    */
-  public getLastMigrationName(): Promise<string|null> {
+  public getLastMigrationName(): Promise<string | null> {
     return this.ensureMigrationTables().then(() => {
       return this.connection(this.tableName)
         .select('name')
@@ -147,16 +93,16 @@ export class MigrationTable {
    *
    * @returns {Promise<Array<string>|null>}
    */
-  public getLastRun(): Promise<Array<string>|null> {
+  public getLastRun(): Promise<Array<string> | null> {
     return this.getLastRunId().then(lastRun => {
       if (lastRun === null) {
         return null;
       }
 
-      let connection = this.connection(this.tableName)
+      const connection = this.connection(this.tableName)
         .select('name')
         .where('run', lastRun)
-        .orderBy('id', 'desc') as Promise<Array<{name: string}>>;
+        .orderBy('id', 'desc');
 
       return connection.then(results => results.map(result => result.name));
     });
@@ -167,10 +113,10 @@ export class MigrationTable {
    *
    * @returns {Promise<Array<string>|null>}
    */
-  public getAllRun(): Promise<Array<Object>|null> {
+  public getAllRun(): Promise<Array<Object> | null> {
     return this.ensureMigrationTables().then(() => {
       return this.connection(this.tableName)
-        .orderBy('id', 'desc') as Promise<Array<Object>>;
+        .orderBy('id', 'desc');
     });
   }
 
@@ -184,7 +130,7 @@ export class MigrationTable {
    */
   public saveRun(direction: string, migrations: Array<string>): Promise<any> {
     if (direction === Migrator.DIRECTION_DOWN) {
-      return this.connection(this.tableName).whereIn('name', migrations).del();
+      return Promise.resolve(this.connection(this.tableName).whereIn('name', migrations).del());
     }
 
     return this.getLastRunId().then(lastRun => {
@@ -192,5 +138,66 @@ export class MigrationTable {
         return { name, run: (lastRun + 1) };
       }));
     });
+  }
+
+  /**
+   * Check if migrations is locked.
+   *
+   * @param {Knex.Transaction} transaction
+   *
+   * @returns {Promise<boolean>}
+   */
+  private isLocked(transaction: Knex.Transaction): Promise<boolean> {
+    const isLocked = this.connection(this.lockTableName)
+      .transacting(transaction)
+      .forUpdate()
+      .select('*')
+      .then(data => !!data[0] && !!data[0].locked);
+
+    return Promise.resolve(isLocked);
+  }
+
+  /**
+   * Lock migrations.
+   *
+   * @param {Knex.Transaction} transaction
+   *
+   * @returns {QueryBuilder}
+   */
+  private lockMigrations(transaction): Promise<any> {
+    return Promise.resolve(this.connection(this.lockTableName).transacting(transaction).update({ locked: 1 }));
+  }
+
+  /**
+   * Ensure the migration tables exist.
+   *
+   * @returns {Promise<any>}
+   */
+  private async ensureMigrationTables(): Promise<any> {
+    const connection = this.connection;
+    const migrationTableExists = await connection.schema.hasTable(this.tableName);
+
+    if (migrationTableExists) {
+      return;
+    }
+
+    await connection.schema.createTable(this.tableName, t => {
+      t.increments();
+      t.string('name');
+      t.integer('run');
+      t.timestamp('migration_time').defaultTo(connection.fn.now());
+      t.index([ 'run' ]);
+      t.index([ 'migration_time' ]);
+    });
+
+    const lockTableExists = await connection.schema.hasTable(this.lockTableName);
+
+    if (lockTableExists) {
+      return;
+    }
+
+    await connection.schema.createTable(this.lockTableName, t => t.boolean('locked'));
+
+    return connection.schema;
   }
 }

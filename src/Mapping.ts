@@ -54,30 +54,7 @@ export class Mapping<T> {
   /**
    * @type {Array}
    */
-  private stagedMappings: Array<{method: string, parameters: any}> = [];
-
-  /**
-   * Get the mapping for a specific entity.
-   *
-   * @param {EntityCtor} target
-   *
-   * @return {Mapping}
-   */
-  public static forEntity<T>(target: EntityCtor<T> | T | ProxyInterface): Mapping<T> {
-    if (!target) {
-      throw new Error('Trying to get mapping for non-target.');
-    }
-
-    target       = target['isEntityProxy'] ? (target as ProxyInterface).getTarget() : target;
-    let entity   = MetaData.getConstructor(target) as EntityCtor<T>;
-    let metadata = MetaData.forTarget(entity);
-
-    if (!metadata.fetch('mapping')) {
-      metadata.put('mapping', new Mapping(entity));
-    }
-
-    return metadata.fetch('mapping') as Mapping<T>;
-  }
+  private stagedMappings: Array<{ method: string, parameters: any }> = [];
 
   /**
    * Create a new mapping.
@@ -93,6 +70,55 @@ export class Mapping<T> {
 
     // Set up default entity mapping information.
     this.entity();
+  }
+
+  /**
+   * Get the mapping for a specific entity.
+   *
+   * @param {EntityCtor} target
+   *
+   * @return {Mapping}
+   */
+  public static forEntity<T>(target: EntityCtor<T> | T | ProxyInterface): Mapping<T> {
+    if (!target) {
+      throw new Error('Trying to get mapping for non-target.');
+    }
+
+    target = target['isEntityProxy'] ? (target as ProxyInterface).getTarget() : target;
+    const entity = MetaData.getConstructor(target) as EntityCtor<T>;
+    const metadata = MetaData.forTarget(entity);
+
+    if (!metadata.fetch('mapping')) {
+      metadata.put('mapping', new Mapping(entity));
+    }
+
+    return metadata.fetch('mapping') as Mapping<T>;
+  }
+
+  /**
+   * Raw command for current timestamp.
+   *
+   * @returns {{}}
+   */
+  public static now(): { __raw: string } {
+    return { __raw: 'CURRENT_TIMESTAMP' };
+  }
+
+  /**
+   * Restore a serialized mapping.
+   *
+   * NOTE: Unless provided, there won't be an entity reference.
+   *
+   * @param {{}} mappingData
+   *
+   * @returns {Mapping}
+   */
+  public static restore(mappingData: Object): Mapping<ProxyInterface> {
+    const mapping = new Mapping();
+
+    mapping.getMappingData().merge(mappingData);
+
+    return mapping;
   }
 
   /**
@@ -120,54 +146,12 @@ export class Mapping<T> {
   }
 
   /**
-   * Apply staged mappings.
-   *
-   * @returns {Mapping}
-   */
-  private applyStagedMappings(): this {
-    this.stagedMappings.forEach(stagedMapping => {
-      this[stagedMapping.method](...stagedMapping.parameters);
-    });
-
-    this.stagedMappings = [];
-
-    return this;
-  }
-
-  /**
-   * Stage given method, or get the entity manager based on the presence of the entity manager.
-   *
-   * @param {string} method     The method to call.
-   * @param {*}      parameters The arguments to call the method with.
-   *
-   * @returns {EntityManager}
-   */
-  private stageOrGetManager(method: string, parameters: any): EntityManager {
-    if (!this.entityManager) {
-      this.stagedMappings.push({ method, parameters });
-
-      return;
-    }
-
-    return this.entityManager;
-  }
-
-  /**
    * Raw command for current timestamp.
    *
    * @returns {{}}
    */
-  public now(): {__raw: string} {
+  public now(): { __raw: string } {
     return Mapping.now();
-  }
-
-  /**
-   * Raw command for current timestamp.
-   *
-   * @returns {{}}
-   */
-  public static now(): {__raw: string} {
-    return { __raw: 'CURRENT_TIMESTAMP' };
   }
 
   /**
@@ -182,15 +166,15 @@ export class Mapping<T> {
    * @return {Mapping}
    */
   public field(property: string, options: FieldOptions): this {
-    let entityManager = this.stageOrGetManager('field', arguments);
+    const entityManager = this.stageOrGetManager('field', arguments);
 
     if (!entityManager) {
       return this;
     }
 
-    let toUnderscore = entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
-    let propertyName = toUnderscore ? this.nameToUnderscore(property) : property;
-    let field        = this.mapping.fetchOrPut(`fields.${property}`, {});
+    const toUnderscore = entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
+    const propertyName = toUnderscore ? this.nameToUnderscore(property) : property;
+    const field = this.mapping.fetchOrPut(`fields.${property}`, {});
 
     if (field.name) {
       this.mapping.remove(`columns.${this.getColumnName(property)}`);
@@ -203,19 +187,6 @@ export class Mapping<T> {
     this.mapColumn(this.getColumnName(property), property);
 
     return this;
-  }
-
-  /**
-   * Replace name case to underscore.
-   *
-   * @param {string} property
-   *
-   * @returns {string}
-   */
-  private nameToUnderscore(property: string): string {
-    let name = property[0].toLowerCase() + property.slice(1);
-
-    return name.replace(/[A-Z]/g, '_$&').replace('__', '_').toLowerCase();
   }
 
   /**
@@ -247,7 +218,7 @@ export class Mapping<T> {
    * @returns {FieldOptions}
    */
   public getField(property: string, tolerant: boolean = false): FieldOptions {
-    let field = this.mapping.fetch(`fields.${property}`);
+    const field = this.mapping.fetch(`fields.${property}`);
 
     if (!field) {
       if (tolerant) {
@@ -279,26 +250,12 @@ export class Mapping<T> {
   }
 
   /**
-   * Map a column to a property.
-   *
-   * @param {string} column
-   * @param {string} property
-   *
-   * @returns {Mapping}
-   */
-  private mapColumn(column, property): this {
-    this.mapping.put(`columns.${column}`, property);
-
-    return this;
-  }
-
-  /**
    * Get the field names (property names) from the mapping.
    *
    * @param {boolean} includeRelations
    */
   public getFieldNames(includeRelations: boolean = false): Array<string> {
-    let fields = this.getFields();
+    const fields = this.getFields();
 
     return Reflect.ownKeys(fields).reduce((fieldNames, fieldName: string) => {
       if (!fields[fieldName].relationship || includeRelations) {
@@ -320,20 +277,20 @@ export class Mapping<T> {
    * @return {Mapping}
    */
   public entity(options: Object = {}): this {
-    let entityManager = this.stageOrGetManager('entity', arguments);
+    const entityManager = this.stageOrGetManager('entity', arguments);
 
     if (!entityManager) {
       return;
     }
 
-    let toUnderscore = entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
-    let tableName    = toUnderscore ? this.nameToUnderscore(this.target.name) : this.target.name.toLowerCase();
+    const toUnderscore = entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
+    const tableName = toUnderscore ? this.nameToUnderscore(this.target.name) : this.target.name.toLowerCase();
 
-    let defaultMapping = {
+    const defaultMapping = {
       repository: EntityRepository,
-      name      : this.target.name,
-      tableName : tableName,
-      store     : null,
+      name: this.target.name,
+      tableName: tableName,
+      store: null,
     };
 
     Homefront.merge(this.mapping.fetchOrPut(`entity`, defaultMapping), options);
@@ -376,42 +333,9 @@ export class Mapping<T> {
    * @return {Mapping}
    */
   public index(indexName: string | Array<string>, fields?: string | Array<string>): this {
-    let unprocessed = this.mapping.fetchOrPut(`unprocessed_indexes`, []);
+    const unprocessed = this.mapping.fetchOrPut(`unprocessed_indexes`, []);
 
     unprocessed.push({ indexName, fields });
-
-    return this;
-  }
-
-  /**
-   * Process unprocessed indexes.
-   *
-   * @returns {Mapping}
-   */
-  private processIndexes(): this {
-    let unprocessed = this.mapping.fetch(`unprocessed_indexes`);
-
-    if (!unprocessed) {
-      return;
-    }
-
-    unprocessed.forEach(index => {
-      let indexName = index.indexName;
-      let fields    = index.fields;
-
-      if (!fields) {
-        fields    = this.getColumnNames(Array.isArray(indexName) ? indexName : [ indexName ]);
-        indexName = `idx_${this.getTableName()}_${fields.join('_').toLowerCase()}`;
-      } else {
-        fields = this.getColumnNames(fields);
-      }
-
-      let indexes = this.mapping.fetchOrPut(`index.${indexName}`, new ArrayCollection);
-
-      indexes.add(...fields);
-    });
-
-    this.mapping.remove(`unprocessed_indexes`);
 
     return this;
   }
@@ -421,7 +345,7 @@ export class Mapping<T> {
    *
    * @returns {{}}
    */
-  public getIndexes(): {[key: string]: Array<string>} {
+  public getIndexes(): { [key: string]: Array<string> } {
     this.processIndexes();
 
     return this.mapping.fetch('index', {});
@@ -447,42 +371,9 @@ export class Mapping<T> {
    * @return {Mapping}
    */
   public uniqueConstraint(constraintName: string | Array<string>, fields?: string | Array<string>) {
-    let unprocessed = this.mapping.fetchOrPut(`unprocessed_uniques`, []);
+    const unprocessed = this.mapping.fetchOrPut(`unprocessed_uniques`, []);
 
     unprocessed.push({ constraintName, fields });
-
-    return this;
-  }
-
-  /**
-   * Process unprocessed constraints.
-   *
-   * @returns {Mapping}
-   */
-  private processUniqueConstraints(): this {
-    let unprocessed = this.mapping.fetch(`unprocessed_uniques`);
-
-    if (!unprocessed) {
-      return;
-    }
-
-    unprocessed.forEach(constraint => {
-      let constraintName = constraint.constraintName;
-      let fields         = constraint.fields;
-
-      if (!fields) {
-        fields         = this.getColumnNames(Array.isArray(constraintName) ? constraintName : [ constraintName ]);
-        constraintName = `${this.getTableName()}_${fields.join('_').toLowerCase()}_unique`;
-      } else {
-        fields = this.getColumnNames(fields);
-      }
-
-      let constraints = this.mapping.fetchOrPut(`unique.${constraintName}`, new ArrayCollection);
-
-      constraints.add(...fields);
-    });
-
-    this.mapping.remove(`unprocessed_uniques`);
 
     return this;
   }
@@ -492,7 +383,7 @@ export class Mapping<T> {
    *
    * @returns {{}}
    */
-  public getUniqueConstraints(): {[key: string]: Array<string>} {
+  public getUniqueConstraints(): { [key: string]: Array<string> } {
     this.processUniqueConstraints();
 
     return this.mapping.fetch('unique', {});
@@ -557,7 +448,7 @@ export class Mapping<T> {
    * @returns {string|null}
    */
   public getPrimaryKeyField(): string {
-    let primaryKey = this.getPrimaryKey();
+    const primaryKey = this.getPrimaryKey();
 
     if (!primaryKey) {
       return null;
@@ -592,7 +483,7 @@ export class Mapping<T> {
    *
    * @returns {FieldOptions[]}
    */
-  public getFields(): {[key: string]: FieldOptions} {
+  public getFields(): { [key: string]: FieldOptions } {
     return this.mapping.fetch('fields', null);
   }
 
@@ -685,27 +576,6 @@ export class Mapping<T> {
   }
 
   /**
-   * Sets the default cascades if no cascade options exist
-   *
-   * @param {string} property
-   *
-   * @returns {Mapping}
-   */
-  private setDefaultCascades(property: string): this {
-    if (!this.entityManager) {
-      return;
-    }
-
-    const field = this.getField(property, true);
-
-    if (field && typeof field.cascades === 'undefined') {
-      this.cascade(property, this.entityManager.getConfig().fetch('mapping.defaults.cascades', []));
-    }
-
-    return this;
-  }
-
-  /**
    * Does property exist as relation.
    *
    * @param {string} property
@@ -732,7 +602,7 @@ export class Mapping<T> {
    *
    * @returns {{}}
    */
-  public getRelations(): {[key: string]: Relationship} {
+  public getRelations(): { [key: string]: Relationship } {
     return this.mapping.fetch('relations');
   }
 
@@ -755,10 +625,10 @@ export class Mapping<T> {
    */
   public oneToOne(property: string, options: Relationship): this {
     this.addRelation(property, {
-      type        : Mapping.RELATION_ONE_TO_ONE,
+      type: Mapping.RELATION_ONE_TO_ONE,
       targetEntity: options.targetEntity,
-      inversedBy  : options.inversedBy,
-      mappedBy    : options.mappedBy,
+      inversedBy: options.inversedBy,
+      mappedBy: options.mappedBy,
     });
 
     if (!options.mappedBy) {
@@ -779,8 +649,8 @@ export class Mapping<T> {
   public oneToMany(property: string, options: Relationship): this {
     return this.addRelation(property, {
       targetEntity: options.targetEntity,
-      type        : Mapping.RELATION_ONE_TO_MANY,
-      mappedBy    : options.mappedBy,
+      type: Mapping.RELATION_ONE_TO_MANY,
+      mappedBy: options.mappedBy,
     });
   }
 
@@ -795,8 +665,8 @@ export class Mapping<T> {
   public manyToOne(property: string, options: Relationship): this {
     this.addRelation(property, {
       targetEntity: options.targetEntity,
-      type        : Mapping.RELATION_MANY_TO_ONE,
-      inversedBy  : options.inversedBy,
+      type: Mapping.RELATION_MANY_TO_ONE,
+      inversedBy: options.inversedBy,
     });
 
     this.ensureJoinColumn(property);
@@ -815,9 +685,9 @@ export class Mapping<T> {
   public manyToMany(property: string, options: Relationship): this {
     return this.addRelation(property, {
       targetEntity: options.targetEntity,
-      type        : Mapping.RELATION_MANY_TO_MANY,
-      inversedBy  : options.inversedBy,
-      mappedBy    : options.mappedBy,
+      type: Mapping.RELATION_MANY_TO_MANY,
+      inversedBy: options.inversedBy,
+      mappedBy: options.mappedBy,
     });
   }
 
@@ -856,12 +726,12 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public ensureJoinColumn(property: string, options?: JoinColumn): this {
-    let field        = this.mapping.fetchOrPut(`fields.${property}`, { joinColumn: {} });
+    const field = this.mapping.fetchOrPut(`fields.${property}`, { joinColumn: {} });
     field.joinColumn = Homefront.merge({
-      name                : `${property}_id`,
+      name: `${property}_id`,
       referencedColumnName: 'id',
-      unique              : false,
-      nullable            : true,
+      unique: false,
+      nullable: true,
     }, options || field.joinColumn);
 
     return this;
@@ -879,29 +749,29 @@ export class Mapping<T> {
       throw new Error('EntityManager is required on the mapping. Make sure you registered the entity.');
     }
 
-    let field = this.mapping.fetchOrPut(`fields.${property}`, { joinTable: { name: '' } }) as FieldOptions;
+    const field = this.mapping.fetchOrPut(`fields.${property}`, { joinTable: { name: '' } }) as FieldOptions;
 
     if (field.joinTable && field.joinTable.complete) {
       return field.joinTable;
     }
 
-    let relationMapping = Mapping.forEntity(this.entityManager.resolveEntityReference(field.relationship.targetEntity));
-    let ownTableName    = this.getTableName();
-    let withTableName   = relationMapping.getTableName();
-    let ownPrimary      = this.getPrimaryKeyField();
-    let withPrimary     = relationMapping.getPrimaryKeyField();
-    field.joinTable     = Homefront.merge({
-      complete          : true,
-      name              : `${ownTableName}_${withTableName}`,
-      joinColumns       : [ {
+    const relationMapping = Mapping.forEntity(this.entityManager.resolveEntityReference(field.relationship.targetEntity));
+    const ownTableName = this.getTableName();
+    const withTableName = relationMapping.getTableName();
+    const ownPrimary = this.getPrimaryKeyField();
+    const withPrimary = relationMapping.getPrimaryKeyField();
+    field.joinTable = Homefront.merge({
+      complete: true,
+      name: `${ownTableName}_${withTableName}`,
+      joinColumns: [ {
         referencedColumnName: ownPrimary,
-        name                : `${ownTableName}_id`,
-        type                : 'integer',
+        name: `${ownTableName}_id`,
+        type: 'integer',
       } ],
       inverseJoinColumns: [ {
         referencedColumnName: withPrimary,
-        name                : `${withTableName}_id`,
-        type                : 'integer',
+        name: `${withTableName}_id`,
+        type: 'integer',
       } ],
     }, field.joinTable) as JoinTable;
 
@@ -928,8 +798,8 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public extendField(property: string, additional: Object): this {
-    let field     = this.mapping.fetchOrPut(`fields.${property}`, {});
-    let needsName = !field.name;
+    const field = this.mapping.fetchOrPut(`fields.${property}`, {});
+    const needsName = !field.name;
 
     if (needsName) {
       field.name = property;
@@ -961,11 +831,11 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public completeMapping(): this {
-    let relations = this.getRelations();
-    let manager   = this.entityManager;
+    const relations = this.getRelations();
+    const manager = this.entityManager;
 
-    for (let property in relations) {
-      let relation = relations[property];
+    for (const property in relations) {
+      const relation = relations[property];
 
       this.setDefaultCascades(property);
 
@@ -980,7 +850,7 @@ export class Mapping<T> {
 
       // Make sure refs are strings
       if (typeof relation.targetEntity !== 'string') {
-        let reference         = manager.resolveEntityReference(relation.targetEntity);
+        const reference = manager.resolveEntityReference(relation.targetEntity);
         relation.targetEntity = Mapping.forEntity(reference).getEntityName();
       }
     }
@@ -1001,20 +871,150 @@ export class Mapping<T> {
   }
 
   /**
-   * Restore a serialized mapping.
-   *
-   * NOTE: Unless provided, there won't be an entity reference.
-   *
-   * @param {{}} mappingData
+   * Apply staged mappings.
    *
    * @returns {Mapping}
    */
-  public static restore(mappingData: Object): Mapping<ProxyInterface> {
-    let mapping = new Mapping();
+  private applyStagedMappings(): this {
+    this.stagedMappings.forEach(stagedMapping => {
+      this[stagedMapping.method](...stagedMapping.parameters);
+    });
 
-    mapping.getMappingData().merge(mappingData);
+    this.stagedMappings = [];
 
-    return mapping;
+    return this;
+  }
+
+  /**
+   * Stage given method, or get the entity manager based on the presence of the entity manager.
+   *
+   * @param {string} method     The method to call.
+   * @param {*}      parameters The arguments to call the method with.
+   *
+   * @returns {EntityManager}
+   */
+  private stageOrGetManager(method: string, parameters: any): EntityManager {
+    if (!this.entityManager) {
+      this.stagedMappings.push({ method, parameters });
+
+      return;
+    }
+
+    return this.entityManager;
+  }
+
+  /**
+   * Replace name case to underscore.
+   *
+   * @param {string} property
+   *
+   * @returns {string}
+   */
+  private nameToUnderscore(property: string): string {
+    const name = property[0].toLowerCase() + property.slice(1);
+
+    return name.replace(/[A-Z]/g, '_$&').replace('__', '_').toLowerCase();
+  }
+
+  /**
+   * Map a column to a property.
+   *
+   * @param {string} column
+   * @param {string} property
+   *
+   * @returns {Mapping}
+   */
+  private mapColumn(column, property): this {
+    this.mapping.put(`columns.${column}`, property);
+
+    return this;
+  }
+
+  /**
+   * Process unprocessed indexes.
+   *
+   * @returns {Mapping}
+   */
+  private processIndexes(): this {
+    const unprocessed = this.mapping.fetch(`unprocessed_indexes`);
+
+    if (!unprocessed) {
+      return;
+    }
+
+    unprocessed.forEach(index => {
+      let indexName = index.indexName;
+      let fields = index.fields;
+
+      if (!fields) {
+        fields = this.getColumnNames(Array.isArray(indexName) ? indexName : [ indexName ]);
+        indexName = `idx_${this.getTableName()}_${fields.join('_').toLowerCase()}`;
+      } else {
+        fields = this.getColumnNames(fields);
+      }
+
+      const indexes = this.mapping.fetchOrPut(`index.${indexName}`, new ArrayCollection);
+
+      indexes.add(...fields);
+    });
+
+    this.mapping.remove(`unprocessed_indexes`);
+
+    return this;
+  }
+
+  /**
+   * Process unprocessed constraints.
+   *
+   * @returns {Mapping}
+   */
+  private processUniqueConstraints(): this {
+    const unprocessed = this.mapping.fetch(`unprocessed_uniques`);
+
+    if (!unprocessed) {
+      return;
+    }
+
+    unprocessed.forEach(constraint => {
+      let constraintName = constraint.constraintName;
+      let fields = constraint.fields;
+
+      if (!fields) {
+        fields = this.getColumnNames(Array.isArray(constraintName) ? constraintName : [ constraintName ]);
+        constraintName = `${this.getTableName()}_${fields.join('_').toLowerCase()}_unique`;
+      } else {
+        fields = this.getColumnNames(fields);
+      }
+
+      const constraints = this.mapping.fetchOrPut(`unique.${constraintName}`, new ArrayCollection);
+
+      constraints.add(...fields);
+    });
+
+    this.mapping.remove(`unprocessed_uniques`);
+
+    return this;
+  }
+
+  /**
+   * Sets the default cascades if no cascade options exist
+   *
+   * @param {string} property
+   *
+   * @returns {Mapping}
+   */
+  private setDefaultCascades(property: string): this {
+    if (!this.entityManager) {
+      return;
+    }
+
+    const field = this.getField(property, true);
+
+    if (field && typeof field.cascades === 'undefined') {
+      this.cascade(property, this.entityManager.getConfig().fetch('mapping.defaults.cascades', []));
+    }
+
+    return this;
   }
 }
 
@@ -1040,7 +1040,7 @@ export class Field {
    */
   constructor(property: string, mapping: Mapping<EntityInterface>) {
     this.property = property;
-    this.mapping  = mapping;
+    this.mapping = mapping;
   }
 
   /**
@@ -1251,6 +1251,7 @@ export interface FieldOptions {
   relationship?: Relationship;
   joinColumn?: JoinColumn;
   joinTable?: JoinTable;
+
   [key: string]: any;
 }
 
@@ -1274,7 +1275,7 @@ export interface JoinColumn {
 }
 
 export interface Relationship {
-  targetEntity: string|EntityCtor<EntityInterface>;
+  targetEntity: string | EntityCtor<EntityInterface>;
   type?: string;
   inversedBy?: string;
   mappedBy?: string;
