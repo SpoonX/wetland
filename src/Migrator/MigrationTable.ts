@@ -186,8 +186,8 @@ export class MigrationTable {
       t.string('name');
       t.integer('run');
       t.timestamp('migration_time').defaultTo(connection.fn.now());
-      t.index(['run']);
-      t.index(['migration_time']);
+      t.index([ 'run' ]);
+      t.index([ 'migration_time' ]);
     });
 
     const lockTableExists = await connection.schema.hasTable(this.lockTableName);

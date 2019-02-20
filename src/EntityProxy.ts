@@ -43,7 +43,7 @@ export class EntityProxy {
     /**
      * @returns {boolean}
      */
-    function isProxyActive() {
+    function isProxyActive () {
       return proxyActive && metaData.fetch('entityState.state') !== UnitOfWork.STATE_UNKNOWN;
     }
 
@@ -54,7 +54,7 @@ export class EntityProxy {
      *
      * @returns {any}
      */
-    function getExpected(property: string): { new() } {
+    function getExpected (property: string): { new() } {
       if (!expected[property]) {
         expected[property] = entityManager.resolveEntityReference(relations[property].targetEntity);
       }
@@ -71,8 +71,8 @@ export class EntityProxy {
      *
      * @returns {boolean}
      */
-    function areDifferent(property: string, current: Date, next: Date): Boolean {
-      const isDate = ['date', 'dateTime', 'datetime', 'time'].indexOf(mapping.getType(property)) > -1;
+    function areDifferent (property: string, current: Date, next: Date): Boolean {
+      const isDate = [ 'date', 'dateTime', 'datetime', 'time' ].indexOf(mapping.getType(property)) > -1;
 
       if (!isDate) {
         return current !== next;
@@ -90,7 +90,7 @@ export class EntityProxy {
      *
      * @returns {boolean}
      */
-    function setDirty(target: Object, property: string, value: any): boolean {
+    function setDirty (target: Object, property: string, value: any): boolean {
       if (typeof value === 'object' && value !== null && '_skipDirty' in value) {
         target[property] = value._skipDirty;
 
@@ -108,7 +108,7 @@ export class EntityProxy {
      *
      * @returns {void}
      */
-    function proxyCollection(property: string, forceNew: boolean = false): void {
+    function proxyCollection (property: string, forceNew: boolean = false): void {
       // Define what this collection consists out of.
       const ExpectedEntity = getExpected(property);
       const collection = (forceNew || !entity[property]) ? new Collection : entity[property];

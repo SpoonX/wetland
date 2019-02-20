@@ -307,7 +307,7 @@ export class Mapping<T> {
    */
   public getColumnNames(properties: Array<string>): Array<string> {
     if (!Array.isArray(properties)) {
-      properties = [(properties as string)];
+      properties = [ (properties as string) ];
     }
 
     return properties.map(column => this.getColumnName(column));
@@ -763,16 +763,16 @@ export class Mapping<T> {
     field.joinTable = Homefront.merge({
       complete: true,
       name: `${ownTableName}_${withTableName}`,
-      joinColumns: [{
+      joinColumns: [ {
         referencedColumnName: ownPrimary,
         name: `${ownTableName}_id`,
         type: 'integer',
-      }],
-      inverseJoinColumns: [{
+      } ],
+      inverseJoinColumns: [ {
         referencedColumnName: withPrimary,
         name: `${withTableName}_id`,
         type: 'integer',
-      }],
+      } ],
     }, field.joinTable) as JoinTable;
 
     return field.joinTable;
@@ -947,7 +947,7 @@ export class Mapping<T> {
       let fields = index.fields;
 
       if (!fields) {
-        fields = this.getColumnNames(Array.isArray(indexName) ? indexName : [indexName]);
+        fields = this.getColumnNames(Array.isArray(indexName) ? indexName : [ indexName ]);
         indexName = `idx_${this.getTableName()}_${fields.join('_').toLowerCase()}`;
       } else {
         fields = this.getColumnNames(fields);
@@ -980,7 +980,7 @@ export class Mapping<T> {
       let fields = constraint.fields;
 
       if (!fields) {
-        fields = this.getColumnNames(Array.isArray(constraintName) ? constraintName : [constraintName]);
+        fields = this.getColumnNames(Array.isArray(constraintName) ? constraintName : [ constraintName ]);
         constraintName = `${this.getTableName()}_${fields.join('_').toLowerCase()}_unique`;
       } else {
         fields = this.getColumnNames(fields);

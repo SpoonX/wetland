@@ -16,7 +16,7 @@ import { EntityRepository } from '../EntityRepository';
  *
  * @return {Mapping}
  */
-export function entity(options?: { repository?: typeof EntityRepository, name?: string, [key: string]: any }) {
+export function entity (options?: { repository?: typeof EntityRepository, name?: string, [key: string]: any }) {
   return (target: Object) => {
     Mapping.forEntity(target).entity(options);
   };
@@ -27,7 +27,7 @@ export function entity(options?: { repository?: typeof EntityRepository, name?: 
  *
  * @return {Mapping}
  */
-export function autoFields() {
+export function autoFields () {
   return (target: Object) => {
     Mapping.forEntity(target).autoFields();
   };
@@ -52,7 +52,7 @@ export function autoFields() {
  *
  * @return {Mapping}
  */
-export function index(indexName: string | Array<string>, fields?: string | Array<string>) {
+export function index (indexName: string | Array<string>, fields?: string | Array<string>) {
   return (target: Object) => {
     Mapping.forEntity(target).index(indexName, fields);
   };
@@ -77,7 +77,7 @@ export function index(indexName: string | Array<string>, fields?: string | Array
  *
  * @return {Function}
  */
-export function uniqueConstraint(constraintName: string | Array<string>, fields?: string | Array<string>) {
+export function uniqueConstraint (constraintName: string | Array<string>, fields?: string | Array<string>) {
   return (target: Object) => {
     Mapping.forEntity(target).uniqueConstraint(constraintName, fields);
   };
@@ -98,7 +98,7 @@ export function uniqueConstraint(constraintName: string | Array<string>, fields?
  *
  * @return {Mapping}
  */
-export function field(options: FieldOptions) {
+export function field (options: FieldOptions) {
   return (target: Object, property: string) => {
     Mapping.forEntity(target).field(property, options);
   };
@@ -109,7 +109,7 @@ export function field(options: FieldOptions) {
  *
  * @return {Field}
  */
-export function primary() {
+export function primary () {
   return (target: Object, property: string) => {
     Mapping.forEntity(target).primary(property);
   };
@@ -120,7 +120,7 @@ export function primary() {
  *
  * @returns {Mapping}
  */
-export function autoPK() {
+export function autoPK () {
   return (target: Object) => {
     Mapping.forEntity(target).autoPK();
   };
@@ -131,7 +131,7 @@ export function autoPK() {
  *
  * @returns {Mapping}
  */
-export function autoCreatedAt() {
+export function autoCreatedAt () {
   return (target: Object) => {
     Mapping.forEntity(target).autoCreatedAt();
   };
@@ -142,7 +142,7 @@ export function autoCreatedAt() {
  *
  * @returns {Mapping}
  */
-export function autoUpdatedAt() {
+export function autoUpdatedAt () {
   return (target: Object) => {
     Mapping.forEntity(target).autoUpdatedAt();
   };
@@ -158,7 +158,7 @@ export function autoUpdatedAt() {
  *
  * @return {Field}
  */
-export function generatedValue(type: string) {
+export function generatedValue (type: string) {
   return (target: Object, property: string) => {
     Mapping.forEntity(target).generatedValue(property, type);
   };
@@ -171,7 +171,7 @@ export function generatedValue(type: string) {
  *
  * @returns {Field}
  */
-export function cascade(cascades: Array<string>) {
+export function cascade (cascades: Array<string>) {
   return (target: Object, property: string) => {
     Mapping.forEntity(target).cascade(property, cascades);
   };
@@ -182,7 +182,7 @@ export function cascade(cascades: Array<string>) {
  *
  * @returns {Field}
  */
-export function increments() {
+export function increments () {
   return (target: Object, property: string) => {
     Mapping.forEntity(target).increments(property);
   };
@@ -195,7 +195,7 @@ export function increments() {
  *
  * @returns {Field}
  */
-export function oneToOne(options: Relationship) {
+export function oneToOne (options: Relationship) {
   return (target: Object, property: string) => {
     Mapping.forEntity(target).oneToOne(property, options);
   };
@@ -208,7 +208,7 @@ export function oneToOne(options: Relationship) {
  *
  * @returns {Field}
  */
-export function oneToMany(options: Relationship) {
+export function oneToMany (options: Relationship) {
   return (target: Object, property: string) => {
     Mapping.forEntity(target).oneToMany(property, options);
   };
@@ -221,7 +221,7 @@ export function oneToMany(options: Relationship) {
  *
  * @returns {Field}
  */
-export function manyToOne(options: Relationship) {
+export function manyToOne (options: Relationship) {
   return (target: Object, property: string) => {
     Mapping.forEntity(target).manyToOne(property, options);
   };
@@ -234,7 +234,7 @@ export function manyToOne(options: Relationship) {
  *
  * @returns {Field}
  */
-export function manyToMany(options: Relationship) {
+export function manyToMany (options: Relationship) {
   return (target: Object, property: string) => {
     Mapping.forEntity(target).manyToMany(property, options);
   };
@@ -247,7 +247,7 @@ export function manyToMany(options: Relationship) {
  *
  * @returns {Field}
  */
-export function joinTable(options: JoinTable) {
+export function joinTable (options: JoinTable) {
   return (target: Object, property: string) => {
     Mapping.forEntity(target).joinTable(property, options);
   };
@@ -260,7 +260,7 @@ export function joinTable(options: JoinTable) {
  *
  * @returns {Field}
  */
-export function joinColumn(options: JoinColumn) {
+export function joinColumn (options: JoinColumn) {
   return (target: Object, property: string) => {
     Mapping.forEntity(target).joinColumn(property, options);
   };

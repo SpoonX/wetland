@@ -151,7 +151,7 @@ export class Migrator {
    * @returns {Promise}
    */
   public up(action: string): Bluebird<any> {
-    return Bluebird.all([this.migrationTable.getLastMigrationName(), this.migrationFile.getMigrations()])
+    return Bluebird.all([ this.migrationTable.getLastMigrationName(), this.migrationFile.getMigrations() ])
       .then(results => results[1][results[1].indexOf(results[0]) + 1])
       .then(migrations => this.run(Migrator.DIRECTION_UP, action, migrations));
   }
@@ -175,7 +175,7 @@ export class Migrator {
    * @returns {Promise}
    */
   public latest(action: string = Migrator.ACTION_RUN): Bluebird<any> {
-    return Bluebird.all([this.migrationTable.getLastMigrationName(), this.migrationFile.getMigrations()])
+    return Bluebird.all([ this.migrationTable.getLastMigrationName(), this.migrationFile.getMigrations() ])
       .then(results => results[1].slice(results[1].indexOf(results[0]) + 1))
       .then(migrations => this.run(Migrator.DIRECTION_UP, action, migrations));
   }
@@ -206,7 +206,7 @@ export class Migrator {
     }
 
     if (!Array.isArray(migrations)) {
-      migrations = [migrations as string];
+      migrations = [ migrations as string ];
     }
 
     const run = new Run(direction, this.manager, migrations as Array<string>, this.config.directory);

@@ -108,7 +108,7 @@ export class Populate {
 
       // Only relationships require special treatment. This isn't one, so just assign and move on.
       if (!field.relationship) {
-        if (['date', 'dateTime', 'datetime', 'time'].indexOf(field.type) > -1 && !(data[property] instanceof Date)) {
+        if ([ 'date', 'dateTime', 'datetime', 'time' ].indexOf(field.type) > -1 && !(data[property] instanceof Date)) {
           data[property] = new Date(data[property]);
         }
 

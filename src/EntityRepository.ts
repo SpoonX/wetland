@@ -28,7 +28,7 @@ export class EntityRepository<T> {
    *
    * @type { string[] }
    */
-  protected queryOptions: Array<string> = ['orderBy', 'limit', 'offset', 'groupBy', 'select'];
+  protected queryOptions: Array<string> = [ 'orderBy', 'limit', 'offset', 'groupBy', 'select' ];
 
   /**
    * Construct a new EntityRepository.
@@ -56,10 +56,11 @@ export class EntityRepository<T> {
    *
    * @param {string}            [alias]
    * @param {knex.QueryBuilder} [statement]
+   * @param {boolean}           [managed]
    *
    * @returns {QueryBuilder}
    */
-  public getQueryBuilder(alias?: string, statement?: knex.QueryBuilder): QueryBuilder<T> {
+  public getQueryBuilder(alias?: string, statement?: knex.QueryBuilder, managed: boolean = true): QueryBuilder<T> {
     alias = alias || this.mapping.getTableName();
 
     if (!statement) {
@@ -69,7 +70,7 @@ export class EntityRepository<T> {
     }
 
     // Create a new QueryBuilder, pass in a scoped entity manager.
-    return new QueryBuilder(this.getScope(), statement, this.mapping, alias);
+    return new QueryBuilder(this.getScope(), statement, this.mapping, alias, managed);
   }
 
   /**
@@ -136,7 +137,7 @@ export class EntityRepository<T> {
         options.populate = Reflect.ownKeys(relations);
       }
     } else if (typeof options.populate === 'string') {
-      options.populate = [options.populate];
+      options.populate = [ options.populate ];
     }
 
     if (Array.isArray(options.populate) && options.populate.length) {

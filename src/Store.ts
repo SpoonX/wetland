@@ -108,7 +108,7 @@ export class Store {
    * @returns {Store}
    */
   public registerConnection(config: SingleConfig, role: string = null): Store {
-    if ([Store.ROLE_MASTER, Store.ROLE_SLAVE, null].indexOf(role) === -1) {
+    if ([ Store.ROLE_MASTER, Store.ROLE_SLAVE, null ].indexOf(role) === -1) {
       throw new Error(
         `Trying to register using invalid role. Expected "${Store.ROLE_MASTER}" or "${Store.ROLE_SLAVE}".`,
       );

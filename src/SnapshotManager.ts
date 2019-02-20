@@ -411,19 +411,19 @@ export class SnapshotManager {
       });
     });
 
-    function getForeignCreateInstructions(foreign, table) {
+    function getForeignCreateInstructions (foreign, table) {
       foreign.create[table] = foreign.create[table] || [];
 
       return foreign.create[table];
     }
 
-    function getForeignDropInstructions(foreign, table) {
+    function getForeignDropInstructions (foreign, table) {
       foreign.drop[table] = foreign.drop[table] || [];
 
       return foreign.drop[table];
     }
 
-    function getAlterInstructions(alter, table) {
+    function getAlterInstructions (alter, table) {
       if (!alter[table]) {
         alter[table] = {
           dropIndex: [],
@@ -439,7 +439,7 @@ export class SnapshotManager {
       return alter[table];
     }
 
-    function getCreateInstructions(create, table) {
+    function getCreateInstructions (create, table) {
       if (!create[table]) {
         create[table] = {
           meta: {},
@@ -452,7 +452,7 @@ export class SnapshotManager {
       return create[table];
     }
 
-    function removeRelation(mapping, property) {
+    function removeRelation (mapping, property) {
       const relation = mapping.relations[property];
       const tableName = mapping.entity.tableName;
       const instructions = getInstructions(mapping.store);
@@ -469,7 +469,7 @@ export class SnapshotManager {
       instructions.drop.push(mapping.fields[property].joinTable.name);
     }
 
-    function createForeign(mapping, property, targetMapping) {
+    function createForeign (mapping, property, targetMapping) {
       const joinColumn = mapping.fields[property].joinColumn;
       return {
         inTable: targetMapping.entity.tableName,
@@ -480,7 +480,7 @@ export class SnapshotManager {
       };
     }
 
-    function createRelation(mapping, property, targetMapping, create?) {
+    function createRelation (mapping, property, targetMapping, create?) {
       const relation = mapping.relations[property];
       const tableName = mapping.entity.tableName;
       const instructions = getInstructions(mapping.store);
@@ -493,7 +493,7 @@ export class SnapshotManager {
             name: joinColumn.name,
             type: 'integer',
             unsigned: true,
-            nullable: (typeof joinColumn.nullable === 'boolean' ? joinColumn.nullable : true)
+            nullable: (typeof joinColumn.nullable === 'boolean' ? joinColumn.nullable : true),
           },
           foreign: createForeign(mapping, property, targetMapping),
         };
@@ -532,18 +532,18 @@ export class SnapshotManager {
       );
     }
 
-    function buildJoinTable(joinTable, tableName, targetTableName, instructions, foreignInstructions) {
+    function buildJoinTable (joinTable, tableName, targetTableName, instructions, foreignInstructions) {
       const foreignColumns = [];
       const referenceColumns = [];
       const foreignColumnsInverse = [];
       const referenceColumnsInverse = [];
       const joinTableIndexes = {};
-      const joinTableFields: Array<FieldOptions> = [{
+      const joinTableFields: Array<FieldOptions> = [ {
         name: 'id',
         primary: true,
         type: 'integer',
         generatedValue: 'autoIncrement',
-      }];
+      } ];
 
       const processTableColumns = (side, foreign, reference) => {
         joinTableFields.push({
@@ -580,7 +580,7 @@ export class SnapshotManager {
       instructions[joinTable.name] = { fields: joinTableFields, index: joinTableIndexes };
     }
 
-    function diffObjectKeys(from, to) {
+    function diffObjectKeys (from, to) {
       if (typeof from !== 'object' && typeof to !== 'object') {
         return { drop: [], create: [], remain: [] };
       }
@@ -589,15 +589,15 @@ export class SnapshotManager {
       to = to || {};
       const oldKeys = new Set(Reflect.ownKeys(from));
       const newKeys = new Set(Reflect.ownKeys(to));
-      const drop = new Set([...oldKeys].filter(key => !newKeys.has(key))); // Old keys
-      const create = new Set([...newKeys].filter(key => !oldKeys.has(key))); // New keys
-      const covered = new Set([...drop, ...create]);                          // Created or dropped
-      const remain = new Set([...newKeys].filter(key => !covered.has(key)));
+      const drop = new Set([ ...oldKeys ].filter(key => !newKeys.has(key))); // Old keys
+      const create = new Set([ ...newKeys ].filter(key => !oldKeys.has(key))); // New keys
+      const covered = new Set([ ...drop, ...create ]);                          // Created or dropped
+      const remain = new Set([ ...newKeys ].filter(key => !covered.has(key)));
 
-      return { drop: [...drop], create: [...create], remain: [...remain] };
+      return { drop: [ ...drop ], create: [ ...create ], remain: [ ...remain ] };
     }
 
-    function fieldChanged(oldField, newField) {
+    function fieldChanged (oldField, newField) {
       return JSON.stringify(oldField) !== JSON.stringify(newField);
     }
 

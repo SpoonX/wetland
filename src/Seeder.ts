@@ -162,7 +162,7 @@ export class Seeder {
 
     return readFile(path.join(src, file), 'utf8')
       .then(data => {
-        const [entityName, extension] = file.split('.'); // Very naive **might** need better
+        const [ entityName, extension ] = file.split('.'); // Very naive **might** need better
 
         if (extension === 'json') {
           const features = JSON.parse(data);
