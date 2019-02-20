@@ -18,7 +18,7 @@ export class IdentityMap {
    */
   public getMapForEntity(entity: Function | EntityInterface): Object {
     const entityReference = (typeof entity === 'function' ? entity : entity.constructor) as Function;
-    const map             = this.map.get(entityReference);
+    const map = this.map.get(entityReference);
 
     if (!map) {
       this.map.set(entityReference, {});

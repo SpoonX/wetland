@@ -1,5 +1,4 @@
 import { Wetland } from './Wetland';
-import { Connection, Store } from './Store';
 import { SnapshotManager } from './SnapshotManager';
 import * as rm from 'del';
 import * as path from 'path';
@@ -16,6 +15,16 @@ export class Cleaner {
    */
   constructor(wetland: Wetland) {
     this.wetland = wetland;
+  }
+
+  /**
+   * Clean wetland's related tables and wetland's dev snapshots'.
+   *
+   * @return {Promise<any>}
+   */
+  public clean(): Promise<any> {
+    return this.dropTables()
+      .then(() => this.cleanDataDirectory());
   }
 
   /**
@@ -40,9 +49,9 @@ export class Cleaner {
    * @return {Promise<any>}
    */
   private dropTables(): any {
-    const manager         = this.wetland.getManager();
+    const manager = this.wetland.getManager();
     const snapshotManager = this.wetland.getSnapshotManager();
-    const schemaBuilder   = new SchemaBuilder(manager);
+    const schemaBuilder = new SchemaBuilder(manager);
 
     return snapshotManager
       .fetch()
@@ -51,15 +60,5 @@ export class Cleaner {
 
         return schemaBuilder.process(instructions).apply();
       });
-  }
-
-  /**
-   * Clean wetland's related tables and wetland's dev snapshots'.
-   *
-   * @return {Promise<any>}
-   */
-  public clean(): Promise<any> {
-    return this.dropTables()
-      .then(() => this.cleanDataDirectory());
   }
 }

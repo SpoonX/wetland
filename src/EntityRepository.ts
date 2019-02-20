@@ -28,7 +28,7 @@ export class EntityRepository<T> {
    *
    * @type { string[] }
    */
-  protected queryOptions: Array<string> = [ 'orderBy', 'limit', 'offset', 'groupBy', 'select' ];
+  protected queryOptions: Array<string> = ['orderBy', 'limit', 'offset', 'groupBy', 'select'];
 
   /**
    * Construct a new EntityRepository.
@@ -38,8 +38,8 @@ export class EntityRepository<T> {
    */
   public constructor(entityManager: EntityManager | Scope, entity: EntityCtor<T>) {
     this.entityManager = entityManager;
-    this.entity        = entity;
-    this.mapping       = Mapping.forEntity(entity);
+    this.entity = entity;
+    this.mapping = Mapping.forEntity(entity);
   }
 
   /**
@@ -49,28 +49,6 @@ export class EntityRepository<T> {
    */
   public getMapping(): Mapping<T> {
     return this.mapping;
-  }
-
-  /**
-   * Get a reference to the entity manager.
-   *
-   * @returns {EntityManager | Scope}
-   */
-  protected getEntityManager(): EntityManager | Scope{
-    return this.entityManager;
-  }
-
-  /**
-   * Get a scope. If this repository was constructed within a scope, you get said scope.
-   *
-   * @returns {Scope}
-   */
-  protected getScope(): Scope {
-    if (this.entityManager instanceof Scope) {
-      return this.entityManager;
-    }
-
-    return this.entityManager.createScope();
   }
 
   /**
@@ -128,7 +106,7 @@ export class EntityRepository<T> {
    * @returns {Promise<Array>}
    */
   public find(criteria?: {} | number | string, options: FindOptions = {}): Promise<Array<T>> {
-    options.alias    = options.alias || this.mapping.getTableName();
+    options.alias = options.alias || this.mapping.getTableName();
     const queryBuilder = this.getQueryBuilder(options.alias);
 
     if (!options.select) {
@@ -158,17 +136,17 @@ export class EntityRepository<T> {
         options.populate = Reflect.ownKeys(relations);
       }
     } else if (typeof options.populate === 'string') {
-      options.populate = [ options.populate ];
+      options.populate = [options.populate];
     }
 
     if (Array.isArray(options.populate) && options.populate.length) {
       options.populate.forEach(join => {
         let column = join as string;
-        let alias  = join as string;
+        let alias = join as string;
 
         if (typeof join === 'object') {
           column = Object.keys(join)[0];
-          alias  = join[column];
+          alias = join[column];
         } else if (join.indexOf('.') > -1) {
           alias = join.split('.')[1];
         }
@@ -229,6 +207,28 @@ export class EntityRepository<T> {
 
     return queryBuilder;
   }
+
+  /**
+   * Get a reference to the entity manager.
+   *
+   * @returns {EntityManager | Scope}
+   */
+  protected getEntityManager(): EntityManager | Scope {
+    return this.entityManager;
+  }
+
+  /**
+   * Get a scope. If this repository was constructed within a scope, you get said scope.
+   *
+   * @returns {Scope}
+   */
+  protected getScope(): Scope {
+    if (this.entityManager instanceof Scope) {
+      return this.entityManager;
+    }
+
+    return this.entityManager.createScope();
+  }
 }
 
 export interface FindOptions {
@@ -240,5 +240,5 @@ export interface FindOptions {
   limit?: number;
   offset?: number;
   debug?: boolean;
-  populate?: string | boolean | {} | Array<string|{}>;
+  populate?: string | boolean | {} | Array<string | {}>;
 }

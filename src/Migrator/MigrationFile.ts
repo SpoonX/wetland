@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as mkdirp from 'mkdirp';
 import * as Promise from 'bluebird';
 import { MigratorConfigInterface } from './MigratorConfigInterface';
+
 const replace = require('stream-replace');
 
 export class MigrationFile {
@@ -37,13 +38,13 @@ export class MigrationFile {
    *
    * @returns {Bluebird}
    */
-  public create(name: string, code?: {up: string, down: string}): Promise<any> {
-    const sourceFile    = `${__dirname}/templates/migration.${this.config.extension}.dist`;
+  public create(name: string, code?: { up: string, down: string }): Promise<any> {
+    const sourceFile = `${__dirname}/templates/migration.${this.config.extension}.dist`;
     const migrationName = `${this.makeMigrationName(name)}.${this.config.extension}`;
-    const targetFile    = path.join(this.config.directory, migrationName);
-    const readStream    = fs.createReadStream(sourceFile);
-    const writeStream   = fs.createWriteStream(targetFile);
-    code              = code || { up: null, down: null };
+    const targetFile = path.join(this.config.directory, migrationName);
+    const readStream = fs.createReadStream(sourceFile);
+    const writeStream = fs.createWriteStream(targetFile);
+    code = code || { up: null, down: null };
 
     if (!code.up) {
       code.up = '    // @todo Implement';
@@ -66,17 +67,6 @@ export class MigrationFile {
   }
 
   /**
-   * Make sure the migration directory exists.
-   */
-  private ensureMigrationDirectory() {
-    try {
-      fs.statSync(this.config.directory);
-    } catch (error) {
-      mkdirp.sync(this.config.directory);
-    }
-  }
-
-  /**
    * Get all migrations from the directory.
    *
    * @returns {Bluebird<string[]>}
@@ -93,6 +83,17 @@ export class MigrationFile {
   }
 
   /**
+   * Make sure the migration directory exists.
+   */
+  private ensureMigrationDirectory() {
+    try {
+      fs.statSync(this.config.directory);
+    } catch (error) {
+      mkdirp.sync(this.config.directory);
+    }
+  }
+
+  /**
    * Make migration name.
    *
    * @param {string} name
@@ -101,7 +102,7 @@ export class MigrationFile {
    */
   private makeMigrationName(name): string {
     const date = new Date();
-    const pad  = (source) => {
+    const pad = (source) => {
       source = source.toString();
 
       return source[1] ? source : `0${source}`;

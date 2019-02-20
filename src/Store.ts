@@ -46,7 +46,7 @@ export class Store {
    */
   private connections: Object = {
     [Store.ROLE_MASTER]: [],
-    [Store.ROLE_SLAVE] : [],
+    [Store.ROLE_SLAVE]: [],
   };
 
   /**
@@ -54,7 +54,7 @@ export class Store {
    */
   private pointers: Object = {
     [Store.ROLE_MASTER]: 0,
-    [Store.ROLE_SLAVE] : 0,
+    [Store.ROLE_SLAVE]: 0,
   };
 
   /**
@@ -108,7 +108,7 @@ export class Store {
    * @returns {Store}
    */
   public registerConnection(config: SingleConfig, role: string = null): Store {
-    if ([ Store.ROLE_MASTER, Store.ROLE_SLAVE, null ].indexOf(role) === -1) {
+    if ([Store.ROLE_MASTER, Store.ROLE_SLAVE, null].indexOf(role) === -1) {
       throw new Error(
         `Trying to register using invalid role. Expected "${Store.ROLE_MASTER}" or "${Store.ROLE_SLAVE}".`,
       );
@@ -169,29 +169,6 @@ export class Store {
   }
 
   /**
-   * Makes the config needed for knex.
-   * This method is needed because (for example) postgres accepts extra arguments such as a searchPath.
-   *
-   * @param {{}} config
-   * @param {{}} connection
-   *
-   * @returns {SingleConfig}
-   */
-  private makeConnectionConfig(config: Object, connection: Object): SingleConfig {
-    const connectionConfig = { connection };
-
-    Object.getOwnPropertyNames(config).forEach(key => {
-      if (key === 'connection' || key === 'connections') {
-        return;
-      }
-
-      connectionConfig[key] = config[key];
-    });
-
-    return connectionConfig;
-  }
-
-  /**
    * Register pool of connections. Example config:
    *
    *  // Connection object could look like: {username: '', password: '', database: '', host: ''}
@@ -241,6 +218,29 @@ export class Store {
 
     return this;
   }
+
+  /**
+   * Makes the config needed for knex.
+   * This method is needed because (for example) postgres accepts extra arguments such as a searchPath.
+   *
+   * @param {{}} config
+   * @param {{}} connection
+   *
+   * @returns {SingleConfig}
+   */
+  private makeConnectionConfig(config: Object, connection: Object): SingleConfig {
+    const connectionConfig = { connection };
+
+    Object.getOwnPropertyNames(config).forEach(key => {
+      if (key === 'connection' || key === 'connections') {
+        return;
+      }
+
+      connectionConfig[key] = config[key];
+    });
+
+    return connectionConfig;
+  }
 }
 
 export interface Connection {
@@ -257,6 +257,7 @@ export interface PoolConfig {
   debug?: boolean;
   client: string;
   connections: Array<Connection>;
+
   [key: string]: any;
 }
 
@@ -267,5 +268,6 @@ export interface ReplicationConfig {
     master?: Array<Connection>,
     slave?: Array<Connection>,
   };
+
   [key: string]: any;
 }

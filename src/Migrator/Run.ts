@@ -35,7 +35,7 @@ export class Run {
   /**
    * @type {{}}}
    */
-  private transactions: {[key: string]: Knex.Transaction | Bluebird<Knex.Transaction>} = {};
+  private transactions: { [key: string]: Knex.Transaction | Bluebird<Knex.Transaction> } = {};
 
   /**
    * Construct a runner.
@@ -46,8 +46,8 @@ export class Run {
    * @param {string}    directory
    */
   public constructor(direction: string, entityManager: Scope, migrations: Array<string>, directory: string) {
-    this.direction     = direction;
-    this.directory     = directory;
+    this.direction = direction;
+    this.directory = directory;
     this.entityManager = entityManager;
 
     this.loadMigrations(migrations);
@@ -111,6 +111,15 @@ export class Run {
   }
 
   /**
+   * Get the entity manager scope.
+   *
+   * @returns {Scope}
+   */
+  public getEntityManager(): Scope {
+    return this.entityManager;
+  }
+
+  /**
    * Load migrations provided.
    *
    * @param {string[]} migrations
@@ -128,7 +137,7 @@ export class Run {
       }
 
       let migrationClass = require(path.join(this.directory, migration));
-      migrationClass     = typeof migrationClass === 'function' ? migrationClass : migrationClass.Migration;
+      migrationClass = typeof migrationClass === 'function' ? migrationClass : migrationClass.Migration;
 
       this.validateMigration(migrationClass);
 
@@ -155,14 +164,5 @@ export class Run {
     if (!Reflect.has(migration, Migrator.DIRECTION_UP) || typeof migration[Migrator.DIRECTION_UP] !== 'function') {
       throw new Error(`Migration is missing a '${Migrator.DIRECTION_UP}' method.`);
     }
-  }
-
-  /**
-   * Get the entity manager scope.
-   *
-   * @returns {Scope}
-   */
-  public getEntityManager(): Scope {
-    return this.entityManager;
   }
 }

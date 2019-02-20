@@ -6,24 +6,20 @@ import { EntityManager, Mapping, Wetland } from './index';
 import { FieldOptions } from './Mapping';
 
 export class SnapshotManager {
+  public static SNAPSHOTS_PATH: string = 'snapshots';
+  public static DEV_SNAPSHOTS_PATH: string = 'dev_snapshots';
   /**
    * @type {Wetland}
    */
   private wetland: Wetland;
-
   /**
    * @type {EntityManager}
    */
   private entityManager: EntityManager;
-
   /**
    * @type {{}}
    */
   private config: { snapshotDirectory: string, devSnapshotDirectory: string };
-
-  public static SNAPSHOTS_PATH: string = 'snapshots';
-
-  public static DEV_SNAPSHOTS_PATH: string = 'dev_snapshots';
 
   /**
    * Construct a new SnapshotManager manager.
@@ -31,12 +27,12 @@ export class SnapshotManager {
    * @param {Wetland} wetland
    */
   public constructor(wetland: Wetland) {
-    this.wetland       = wetland;
+    this.wetland = wetland;
     this.entityManager = wetland.getEntityManager();
 
-    const config  = wetland.getConfig();
+    const config = wetland.getConfig();
     this.config = {
-      snapshotDirectory   : path.join(config.fetch('dataDirectory'), SnapshotManager.SNAPSHOTS_PATH),
+      snapshotDirectory: path.join(config.fetch('dataDirectory'), SnapshotManager.SNAPSHOTS_PATH),
       devSnapshotDirectory: path.join(config.fetch('dataDirectory'), SnapshotManager.DEV_SNAPSHOTS_PATH),
     };
 
@@ -114,20 +110,6 @@ export class SnapshotManager {
   }
 
   /**
-   * Resolve to file location.
-   *
-   * @param {string}  name
-   * @param {boolean} devSnapshot
-   *
-   * @returns {string}
-   */
-  private fileLocation(name: string, devSnapshot: boolean): string {
-    const directory = this.config[devSnapshot ? 'devSnapshotDirectory' : 'snapshotDirectory'];
-
-    return path.resolve(directory, `${name}.json`);
-  }
-
-  /**
    * Serialize and return the mappings.
    *
    * @returns {string}
@@ -142,7 +124,7 @@ export class SnapshotManager {
    * @returns {{}}
    */
   public getSerializable(): Object {
-    const entities     = this.entityManager.getEntities();
+    const entities = this.entityManager.getEntities();
     const serializable = {};
 
     for (const entity in entities) {
@@ -161,10 +143,10 @@ export class SnapshotManager {
    * @returns {Object}
    */
   public diff(oldMapping: Object, newMapping: Object): Object {
-    const instructions    = {};
-    const diff            = diffObjectKeys(oldMapping, newMapping);
+    const instructions = {};
+    const diff = diffObjectKeys(oldMapping, newMapping);
     const getInstructions = store => {
-      store               = store || this.entityManager.getConfig().fetch('defaultStore');
+      store = store || this.entityManager.getConfig().fetch('defaultStore');
 
       if (!instructions[store]) {
         instructions[store] = { alter: {}, drop: [], create: {}, rename: [], foreign: { create: {}, drop: {} } };
@@ -175,12 +157,12 @@ export class SnapshotManager {
 
     diff.remain.forEach(entity => {
       const instructions = getInstructions(oldMapping[entity].store);
-      const previous     = Mapping.restore(oldMapping[entity]);
-      const current      = Mapping.restore(newMapping[entity]);
-      const tableName    = current.getTableName();
-      const indexDiff    = diffObjectKeys(oldMapping[entity].index, newMapping[entity].index);
-      const fieldDiff    = diffObjectKeys(oldMapping[entity].fields, newMapping[entity].fields);
-      const uniqueDiff   = diffObjectKeys(oldMapping[entity].unique, newMapping[entity].unique);
+      const previous = Mapping.restore(oldMapping[entity]);
+      const current = Mapping.restore(newMapping[entity]);
+      const tableName = current.getTableName();
+      const indexDiff = diffObjectKeys(oldMapping[entity].index, newMapping[entity].index);
+      const fieldDiff = diffObjectKeys(oldMapping[entity].fields, newMapping[entity].fields);
+      const uniqueDiff = diffObjectKeys(oldMapping[entity].unique, newMapping[entity].unique);
       const relationDiff = diffObjectKeys(oldMapping[entity].relations, newMapping[entity].relations);
 
       if (tableName !== oldMapping[entity].entity.tableName) {
@@ -206,7 +188,7 @@ export class SnapshotManager {
 
         // Was removed, don't do that. Column rename.
         if (alter.dropColumn.includes(field.name)) {
-          const dropped       = alter.dropColumn.splice(alter.dropColumn.indexOf(field.name), 1);
+          const dropped = alter.dropColumn.splice(alter.dropColumn.indexOf(field.name), 1);
           const previousField = oldMapping[entity].fields[oldMapping[entity].columns[dropped]];
 
           if (fieldChanged(previousField, field)) {
@@ -221,15 +203,15 @@ export class SnapshotManager {
 
       fieldDiff.remain.forEach(property => {
         const previousField = oldMapping[entity].fields[property];
-        const field         = newMapping[entity].fields[property];
+        const field = newMapping[entity].fields[property];
 
         if (field.relationship) {
           const previousJoinColumn = previousField.joinColumn;
-          const joinColumn         = field.joinColumn;
+          const joinColumn = field.joinColumn;
 
           if (fieldChanged(previousJoinColumn, joinColumn)) {
             const relation = newMapping[entity].relations[field.name];
-            const alter    = getAlterInstructions(instructions.alter, tableName);
+            const alter = getAlterInstructions(instructions.alter, tableName);
 
             getForeignCreateInstructions(instructions.foreign, tableName).push(createForeign(newMapping[entity], field.name, newMapping[relation.targetEntity]));
             getForeignDropInstructions(instructions.foreign, tableName).push(previousJoinColumn.name);
@@ -252,7 +234,7 @@ export class SnapshotManager {
       });
 
       indexDiff.create.forEach(index => {
-        const alter          = getAlterInstructions(instructions.alter, tableName);
+        const alter = getAlterInstructions(instructions.alter, tableName);
         alter.index[index] = newMapping[entity].index[index];
       });
 
@@ -265,7 +247,7 @@ export class SnapshotManager {
 
       indexDiff.remain.forEach(index => {
         if (oldMapping[entity].index[index].join() !== newMapping[entity].index[index].join()) {
-          const alter          = getAlterInstructions(instructions.alter, tableName);
+          const alter = getAlterInstructions(instructions.alter, tableName);
           alter.index[index] = newMapping[entity].index[index];
 
           alter.dropIndex.push({
@@ -276,7 +258,7 @@ export class SnapshotManager {
       });
 
       uniqueDiff.create.forEach(unique => {
-        const alter            = getAlterInstructions(instructions.alter, tableName);
+        const alter = getAlterInstructions(instructions.alter, tableName);
         alter.unique[unique] = newMapping[entity].unique[unique];
       });
 
@@ -287,7 +269,7 @@ export class SnapshotManager {
 
       uniqueDiff.remain.forEach(unique => {
         if (oldMapping[entity].unique[unique].join() !== newMapping[entity].unique[unique].join()) {
-          const alter            = getAlterInstructions(instructions.alter, tableName);
+          const alter = getAlterInstructions(instructions.alter, tableName);
           alter.unique[unique] = newMapping[entity].unique[unique];
 
           alter.dropUnique.push({
@@ -348,13 +330,13 @@ export class SnapshotManager {
     });
 
     diff.create.forEach((entity: string) => {
-      const toCreate     = newMapping[entity];
+      const toCreate = newMapping[entity];
       const instructions = getInstructions(toCreate.store);
-      const create       = getCreateInstructions(instructions.create, toCreate.entity.tableName);
-      create.index     = toCreate.index;
-      create.unique    = toCreate.unique;
-      create.meta      = {};
-      create.fields    = Reflect.ownKeys(toCreate.fields)
+      const create = getCreateInstructions(instructions.create, toCreate.entity.tableName);
+      create.index = toCreate.index;
+      create.unique = toCreate.unique;
+      create.meta = {};
+      create.fields = Reflect.ownKeys(toCreate.fields)
         .filter(field => !toCreate.fields[field].relationship)
         .map(field => {
           toCreate.fields[field].name = toCreate.fields[field].name || field;
@@ -405,7 +387,7 @@ export class SnapshotManager {
 
     diff.drop.forEach(entity => {
       const instructions = getInstructions(oldMapping[entity].store);
-      const relations    = oldMapping[entity].relations;
+      const relations = oldMapping[entity].relations;
 
       if (!relations) {
         return;
@@ -429,27 +411,27 @@ export class SnapshotManager {
       });
     });
 
-    function getForeignCreateInstructions (foreign, table) {
+    function getForeignCreateInstructions(foreign, table) {
       foreign.create[table] = foreign.create[table] || [];
 
       return foreign.create[table];
     }
 
-    function getForeignDropInstructions (foreign, table) {
+    function getForeignDropInstructions(foreign, table) {
       foreign.drop[table] = foreign.drop[table] || [];
 
       return foreign.drop[table];
     }
 
-    function getAlterInstructions (alter, table) {
+    function getAlterInstructions(alter, table) {
       if (!alter[table]) {
         alter[table] = {
-          dropIndex  : [],
-          dropUnique : [],
-          dropColumn : [],
-          index      : {},
-          unique     : {},
-          fields     : [],
+          dropIndex: [],
+          dropUnique: [],
+          dropColumn: [],
+          index: {},
+          unique: {},
+          fields: [],
           alterFields: [],
         };
       }
@@ -457,22 +439,22 @@ export class SnapshotManager {
       return alter[table];
     }
 
-    function getCreateInstructions (create, table) {
+    function getCreateInstructions(create, table) {
       if (!create[table]) {
         create[table] = {
-          meta   : {},
-          index  : {},
-          unique : {},
-          fields : [],
+          meta: {},
+          index: {},
+          unique: {},
+          fields: [],
         };
       }
 
       return create[table];
     }
 
-    function removeRelation (mapping, property) {
-      const relation     = mapping.relations[property];
-      const tableName    = mapping.entity.tableName;
+    function removeRelation(mapping, property) {
+      const relation = mapping.relations[property];
+      const tableName = mapping.entity.tableName;
       const instructions = getInstructions(mapping.store);
 
       if ((relation.type === Mapping.RELATION_MANY_TO_ONE) || (relation.type === Mapping.RELATION_ONE_TO_ONE && !relation.mappedBy)) {
@@ -487,27 +469,32 @@ export class SnapshotManager {
       instructions.drop.push(mapping.fields[property].joinTable.name);
     }
 
-    function createForeign (mapping, property, targetMapping) {
+    function createForeign(mapping, property, targetMapping) {
       const joinColumn = mapping.fields[property].joinColumn;
       return {
-        inTable   : targetMapping.entity.tableName,
+        inTable: targetMapping.entity.tableName,
         references: joinColumn.referencedColumnName,
-        columns   : joinColumn.name,
-        onDelete  : joinColumn.onDelete,
-        onUpdate  : joinColumn.onUpdate,
+        columns: joinColumn.name,
+        onDelete: joinColumn.onDelete,
+        onUpdate: joinColumn.onUpdate,
       };
     }
 
-    function createRelation (mapping, property, targetMapping, create?) {
-      const relation     = mapping.relations[property];
-      const tableName    = mapping.entity.tableName;
+    function createRelation(mapping, property, targetMapping, create?) {
+      const relation = mapping.relations[property];
+      const tableName = mapping.entity.tableName;
       const instructions = getInstructions(mapping.store);
 
       if ((relation.type === Mapping.RELATION_MANY_TO_ONE) || (relation.type === Mapping.RELATION_ONE_TO_ONE && !relation.mappedBy)) {
         // We own the fk.
         const joinColumn = mapping.fields[property].joinColumn;
-        const changes    = {
-          field  : { name: joinColumn.name, type: 'integer', unsigned: true, nullable: (typeof joinColumn.nullable === 'boolean' ? joinColumn.nullable : true) },
+        const changes = {
+          field: {
+            name: joinColumn.name,
+            type: 'integer',
+            unsigned: true,
+            nullable: (typeof joinColumn.nullable === 'boolean' ? joinColumn.nullable : true)
+          },
           foreign: createForeign(mapping, property, targetMapping),
         };
 
@@ -545,24 +532,24 @@ export class SnapshotManager {
       );
     }
 
-    function buildJoinTable (joinTable, tableName, targetTableName, instructions, foreignInstructions) {
-      const foreignColumns                       = [];
-      const referenceColumns                     = [];
-      const foreignColumnsInverse                = [];
-      const referenceColumnsInverse              = [];
-      const joinTableIndexes                     = {};
-      const joinTableFields: Array<FieldOptions> = [ {
-        name          : 'id',
-        primary       : true,
-        type          : 'integer',
+    function buildJoinTable(joinTable, tableName, targetTableName, instructions, foreignInstructions) {
+      const foreignColumns = [];
+      const referenceColumns = [];
+      const foreignColumnsInverse = [];
+      const referenceColumnsInverse = [];
+      const joinTableIndexes = {};
+      const joinTableFields: Array<FieldOptions> = [{
+        name: 'id',
+        primary: true,
+        type: 'integer',
         generatedValue: 'autoIncrement',
-      } ];
+      }];
 
       const processTableColumns = (side, foreign, reference) => {
         joinTableFields.push({
-          name    : side.name,
-          type    : side.type || 'integer',
-          size    : side.size || null,
+          name: side.name,
+          type: side.type || 'integer',
+          size: side.size || null,
           unsigned: true,
           nullable: true,
         });
@@ -590,31 +577,45 @@ export class SnapshotManager {
         },
       );
 
-      instructions[joinTable.name] = { fields : joinTableFields, index  : joinTableIndexes };
+      instructions[joinTable.name] = { fields: joinTableFields, index: joinTableIndexes };
     }
 
-    function diffObjectKeys (from, to) {
+    function diffObjectKeys(from, to) {
       if (typeof from !== 'object' && typeof to !== 'object') {
         return { drop: [], create: [], remain: [] };
       }
 
-      from        = from || {};
-      to          = to || {};
+      from = from || {};
+      to = to || {};
       const oldKeys = new Set(Reflect.ownKeys(from));
       const newKeys = new Set(Reflect.ownKeys(to));
-      const drop    = new Set([ ...oldKeys ].filter(key => !newKeys.has(key))); // Old keys
-      const create  = new Set([ ...newKeys ].filter(key => !oldKeys.has(key))); // New keys
-      const covered = new Set([ ...drop, ...create ]);                          // Created or dropped
-      const remain  = new Set([ ...newKeys ].filter(key => !covered.has(key)));
+      const drop = new Set([...oldKeys].filter(key => !newKeys.has(key))); // Old keys
+      const create = new Set([...newKeys].filter(key => !oldKeys.has(key))); // New keys
+      const covered = new Set([...drop, ...create]);                          // Created or dropped
+      const remain = new Set([...newKeys].filter(key => !covered.has(key)));
 
-      return { drop: [ ...drop ], create: [ ...create ], remain: [ ...remain ] };
+      return { drop: [...drop], create: [...create], remain: [...remain] };
     }
 
-    function fieldChanged (oldField, newField) {
+    function fieldChanged(oldField, newField) {
       return JSON.stringify(oldField) !== JSON.stringify(newField);
     }
 
     return this.postDiffingOperations(instructions);
+  }
+
+  /**
+   * Resolve to file location.
+   *
+   * @param {string}  name
+   * @param {boolean} devSnapshot
+   *
+   * @returns {string}
+   */
+  private fileLocation(name: string, devSnapshot: boolean): string {
+    const directory = this.config[devSnapshot ? 'devSnapshotDirectory' : 'snapshotDirectory'];
+
+    return path.resolve(directory, `${name}.json`);
   }
 
   /**
@@ -633,13 +634,13 @@ export class SnapshotManager {
       });
 
       instructions[store].alter = Reflect.ownKeys(instructions[store].alter).map(tableName => {
-        const alter       = instructions[store].alter[tableName];
+        const alter = instructions[store].alter[tableName];
         const dropIndexes = alter.dropIndex;
         const dropUniques = alter.dropUnique;
         const dropColumns = alter.dropColumn;
 
         if (Array.isArray(dropColumns) && dropColumns.length) {
-          alter.dropIndex  = dropIndexes.filter(drop => drop.fields.filter(field => !dropColumns.includes(field)).length);
+          alter.dropIndex = dropIndexes.filter(drop => drop.fields.filter(field => !dropColumns.includes(field)).length);
           alter.dropUnique = dropUniques.filter(drop => drop.fields.filter(field => !dropColumns.includes(field)).length);
         }
 

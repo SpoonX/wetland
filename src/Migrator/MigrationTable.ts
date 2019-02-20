@@ -25,37 +25,9 @@ export class MigrationTable {
    * @param {string} lockTableName
    */
   public constructor(connection: Knex, tableName: string, lockTableName: string) {
-    this.connection    = connection;
-    this.tableName     = tableName;
+    this.connection = connection;
+    this.tableName = tableName;
     this.lockTableName = lockTableName;
-  }
-
-  /**
-   * Check if migrations is locked.
-   *
-   * @param {Knex.Transaction} transaction
-   *
-   * @returns {Promise<boolean>}
-   */
-  private isLocked(transaction: Knex.Transaction): Promise<boolean> {
-    const isLocked = this.connection(this.lockTableName)
-      .transacting(transaction)
-      .forUpdate()
-      .select('*')
-      .then(data => !!data[0] && !!data[0].locked);
-
-    return Promise.resolve(isLocked);
-  }
-
-  /**
-   * Lock migrations.
-   *
-   * @param {Knex.Transaction} transaction
-   *
-   * @returns {QueryBuilder}
-   */
-  private lockMigrations(transaction): Promise<any> {
-    return Promise.resolve(this.connection(this.lockTableName).transacting(transaction).update({ locked: 1 }));
   }
 
   /**
@@ -87,44 +59,11 @@ export class MigrationTable {
   }
 
   /**
-   * Ensure the migration tables exist.
-   *
-   * @returns {Promise<any>}
-   */
-  private async ensureMigrationTables(): Promise<any> {
-    const connection = this.connection;
-    const migrationTableExists = await connection.schema.hasTable(this.tableName);
-
-    if (migrationTableExists) {
-      return;
-    }
-
-    await connection.schema.createTable(this.tableName, t => {
-      t.increments();
-      t.string('name');
-      t.integer('run');
-      t.timestamp('migration_time').defaultTo(connection.fn.now());
-      t.index([ 'run' ]);
-      t.index([ 'migration_time' ]);
-    });
-
-    const lockTableExists = await connection.schema.hasTable(this.lockTableName);
-
-    if (lockTableExists) {
-      return;
-    }
-
-    await connection.schema.createTable(this.lockTableName, t => t.boolean('locked'));
-
-    return connection.schema;
-  }
-
-  /**
    * Get the ID of the last run.
    *
    * @returns {Promise<number|null>}
    */
-  public getLastRunId(): Promise<number|null> {
+  public getLastRunId(): Promise<number | null> {
     const lastRunId = this.connection(this.tableName)
       .select('run')
       .limit(1)
@@ -139,7 +78,7 @@ export class MigrationTable {
    *
    * @returns {Promise<string|null>}
    */
-  public getLastMigrationName(): Promise<string|null> {
+  public getLastMigrationName(): Promise<string | null> {
     return this.ensureMigrationTables().then(() => {
       return this.connection(this.tableName)
         .select('name')
@@ -154,7 +93,7 @@ export class MigrationTable {
    *
    * @returns {Promise<Array<string>|null>}
    */
-  public getLastRun(): Promise<Array<string>|null> {
+  public getLastRun(): Promise<Array<string> | null> {
     return this.getLastRunId().then(lastRun => {
       if (lastRun === null) {
         return null;
@@ -174,7 +113,7 @@ export class MigrationTable {
    *
    * @returns {Promise<Array<string>|null>}
    */
-  public getAllRun(): Promise<Array<Object>|null> {
+  public getAllRun(): Promise<Array<Object> | null> {
     return this.ensureMigrationTables().then(() => {
       return this.connection(this.tableName)
         .orderBy('id', 'desc');
@@ -199,5 +138,66 @@ export class MigrationTable {
         return { name, run: (lastRun + 1) };
       }));
     });
+  }
+
+  /**
+   * Check if migrations is locked.
+   *
+   * @param {Knex.Transaction} transaction
+   *
+   * @returns {Promise<boolean>}
+   */
+  private isLocked(transaction: Knex.Transaction): Promise<boolean> {
+    const isLocked = this.connection(this.lockTableName)
+      .transacting(transaction)
+      .forUpdate()
+      .select('*')
+      .then(data => !!data[0] && !!data[0].locked);
+
+    return Promise.resolve(isLocked);
+  }
+
+  /**
+   * Lock migrations.
+   *
+   * @param {Knex.Transaction} transaction
+   *
+   * @returns {QueryBuilder}
+   */
+  private lockMigrations(transaction): Promise<any> {
+    return Promise.resolve(this.connection(this.lockTableName).transacting(transaction).update({ locked: 1 }));
+  }
+
+  /**
+   * Ensure the migration tables exist.
+   *
+   * @returns {Promise<any>}
+   */
+  private async ensureMigrationTables(): Promise<any> {
+    const connection = this.connection;
+    const migrationTableExists = await connection.schema.hasTable(this.tableName);
+
+    if (migrationTableExists) {
+      return;
+    }
+
+    await connection.schema.createTable(this.tableName, t => {
+      t.increments();
+      t.string('name');
+      t.integer('run');
+      t.timestamp('migration_time').defaultTo(connection.fn.now());
+      t.index(['run']);
+      t.index(['migration_time']);
+    });
+
+    const lockTableExists = await connection.schema.hasTable(this.lockTableName);
+
+    if (lockTableExists) {
+      return;
+    }
+
+    await connection.schema.createTable(this.lockTableName, t => t.boolean('locked'));
+
+    return connection.schema;
   }
 }

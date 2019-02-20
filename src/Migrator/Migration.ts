@@ -14,7 +14,7 @@ export class Migration {
   /**
    * @type {{}[]}
    */
-  private builders: Array<{store: string, schemaBuilder: Knex.SchemaBuilder, knex: Knex}> = [];
+  private builders: Array<{ store: string, schemaBuilder: Knex.SchemaBuilder, knex: Knex }> = [];
 
   /**
    * @type {Function}
@@ -40,22 +40,11 @@ export class Migration {
    * @param {Run}      run
    */
   public constructor(migration: Function, run: Run) {
-    this.migration     = migration;
+    this.migration = migration;
     this.entityManager = run.getEntityManager();
-    this.migrationRun  = run;
+    this.migrationRun = run;
 
     this.prepare();
-  }
-
-  /**
-   * Prepare the migration by running it.
-   */
-  private prepare(): void {
-    const prepared = this.migration(this);
-
-    if (prepared && 'then' in prepared) {
-      this.promise = true;
-    }
   }
 
   /**
@@ -87,8 +76,8 @@ export class Migration {
    *
    * @returns {{schema: Knex.SchemaBuilder, knex: Knex}}
    */
-  public getBuilder(store?: string): {schema: Knex.SchemaBuilder, knex: Knex} {
-    const connection    = this.getConnection(store);
+  public getBuilder(store?: string): { schema: Knex.SchemaBuilder, knex: Knex } {
+    const connection = this.getConnection(store);
     const schemaBuilder = connection.schema;
 
     this.builders.push({ store, schemaBuilder, knex: connection });
@@ -103,7 +92,7 @@ export class Migration {
    */
   public getSQL(): string {
     if (this.promise) {
-      throw new Error("It's not possible to get SQL for a promise based migration.");
+      throw new Error('It\'s not possible to get SQL for a promise based migration.');
     }
 
     return this.builders.map(builder => builder.schemaBuilder.toString()).join('\n');
@@ -120,6 +109,17 @@ export class Migration {
         return builder.schemaBuilder['transacting'](transaction).then();
       });
     });
+  }
+
+  /**
+   * Prepare the migration by running it.
+   */
+  private prepare(): void {
+    const prepared = this.migration(this);
+
+    if (prepared && 'then' in prepared) {
+      this.promise = true;
+    }
   }
 
   /**

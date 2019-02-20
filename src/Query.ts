@@ -19,14 +19,14 @@ export class Query {
    *
    * @type {{}}
    */
-  private parent: {column: string, primaries: Array<number|string>};
+  private parent: { column: string, primaries: Array<number | string> };
 
   /**
    * The child queries.
    *
    * @type {Array}
    */
-  private children: Array<QueryBuilder<{new ()}>> = [];
+  private children: Array<QueryBuilder<{ new() }>> = [];
 
   /**
    * Construct a new Query.
@@ -35,10 +35,10 @@ export class Query {
    * @param {Hydrator}          hydrator
    * @param {[]}                children
    */
-  public constructor(statement: knex.QueryBuilder, hydrator: Hydrator, children: Array<QueryBuilder<{new ()}>> = []) {
+  public constructor(statement: knex.QueryBuilder, hydrator: Hydrator, children: Array<QueryBuilder<{ new() }>> = []) {
     this.statement = statement;
-    this.hydrator  = hydrator;
-    this.children  = children;
+    this.hydrator = hydrator;
+    this.children = children;
   }
 
   /**
@@ -47,7 +47,7 @@ export class Query {
    * @param parent
    * @returns {Query}
    */
-  public setParent(parent: {column: string, primaries: Array<number|string>}): this {
+  public setParent(parent: { column: string, primaries: Array<number | string> }): this {
     this.parent = parent;
 
     return this;
@@ -66,44 +66,6 @@ export class Query {
     }
 
     return Promise.resolve(query.then());
-  }
-
-  /**
-   * Restrict this query to parents.
-   *
-   * @returns {any}
-   */
-  private restrictToParent(): knex.QueryBuilder {
-    const statement = this.statement;
-
-    if (!this.parent || !this.parent.primaries.length) {
-      return statement;
-    }
-
-    const parent = this.parent;
-
-    if (parent.primaries.length === 1) {
-      statement.where(parent.column, parent.primaries[0]);
-
-      return statement;
-    }
-
-    const client    = statement['client'];
-    const unionized = client.queryBuilder();
-
-    parent.primaries.forEach(primary => {
-      const toUnion = statement.clone().where(parent.column, primary);
-
-      if (client.config.client === 'sqlite3' || client.config.client === 'sqlite') {
-        unionized.union(client.queryBuilder().select('*').from(client.raw(toUnion).wrap('(', ')')));
-
-        return unionized;
-      }
-
-      unionized.union(toUnion, true);
-    });
-
-    return unionized;
   }
 
   /**
@@ -156,5 +118,43 @@ export class Query {
    */
   public getStatement(): knex.QueryBuilder {
     return this.statement;
+  }
+
+  /**
+   * Restrict this query to parents.
+   *
+   * @returns {any}
+   */
+  private restrictToParent(): knex.QueryBuilder {
+    const statement = this.statement;
+
+    if (!this.parent || !this.parent.primaries.length) {
+      return statement;
+    }
+
+    const parent = this.parent;
+
+    if (parent.primaries.length === 1) {
+      statement.where(parent.column, parent.primaries[0]);
+
+      return statement;
+    }
+
+    const client = statement['client'];
+    const unionized = client.queryBuilder();
+
+    parent.primaries.forEach(primary => {
+      const toUnion = statement.clone().where(parent.column, primary);
+
+      if (client.config.client === 'sqlite3' || client.config.client === 'sqlite') {
+        unionized.union(client.queryBuilder().select('*').from(client.raw(toUnion).wrap('(', ')')));
+
+        return unionized;
+      }
+
+      unionized.union(toUnion, true);
+    });
+
+    return unionized;
   }
 }

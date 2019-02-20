@@ -1,7 +1,7 @@
 import { Mapping } from './Mapping';
 import { Wetland } from './Wetland';
-import { Scope, Entity } from './Scope';
-import { EntityInterface, EntityCtor } from './EntityInterface';
+import { Entity, Scope } from './Scope';
+import { EntityCtor, EntityInterface } from './EntityInterface';
 import { Homefront } from 'homefront';
 import { EntityRepository } from './EntityRepository';
 import { Store } from './Store';
@@ -24,7 +24,7 @@ export class EntityManager {
    *
    * @type {{}}
    */
-  private entities: { [ key: string ]: { entity: EntityCtor<EntityInterface>, mapping: Mapping<EntityInterface> } } = {};
+  private entities: { [key: string]: { entity: EntityCtor<EntityInterface>, mapping: Mapping<EntityInterface> } } = {};
 
   /**
    * Holds instances of repositories that have been instantiated before, as a cache.
@@ -69,7 +69,7 @@ export class EntityManager {
    * @returns {Function}
    */
   public getEntity(name: string): EntityCtor<EntityInterface> {
-    const entity = this.entities[ name ];
+    const entity = this.entities[name];
 
     if (!entity) {
       throw new Error(`No entity found for "${name}".`);
@@ -121,24 +121,12 @@ export class EntityManager {
     return this.wetland.getStore(this.getStoreName(entity));
   }
 
-  private getStoreName(entity?: EntityInterface | string): string {
-    if (typeof entity === 'string') {
-      return entity;
-    }
-
-    if (entity) {
-      return this.getMapping(entity).getStoreName();
-    }
-
-    return null;
-  }
-
   /**
    * Get all registered entities.
    *
    * @returns {{}}
    */
-  public getEntities(): { [ key: string ]: { entity: EntityCtor<EntityInterface>, mapping: Mapping<EntityInterface> } } {
+  public getEntities(): { [key: string]: { entity: EntityCtor<EntityInterface>, mapping: Mapping<EntityInterface> } } {
     return this.entities;
   }
 
@@ -156,7 +144,7 @@ export class EntityManager {
       entity.setMapping(mapping);
     }
 
-    this.entities[ mapping.getEntityName() ] = { entity, mapping };
+    this.entities[mapping.getEntityName()] = { entity, mapping };
 
     return this;
   }
@@ -204,5 +192,17 @@ export class EntityManager {
     }
 
     return typeof hint === 'function' ? hint as EntityCtor<EntityInterface> : null;
+  }
+
+  private getStoreName(entity?: EntityInterface | string): string {
+    if (typeof entity === 'string') {
+      return entity;
+    }
+
+    if (entity) {
+      return this.getMapping(entity).getStoreName();
+    }
+
+    return null;
   }
 }
