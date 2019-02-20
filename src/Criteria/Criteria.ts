@@ -246,7 +246,7 @@ export class Criteria {
     }
 
     if (property.indexOf('.') > -1) {
-      let parts = property.split('.');
+      const parts = property.split('.');
 
       if (!this.mappings[parts[0]]) {
         return property;
@@ -257,10 +257,10 @@ export class Criteria {
       return parts.join('.');
     }
 
-    let columnName = this.hostMapping.getFieldName(property, property);
+    const columnName = this.hostMapping.getFieldName(property, property);
 
     if (this.hostAlias && this.hostMapping.getField(property, true)) {
-      columnName = this.hostAlias + '.' + columnName;
+      return this.hostAlias + '.' + columnName;
     }
 
     return columnName;

@@ -85,7 +85,7 @@ export class EntityRepository<T> {
     alias = alias || this.mapping.getTableName();
 
     if (!statement) {
-      let connection = this.getConnection();
+      const connection = this.getConnection();
 
       statement = connection(`${this.mapping.getTableName()} as ${alias}`);
     }
@@ -129,7 +129,7 @@ export class EntityRepository<T> {
    */
   public find(criteria?: {} | number | string, options: FindOptions = {}): Promise<Array<T>> {
     options.alias    = options.alias || this.mapping.getTableName();
-    let queryBuilder = this.getQueryBuilder(options.alias);
+    const queryBuilder = this.getQueryBuilder(options.alias);
 
     if (!options.select) {
       queryBuilder.select(options.alias);
@@ -152,7 +152,7 @@ export class EntityRepository<T> {
     }
 
     if (options.populate === true) {
-      let relations = this.mapping.getRelations();
+      const relations = this.mapping.getRelations();
 
       if (typeof relations === 'object' && relations !== null) {
         options.populate = Reflect.ownKeys(relations);
@@ -173,7 +173,7 @@ export class EntityRepository<T> {
           alias = join.split('.')[1];
         }
 
-        let targetBuilder = queryBuilder.quickJoin(column, alias);
+        const targetBuilder = queryBuilder.quickJoin(column, alias);
 
         if (!options.select) {
           targetBuilder.select(alias);
@@ -181,7 +181,7 @@ export class EntityRepository<T> {
       });
     } else if (options.populate && !Array.isArray(options.populate)) {
       Object.getOwnPropertyNames(options.populate).forEach(column => {
-        let targetBuilder = queryBuilder.quickJoin(column, options.populate[column]);
+        const targetBuilder = queryBuilder.quickJoin(column, options.populate[column]);
 
         if (!options.select) {
           targetBuilder.select(options.populate[column]);

@@ -148,11 +148,11 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public makeJoin(joinMethod: string, column: string, targetAlias: string): this {
-    let { owningMapping, join, property, alias } = this.getRelationship(column);
-    let TargetReference                        = this.entityManager.resolveEntityReference(join.targetEntity);
+    const { owningMapping, join, property, alias } = this.getRelationship(column);
+    const TargetReference                        = this.entityManager.resolveEntityReference(join.targetEntity);
     this.mappings[targetAlias]                 = this.mappings[targetAlias] || Mapping.forEntity(TargetReference);
-    let targetMapping                          = this.mappings[targetAlias];
-    let joinType                               = this.singleJoinTypes.indexOf(join.type) > -1 ? 'single' : 'collection';
+    const targetMapping                          = this.mappings[targetAlias];
+    const joinType                               = this.singleJoinTypes.indexOf(join.type) > -1 ? 'single' : 'collection';
     let joinColumn                             = owningMapping.getJoinColumn(property);
     let owning                                 = alias;
     let inversed                               = targetAlias;
@@ -174,10 +174,10 @@ export class QueryBuilder<T> {
         inverseJoinColumns = joinTable.joinColumns;
       }
 
-      let joinTableAlias = this.createAlias(joinTable.name);
+      const joinTableAlias = this.createAlias(joinTable.name);
 
       // Join from owning to makeJoin-table.
-      let onCriteriaOwning = {};
+      const onCriteriaOwning = {};
 
       joinColumns.forEach((joinColumn: JoinColumn) => {
         onCriteriaOwning[`${owning}.${joinColumn.referencedColumnName}`] = `${joinTableAlias}.${joinColumn.name}`;
@@ -186,7 +186,7 @@ export class QueryBuilder<T> {
       this.join(joinMethod, joinTable.name, joinTableAlias, onCriteriaOwning);
 
       // Join from makeJoin-table to inversed.
-      let onCriteriaInversed = {};
+      const onCriteriaInversed = {};
 
       inverseJoinColumns.forEach((inverseJoinColumn: JoinColumn) => {
         onCriteriaInversed[`${joinTableAlias}.${inverseJoinColumn.name}`] = `${inversed}.${inverseJoinColumn.referencedColumnName}`;
@@ -203,7 +203,7 @@ export class QueryBuilder<T> {
       inversed   = alias;
     }
 
-    let onCriteria = { [`${owning}.${joinColumn.name}`]: `${inversed}.${joinColumn.referencedColumnName}` };
+    const onCriteria = { [`${owning}.${joinColumn.name}`]: `${inversed}.${joinColumn.referencedColumnName}` };
 
     this.join(joinMethod, targetMapping.getTableName(), targetAlias, onCriteria);
 
@@ -359,8 +359,8 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   public quickJoin(column: string, targetAlias?: string): QueryBuilder<{new ()}> {
-    let { join, alias, property } = this.getRelationship(column);
-    let parentQueryBuilder      = this.getChild(alias) || this;
+    const { join, alias, property } = this.getRelationship(column);
+    const parentQueryBuilder      = this.getChild(alias) || this;
     targetAlias                 = targetAlias || parentQueryBuilder.createAlias(property);
 
     if (join.type !== Mapping.RELATION_MANY_TO_MANY && join.type !== Mapping.RELATION_ONE_TO_MANY) {
@@ -368,7 +368,7 @@ export class QueryBuilder<T> {
     }
 
     // Collections need to be fetched individually.
-    let childQueryBuilder           = parentQueryBuilder.populate(column, null, targetAlias);
+    const childQueryBuilder           = parentQueryBuilder.populate(column, null, targetAlias);
     this.queryBuilders[targetAlias] = childQueryBuilder;
 
     return childQueryBuilder;
@@ -384,14 +384,14 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder<{new()}>}
    */
   public populate(column: string, queryBuilder?: QueryBuilder<{new ()}>, targetAlias?: string): QueryBuilder<{new ()}> {
-    let { owningMapping, join, property, alias } = this.getRelationship(column);
+    const { owningMapping, join, property, alias } = this.getRelationship(column);
 
     if (join.type !== Mapping.RELATION_MANY_TO_MANY && join.type !== Mapping.RELATION_ONE_TO_MANY) {
       throw new Error(`It's not possible to populate relations with type '${join.type}', target must be a collection.`);
     }
 
-    let parentQueryBuilder                   = this.getChild(alias) || this;
-    let TargetReference                      = this.entityManager.resolveEntityReference(join.targetEntity);
+    const parentQueryBuilder                   = this.getChild(alias) || this;
+    const TargetReference                      = this.entityManager.resolveEntityReference(join.targetEntity);
     targetAlias                              = targetAlias || parentQueryBuilder.createAlias(property);
     parentQueryBuilder.mappings[targetAlias] = parentQueryBuilder.mappings[targetAlias] || Mapping.forEntity(TargetReference);
 
@@ -400,7 +400,7 @@ export class QueryBuilder<T> {
       queryBuilder = this.entityManager.getRepository(TargetReference).getQueryBuilder(targetAlias);
     }
 
-    let targetMapping               = queryBuilder.getHostMapping();
+    const targetMapping               = queryBuilder.getHostMapping();
     this.queryBuilders[targetAlias] = queryBuilder;
     let parentColumn;
 
@@ -433,7 +433,7 @@ export class QueryBuilder<T> {
       });
     }
 
-    let hydrator = parentQueryBuilder.getHydrator();
+    const hydrator = parentQueryBuilder.getHydrator();
 
     hydrator.getRecipe().hydrate = true;
 
@@ -454,9 +454,9 @@ export class QueryBuilder<T> {
    */
   private getRelationship(column: string): {owningMapping: Mapping<Entity>, join: Relationship, property: string, alias: string} {
     column                = column.indexOf('.') > -1 ? column : `${this.alias}.${column}`;
-    let [ alias, property ] = column.split('.');
-    let parent            = this.getChild(alias) || this;
-    let owningMapping     = parent.mappings[alias];
+    const [ alias, property ] = column.split('.');
+    const parent            = this.getChild(alias) || this;
+    const owningMapping     = parent.mappings[alias];
     let field;
 
     // Ensure existing mapping
@@ -593,7 +593,7 @@ export class QueryBuilder<T> {
    */
   private applyFrom(): this {
     if (this.derivedFrom) {
-      let { derived, alias } = this.derivedFrom;
+      const { derived, alias } = this.derivedFrom;
 
       this.statement.from(this.statement['client'].raw(`(${derived.getQuery().getSQL()}) as ${alias}`));
 
@@ -639,10 +639,10 @@ export class QueryBuilder<T> {
     }
 
     // Support select functions. Don't add to hydrator, as they aren't part of the entities.
-    let select       = Object.getOwnPropertyNames(propertyAlias);
-    let functionName = select[0] === 'alias' ? select[1] : select[0];
-    let alias        = propertyAlias[select[0] === 'alias' ? select[0] : select[1]];
-    let fieldName    = this.whereCriteria.mapToColumn(propertyAlias[functionName]);
+    const select       = Object.getOwnPropertyNames(propertyAlias);
+    const functionName = select[0] === 'alias' ? select[1] : select[0];
+    const alias        = propertyAlias[select[0] === 'alias' ? select[0] : select[1]];
+    const fieldName    = this.whereCriteria.mapToColumn(propertyAlias[functionName]);
 
     if (this.functions.indexOf(functionName) === -1) {
       throw new Error(`Unknown function "${select[0]}" specified.`);
@@ -670,13 +670,13 @@ export class QueryBuilder<T> {
       propertyAlias = `${alias}.${propertyAlias}`;
     }
 
-    let selectAliases  = [];
-    let hydrateColumns = {};
+    const selectAliases  = [];
+    const hydrateColumns = {};
 
     if (propertyAlias.indexOf('.') > -1) {
-      let parts              = propertyAlias.split('.');
-      let property           = parts[1];
-      let column             = this.whereCriteria.mapToColumn(propertyAlias);
+      const parts              = propertyAlias.split('.');
+      const property           = parts[1];
+      const column             = this.whereCriteria.mapToColumn(propertyAlias);
       hydrateColumns[column] = property;
       alias                  = parts[0];
 
@@ -684,13 +684,13 @@ export class QueryBuilder<T> {
 
       selectAliases.push(`${column} as ${column}`);
     } else {
-      let mapping = this.mappings[propertyAlias];
-      let fields  = mapping.getFields();
+      const mapping = this.mappings[propertyAlias];
+      const fields  = mapping.getFields();
       alias       = propertyAlias;
 
       Object.getOwnPropertyNames(fields).forEach(field => {
         if (!fields[field].relationship) {
-          let fieldName = fields[field].name || (fields[field].primary ? 'id' : null);
+          const fieldName = fields[field].name || (fields[field].primary ? 'id' : null);
 
           if (!fieldName) {
             throw new Error(
@@ -698,7 +698,7 @@ export class QueryBuilder<T> {
             );
           }
 
-          let fieldAlias             = (propertyAlias ? propertyAlias + '.' : '') + fieldName;
+          const fieldAlias             = (propertyAlias ? propertyAlias + '.' : '') + fieldName;
           hydrateColumns[fieldAlias] = field;
 
           selectAliases.push(`${fieldAlias} as ${fieldAlias}`);
@@ -722,7 +722,7 @@ export class QueryBuilder<T> {
    */
   private applyPrimaryKeySelect(alias: string): this {
     if (!this.appliedPrimaryKeys[alias]) {
-      let aliasRecipe                = this.hydrator.getRecipe(alias);
+      const aliasRecipe                = this.hydrator.getRecipe(alias);
       this.appliedPrimaryKeys[alias] = `${aliasRecipe.primaryKey.alias} as ${aliasRecipe.primaryKey.alias}`;
 
       this.statement.select(this.appliedPrimaryKeys[alias]);
@@ -826,7 +826,7 @@ export class QueryBuilder<T> {
    * @returns {QueryBuilder}
    */
   private applyGroupBy(groupBy: string | Array<string>): this {
-    let properties = [];
+    const properties = [];
 
     if (typeof groupBy === 'string') {
       properties.push(this.whereCriteria.mapToColumn(groupBy));
@@ -885,7 +885,7 @@ export class QueryBuilder<T> {
     } else if (Array.isArray(orderBy)) {
       orderBy.forEach(order => this.applyOrderBy(order));
     } else if (typeof orderBy === 'object') {
-      let property = Object.keys(orderBy)[0];
+      const property = Object.keys(orderBy)[0];
 
       this.applyOrderBy(property, orderBy[property]);
     }
@@ -1025,7 +1025,7 @@ export class QueryBuilder<T> {
       let fieldName, type;
 
       if (property.indexOf('.') > -1) {
-        let parts = property.split('.');
+        const parts = property.split('.');
 
         if (this.mappings[parts[0]].isRelation(parts[1]) && typeof value === 'object') {
           return;

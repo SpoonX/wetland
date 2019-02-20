@@ -114,7 +114,7 @@ export class Store {
       );
     }
 
-    let connection = knex(config);
+    const connection = knex(config);
 
     if (role === Store.ROLE_MASTER || role === null) {
       this.connections[Store.ROLE_MASTER].push(connection);
@@ -159,7 +159,7 @@ export class Store {
       return this.connections[role][0];
     }
 
-    let connection = this.connections[role][this.pointers[role]++];
+    const connection = this.connections[role][this.pointers[role]++];
 
     if (this.pointers[role] >= this.connections[role].length) {
       this.pointers[role] = 0;
@@ -178,7 +178,7 @@ export class Store {
    * @returns {SingleConfig}
    */
   private makeConnectionConfig(config: Object, connection: Object): SingleConfig {
-    let connectionConfig = { connection };
+    const connectionConfig = { connection };
 
     Object.getOwnPropertyNames(config).forEach(key => {
       if (key === 'connection' || key === 'connections') {

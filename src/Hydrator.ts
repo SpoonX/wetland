@@ -62,12 +62,12 @@ export class Hydrator {
    * @returns {EntityInterface|Function|EntityCtor<EntityInterface>}
    */
   public fromSchema(values: Object, EntityClass: EntityInterface | Function | EntityCtor<EntityInterface>): ProxyInterface {
-    let mapping = Mapping.forEntity(EntityClass);
+    const mapping = Mapping.forEntity(EntityClass);
     let entity  = typeof EntityClass === 'function' ? new (EntityClass as EntityCtor<EntityInterface>) : EntityClass;
     entity      = EntityProxy.patchEntity(entity as EntityInterface, this.entityManager);
 
     Object.getOwnPropertyNames(values).forEach(column => {
-      let property = mapping.getPropertyName(column);
+      const property = mapping.getPropertyName(column);
 
       if (!property) {
         return;
@@ -105,9 +105,9 @@ export class Hydrator {
    * @returns {Recipe}
    */
   public addRecipe(parent: null | string, alias: string, mapping: Mapping<Entity>, joinType?: string, property?: string): Recipe {
-    let primaryKey        = mapping.getPrimaryKey();
-    let primaryKeyAliased = `${alias}.${primaryKey}`;
-    let recipe            = {
+    const primaryKey        = mapping.getPrimaryKey();
+    const primaryKeyAliased = `${alias}.${primaryKey}`;
+    const recipe            = {
       hydrate   : false,
       parent    : null,
       entity    : mapping.getTarget() as EntityCtor<EntityInterface>,
@@ -121,7 +121,7 @@ export class Hydrator {
     this.recipeIndex[alias] = recipe;
 
     if (parent) {
-      let parentRecipe          = this.recipeIndex[parent];
+      const parentRecipe          = this.recipeIndex[parent];
       parentRecipe.joins        = parentRecipe.joins || {};
       parentRecipe.joins[alias] = recipe;
     } else {
@@ -153,10 +153,10 @@ export class Hydrator {
    * @returns {ArrayCollection}
    */
   public hydrateAll(rows: Array<Object>): ArrayCollection<EntityInterface> {
-    let entities = new ArrayCollection;
+    const entities = new ArrayCollection;
 
     rows.forEach(row => {
-      let hydrated = this.hydrate(row, this.recipe);
+      const hydrated = this.hydrate(row, this.recipe);
 
       if (hydrated) {
         entities.add(hydrated);
@@ -211,7 +211,7 @@ export class Hydrator {
    * @returns {Hydrator}
    */
   public clearCatalogue(alias?: string): this {
-    let recipe = this.getRecipe(alias);
+    const recipe = this.getRecipe(alias);
 
     delete recipe.catalogue;
 
@@ -227,8 +227,8 @@ export class Hydrator {
    */
   private hydrateJoins(recipe: Recipe, row: Object, entity: ProxyInterface): void {
     Object.getOwnPropertyNames(recipe.joins).forEach(alias => {
-      let joinRecipe = recipe.joins[alias];
-      let hydrated   = this.hydrate(row, joinRecipe);
+      const joinRecipe = recipe.joins[alias];
+      const hydrated   = this.hydrate(row, joinRecipe);
 
       if (!joinRecipe.hydrate) {
         return;
@@ -258,8 +258,8 @@ export class Hydrator {
    * @returns {Hydrator}
    */
   private addToCatalogue(recipe: Recipe, entity: ProxyInterface): this {
-    let primary                 = entity[recipe.primaryKey.property];
-    let catalogue               = this.getCatalogue(recipe.alias);
+    const primary                 = entity[recipe.primaryKey.property];
+    const catalogue               = this.getCatalogue(recipe.alias);
     catalogue.entities[primary] = entity;
 
     catalogue.primaries.add(primary);
@@ -297,7 +297,7 @@ export class Hydrator {
    * @returns {Catalogue}
    */
   public getCatalogue(alias: string): Catalogue {
-    let recipe       = this.getRecipe(alias);
+    const recipe       = this.getRecipe(alias);
     recipe.catalogue = recipe.catalogue || { entities: {}, primaries: new ArrayCollection() };
 
     return recipe.catalogue;
@@ -316,7 +316,7 @@ export class Hydrator {
       return null;
     }
 
-    let entity                         = new recipe.entity;
+    const entity                         = new recipe.entity;
     entity[recipe.primaryKey.property] = row[recipe.primaryKey.alias];
 
     Object.getOwnPropertyNames(recipe.columns).forEach(alias => {
@@ -325,7 +325,7 @@ export class Hydrator {
 
     this.unitOfWork.registerClean(entity, true);
 
-    let patched = EntityProxy.patchEntity(entity, this.entityManager);
+    const patched = EntityProxy.patchEntity(entity, this.entityManager);
 
     this.identityMap.register(entity, patched);
 

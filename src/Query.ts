@@ -59,7 +59,7 @@ export class Query {
    * @returns {Promise<[]>}
    */
   public execute(): Promise<Array<Object>> {
-    let query = this.restrictToParent();
+    const query = this.restrictToParent();
 
     if (process.env.LOG_QUERIES) {
       console.log('Executing query:', query.toString());
@@ -74,13 +74,13 @@ export class Query {
    * @returns {any}
    */
   private restrictToParent(): knex.QueryBuilder {
-    let statement = this.statement;
+    const statement = this.statement;
 
     if (!this.parent || !this.parent.primaries.length) {
       return statement;
     }
 
-    let parent = this.parent;
+    const parent = this.parent;
 
     if (parent.primaries.length === 1) {
       statement.where(parent.column, parent.primaries[0]);
@@ -88,11 +88,11 @@ export class Query {
       return statement;
     }
 
-    let client    = statement['client'];
-    let unionized = client.queryBuilder();
+    const client    = statement['client'];
+    const unionized = client.queryBuilder();
 
     parent.primaries.forEach(primary => {
-      let toUnion = statement.clone().where(parent.column, primary);
+      const toUnion = statement.clone().where(parent.column, primary);
 
       if (client.config.client === 'sqlite3' || client.config.client === 'sqlite') {
         unionized.union(client.queryBuilder().select('*').from(client.raw(toUnion).wrap('(', ')')));
@@ -132,7 +132,7 @@ export class Query {
         return null;
       }
 
-      let hydrated = this.hydrator.hydrateAll(result);
+      const hydrated = this.hydrator.hydrateAll(result);
 
       return Promise.all(this.children.map(child => {
         return child.getQuery().getResult();

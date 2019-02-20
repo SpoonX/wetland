@@ -6,7 +6,7 @@ export class Entity {
       return source.map(target => Entity.toObject(target)) as Partial<T>[];
     }
 
-    let mapping = Mapping.forEntity(source);
+    const mapping = Mapping.forEntity(source);
 
     if (!mapping) {
       return source;

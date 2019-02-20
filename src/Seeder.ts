@@ -36,7 +36,7 @@ export class Seeder {
     const entities   = new ArrayCollection();
 
     features.forEach(feature => {
-      let entity = populator.assign(Entity, feature);
+      const entity = populator.assign(Entity, feature);
 
       unitOfWork.setEntityState(entity, UnitOfWork.STATE_NEW);
 
@@ -66,7 +66,7 @@ export class Seeder {
 
     features.forEach(feature => {
 
-      let target = {};
+      const target = {};
 
       Reflect.ownKeys(feature).forEach((field: string) => {
         if (correctFields.includes(field)) {
@@ -76,7 +76,7 @@ export class Seeder {
 
       queries.push(entityRepository.findOne(target).then(response => {
         if (!response) {
-          let populated = populator.assign(Entity, feature);
+          const populated = populator.assign(Entity, feature);
 
           unitOfWork.setEntityState(populated, UnitOfWork.STATE_NEW);
 
@@ -129,10 +129,10 @@ export class Seeder {
 
     return readFile(path.join(src, file), 'utf8')
       .then(data => {
-        let [ entityName, extension ] = file.split('.'); // Very naive **might** need better
+        const [ entityName, extension ] = file.split('.'); // Very naive **might** need better
 
         if (extension === 'json') {
-          let features = JSON.parse(data);
+          const features = JSON.parse(data);
 
           return this.seedFeatures(entityName, features, clean, bypassLifecyclehooks);
         }

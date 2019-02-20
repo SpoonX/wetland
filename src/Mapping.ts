@@ -69,8 +69,8 @@ export class Mapping<T> {
     }
 
     target       = target['isEntityProxy'] ? (target as ProxyInterface).getTarget() : target;
-    let entity   = MetaData.getConstructor(target) as EntityCtor<T>;
-    let metadata = MetaData.forTarget(entity);
+    const entity   = MetaData.getConstructor(target) as EntityCtor<T>;
+    const metadata = MetaData.forTarget(entity);
 
     if (!metadata.fetch('mapping')) {
       metadata.put('mapping', new Mapping(entity));
@@ -182,15 +182,15 @@ export class Mapping<T> {
    * @return {Mapping}
    */
   public field(property: string, options: FieldOptions): this {
-    let entityManager = this.stageOrGetManager('field', arguments);
+    const entityManager = this.stageOrGetManager('field', arguments);
 
     if (!entityManager) {
       return this;
     }
 
-    let toUnderscore = entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
-    let propertyName = toUnderscore ? this.nameToUnderscore(property) : property;
-    let field        = this.mapping.fetchOrPut(`fields.${property}`, {});
+    const toUnderscore = entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
+    const propertyName = toUnderscore ? this.nameToUnderscore(property) : property;
+    const field        = this.mapping.fetchOrPut(`fields.${property}`, {});
 
     if (field.name) {
       this.mapping.remove(`columns.${this.getColumnName(property)}`);
@@ -213,7 +213,7 @@ export class Mapping<T> {
    * @returns {string}
    */
   private nameToUnderscore(property: string): string {
-    let name = property[0].toLowerCase() + property.slice(1);
+    const name = property[0].toLowerCase() + property.slice(1);
 
     return name.replace(/[A-Z]/g, '_$&').replace('__', '_').toLowerCase();
   }
@@ -247,7 +247,7 @@ export class Mapping<T> {
    * @returns {FieldOptions}
    */
   public getField(property: string, tolerant: boolean = false): FieldOptions {
-    let field = this.mapping.fetch(`fields.${property}`);
+    const field = this.mapping.fetch(`fields.${property}`);
 
     if (!field) {
       if (tolerant) {
@@ -298,7 +298,7 @@ export class Mapping<T> {
    * @param {boolean} includeRelations
    */
   public getFieldNames(includeRelations: boolean = false): Array<string> {
-    let fields = this.getFields();
+    const fields = this.getFields();
 
     return Reflect.ownKeys(fields).reduce((fieldNames, fieldName: string) => {
       if (!fields[fieldName].relationship || includeRelations) {
@@ -320,16 +320,16 @@ export class Mapping<T> {
    * @return {Mapping}
    */
   public entity(options: Object = {}): this {
-    let entityManager = this.stageOrGetManager('entity', arguments);
+    const entityManager = this.stageOrGetManager('entity', arguments);
 
     if (!entityManager) {
       return;
     }
 
-    let toUnderscore = entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
-    let tableName    = toUnderscore ? this.nameToUnderscore(this.target.name) : this.target.name.toLowerCase();
+    const toUnderscore = entityManager.getConfig().fetch('mapping.defaultNamesToUnderscore');
+    const tableName    = toUnderscore ? this.nameToUnderscore(this.target.name) : this.target.name.toLowerCase();
 
-    let defaultMapping = {
+    const defaultMapping = {
       repository: EntityRepository,
       name      : this.target.name,
       tableName : tableName,
@@ -376,7 +376,7 @@ export class Mapping<T> {
    * @return {Mapping}
    */
   public index(indexName: string | Array<string>, fields?: string | Array<string>): this {
-    let unprocessed = this.mapping.fetchOrPut(`unprocessed_indexes`, []);
+    const unprocessed = this.mapping.fetchOrPut(`unprocessed_indexes`, []);
 
     unprocessed.push({ indexName, fields });
 
@@ -389,7 +389,7 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   private processIndexes(): this {
-    let unprocessed = this.mapping.fetch(`unprocessed_indexes`);
+    const unprocessed = this.mapping.fetch(`unprocessed_indexes`);
 
     if (!unprocessed) {
       return;
@@ -406,7 +406,7 @@ export class Mapping<T> {
         fields = this.getColumnNames(fields);
       }
 
-      let indexes = this.mapping.fetchOrPut(`index.${indexName}`, new ArrayCollection);
+      const indexes = this.mapping.fetchOrPut(`index.${indexName}`, new ArrayCollection);
 
       indexes.add(...fields);
     });
@@ -447,7 +447,7 @@ export class Mapping<T> {
    * @return {Mapping}
    */
   public uniqueConstraint(constraintName: string | Array<string>, fields?: string | Array<string>) {
-    let unprocessed = this.mapping.fetchOrPut(`unprocessed_uniques`, []);
+    const unprocessed = this.mapping.fetchOrPut(`unprocessed_uniques`, []);
 
     unprocessed.push({ constraintName, fields });
 
@@ -460,7 +460,7 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   private processUniqueConstraints(): this {
-    let unprocessed = this.mapping.fetch(`unprocessed_uniques`);
+    const unprocessed = this.mapping.fetch(`unprocessed_uniques`);
 
     if (!unprocessed) {
       return;
@@ -477,7 +477,7 @@ export class Mapping<T> {
         fields = this.getColumnNames(fields);
       }
 
-      let constraints = this.mapping.fetchOrPut(`unique.${constraintName}`, new ArrayCollection);
+      const constraints = this.mapping.fetchOrPut(`unique.${constraintName}`, new ArrayCollection);
 
       constraints.add(...fields);
     });
@@ -557,7 +557,7 @@ export class Mapping<T> {
    * @returns {string|null}
    */
   public getPrimaryKeyField(): string {
-    let primaryKey = this.getPrimaryKey();
+    const primaryKey = this.getPrimaryKey();
 
     if (!primaryKey) {
       return null;
@@ -856,7 +856,7 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public ensureJoinColumn(property: string, options?: JoinColumn): this {
-    let field        = this.mapping.fetchOrPut(`fields.${property}`, { joinColumn: {} });
+    const field        = this.mapping.fetchOrPut(`fields.${property}`, { joinColumn: {} });
     field.joinColumn = Homefront.merge({
       name                : `${property}_id`,
       referencedColumnName: 'id',
@@ -879,17 +879,17 @@ export class Mapping<T> {
       throw new Error('EntityManager is required on the mapping. Make sure you registered the entity.');
     }
 
-    let field = this.mapping.fetchOrPut(`fields.${property}`, { joinTable: { name: '' } }) as FieldOptions;
+    const field = this.mapping.fetchOrPut(`fields.${property}`, { joinTable: { name: '' } }) as FieldOptions;
 
     if (field.joinTable && field.joinTable.complete) {
       return field.joinTable;
     }
 
-    let relationMapping = Mapping.forEntity(this.entityManager.resolveEntityReference(field.relationship.targetEntity));
-    let ownTableName    = this.getTableName();
-    let withTableName   = relationMapping.getTableName();
-    let ownPrimary      = this.getPrimaryKeyField();
-    let withPrimary     = relationMapping.getPrimaryKeyField();
+    const relationMapping = Mapping.forEntity(this.entityManager.resolveEntityReference(field.relationship.targetEntity));
+    const ownTableName    = this.getTableName();
+    const withTableName   = relationMapping.getTableName();
+    const ownPrimary      = this.getPrimaryKeyField();
+    const withPrimary     = relationMapping.getPrimaryKeyField();
     field.joinTable     = Homefront.merge({
       complete          : true,
       name              : `${ownTableName}_${withTableName}`,
@@ -928,8 +928,8 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public extendField(property: string, additional: Object): this {
-    let field     = this.mapping.fetchOrPut(`fields.${property}`, {});
-    let needsName = !field.name;
+    const field     = this.mapping.fetchOrPut(`fields.${property}`, {});
+    const needsName = !field.name;
 
     if (needsName) {
       field.name = property;
@@ -961,11 +961,11 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public completeMapping(): this {
-    let relations = this.getRelations();
-    let manager   = this.entityManager;
+    const relations = this.getRelations();
+    const manager   = this.entityManager;
 
-    for (let property in relations) {
-      let relation = relations[property];
+    for (const property in relations) {
+      const relation = relations[property];
 
       this.setDefaultCascades(property);
 
@@ -980,7 +980,7 @@ export class Mapping<T> {
 
       // Make sure refs are strings
       if (typeof relation.targetEntity !== 'string') {
-        let reference         = manager.resolveEntityReference(relation.targetEntity);
+        const reference         = manager.resolveEntityReference(relation.targetEntity);
         relation.targetEntity = Mapping.forEntity(reference).getEntityName();
       }
     }
@@ -1010,7 +1010,7 @@ export class Mapping<T> {
    * @returns {Mapping}
    */
   public static restore(mappingData: Object): Mapping<ProxyInterface> {
-    let mapping = new Mapping();
+    const mapping = new Mapping();
 
     mapping.getMappingData().merge(mappingData);
 

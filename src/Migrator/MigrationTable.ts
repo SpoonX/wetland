@@ -160,7 +160,7 @@ export class MigrationTable {
         return null;
       }
 
-      let connection = this.connection(this.tableName)
+      const connection = this.connection(this.tableName)
         .select('name')
         .where('run', lastRun)
         .orderBy('id', 'desc');

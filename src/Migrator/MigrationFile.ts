@@ -38,11 +38,11 @@ export class MigrationFile {
    * @returns {Bluebird}
    */
   public create(name: string, code?: {up: string, down: string}): Promise<any> {
-    let sourceFile    = `${__dirname}/templates/migration.${this.config.extension}.dist`;
-    let migrationName = `${this.makeMigrationName(name)}.${this.config.extension}`;
-    let targetFile    = path.join(this.config.directory, migrationName);
-    let readStream    = fs.createReadStream(sourceFile);
-    let writeStream   = fs.createWriteStream(targetFile);
+    const sourceFile    = `${__dirname}/templates/migration.${this.config.extension}.dist`;
+    const migrationName = `${this.makeMigrationName(name)}.${this.config.extension}`;
+    const targetFile    = path.join(this.config.directory, migrationName);
+    const readStream    = fs.createReadStream(sourceFile);
+    const writeStream   = fs.createWriteStream(targetFile);
     code              = code || { up: null, down: null };
 
     if (!code.up) {
@@ -83,7 +83,7 @@ export class MigrationFile {
    */
   public getMigrations(): Promise<Array<string>> {
     return Promise.promisify(fs.readdir)(this.config.directory).then(contents => {
-      let regexp = new RegExp(`\.${this.config.extension}$`);
+      const regexp = new RegExp(`\.${this.config.extension}$`);
 
       return contents
         .filter(migration => migration.search(regexp) > -1)
@@ -100,8 +100,8 @@ export class MigrationFile {
    * @returns {string}
    */
   private makeMigrationName(name): string {
-    let date = new Date();
-    let pad  = (source) => {
+    const date = new Date();
+    const pad  = (source) => {
       source = source.toString();
 
       return source[1] ? source : `0${source}`;

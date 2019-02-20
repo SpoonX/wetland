@@ -31,19 +31,19 @@ export class Populate {
    * @returns {Promise<{new()}>}
    */
   public findDataForUpdate(primaryKey: string | number, Entity: EntityCtor<{new ()}>, data: Object): Promise<any> {
-    let repository = this.entityManager.getRepository(Entity);
-    let mapping    = this.entityManager.getMapping(Entity);
-    let options    = { populate: new Collection(), alias: mapping.getTableName() };
-    let relations  = mapping.getRelations();
+    const repository = this.entityManager.getRepository(Entity);
+    const mapping    = this.entityManager.getMapping(Entity);
+    const options    = { populate: new Collection(), alias: mapping.getTableName() };
+    const relations  = mapping.getRelations();
 
     Reflect.ownKeys(data).forEach((property: string) => {
       if (!relations || !relations[property]) {
         return;
       }
 
-      let relation  = relations[property];
-      let reference = this.entityManager.resolveEntityReference(relation.targetEntity);
-      let type      = relation.type;
+      const relation  = relations[property];
+      const reference = this.entityManager.resolveEntityReference(relation.targetEntity);
+      const type      = relation.type;
 
       if (type === Mapping.RELATION_ONE_TO_MANY || type === Mapping.RELATION_MANY_TO_MANY) {
         return options.populate.add({ [property]: property });
@@ -96,9 +96,9 @@ export class Populate {
    * @returns {T}
    */
   public assign<T>(Entity: EntityCtor<T>, data: Object, base?: T | Collection<T>, recursive: boolean | number = 1): T {
-    let mapping = this.entityManager.getMapping(Entity);
-    let fields  = mapping.getFields();
-    let primary = mapping.getPrimaryKey();
+    const mapping = this.entityManager.getMapping(Entity);
+    const fields  = mapping.getFields();
+    const primary = mapping.getPrimaryKey();
 
     // Ensure base.
     if (!(base instanceof Entity)) {
@@ -121,7 +121,7 @@ export class Populate {
     }
 
     Reflect.ownKeys(data).forEach((property: string) => {
-      let field = fields[property];
+      const field = fields[property];
 
       // Only allow mapped fields to be assigned.
       if (!field) {
@@ -161,7 +161,7 @@ export class Populate {
         level--;
       }
 
-      let targetConstructor = this.entityManager.resolveEntityReference(field.relationship.targetEntity);
+      const targetConstructor = this.entityManager.resolveEntityReference(field.relationship.targetEntity);
 
       if (Array.isArray(data[property])) {
         base[property] = this.assignCollection(targetConstructor, data[property], base[property], level);

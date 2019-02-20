@@ -89,7 +89,7 @@ export class Run {
    * @returns {Bluebird<Knex.Transaction>}
    */
   public getTransaction(storeName?: string): Bluebird<Knex.Transaction> {
-    let store = this.entityManager.getStore(storeName);
+    const store = this.entityManager.getStore(storeName);
 
     if (this.transactions[storeName]) {
       if (this.transactions[storeName] instanceof Bluebird) {
@@ -100,7 +100,7 @@ export class Run {
     }
 
     return this.transactions[storeName] = new Bluebird<Knex.Transaction>(resolve => {
-      let connection = store.getConnection(Store.ROLE_MASTER);
+      const connection = store.getConnection(Store.ROLE_MASTER);
 
       connection.transaction(transaction => {
         this.transactions[storeName] = transaction;

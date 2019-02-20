@@ -51,7 +51,7 @@ export class Migration {
    * Prepare the migration by running it.
    */
   private prepare(): void {
-    let prepared = this.migration(this);
+    const prepared = this.migration(this);
 
     if (prepared && 'then' in prepared) {
       this.promise = true;
@@ -88,8 +88,8 @@ export class Migration {
    * @returns {{schema: Knex.SchemaBuilder, knex: Knex}}
    */
   public getBuilder(store?: string): {schema: Knex.SchemaBuilder, knex: Knex} {
-    let connection    = this.getConnection(store);
-    let schemaBuilder = connection.schema;
+    const connection    = this.getConnection(store);
+    const schemaBuilder = connection.schema;
 
     this.builders.push({ store, schemaBuilder, knex: connection });
 

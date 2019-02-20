@@ -69,7 +69,7 @@ export class EntityManager {
    * @returns {Function}
    */
   public getEntity(name: string): EntityCtor<EntityInterface> {
-    let entity = this.entities[ name ];
+    const entity = this.entities[ name ];
 
     if (!entity) {
       throw new Error(`No entity found for "${name}".`);
@@ -118,15 +118,19 @@ export class EntityManager {
    * @returns {Store}
    */
   public getStore(entity?: EntityInterface | string): Store {
-    let storeName = null;
+    return this.wetland.getStore(this.getStoreName(entity));
+  }
 
+  private getStoreName(entity?: EntityInterface | string): string {
     if (typeof entity === 'string') {
-      storeName = entity;
-    } else if (entity) {
-      storeName = this.getMapping(entity).getStoreName();
+      return entity;
     }
 
-    return this.wetland.getStore(storeName);
+    if (entity) {
+      return this.getMapping(entity).getStoreName();
+    }
+
+    return null;
   }
 
   /**
@@ -146,7 +150,7 @@ export class EntityManager {
    * @returns {EntityManager}
    */
   public registerEntity<T>(entity: EntityCtor<T> & EntityInterface): EntityManager {
-    let mapping = this.getMapping(entity).setEntityManager(this);
+    const mapping = this.getMapping(entity).setEntityManager(this);
 
     if (typeof entity.setMapping === 'function') {
       entity.setMapping(mapping);

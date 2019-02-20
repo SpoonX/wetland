@@ -107,7 +107,7 @@ export class Migrator {
    * @returns {Bluebird<any>}
    */
   public devMigrations(revert: boolean = false): Bluebird<any> {
-    let snapshot = this.wetland.getSnapshotManager();
+    const snapshot = this.wetland.getSnapshotManager();
 
     return snapshot
       .fetch()
@@ -209,7 +209,7 @@ export class Migrator {
       migrations = [ migrations as string ];
     }
 
-    let run = new Run(direction, this.manager, migrations as Array<string>, this.config.directory);
+    const run = new Run(direction, this.manager, migrations as Array<string>, this.config.directory);
 
     if (action === Migrator.ACTION_RUN) {
       return this.migrationTable.getLock()

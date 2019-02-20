@@ -68,7 +68,7 @@ export class SchemaBuilder {
    * @returns {boolean}
    */
   private useForeignKeys(store: string): boolean {
-    let manager = this.entityManager;
+    const manager = this.entityManager;
 
     if (!this.useForeignKeysGlobal) {
       this.useForeignKeysGlobal = manager.getConfig().fetch('useForeignKeys');
@@ -91,10 +91,10 @@ export class SchemaBuilder {
       this.runCode();
     }
 
-    let queries = [];
+    const queries = [];
 
     this.builders.forEach(builder => {
-      let query = builder.toString();
+      const query = builder.toString();
 
       if (query) {
         queries.push(query);
@@ -119,10 +119,10 @@ export class SchemaBuilder {
    * @returns {SchemaBuilder}
    */
   private runCode(): this {
-    let migration = {
+    const migration = {
       getBuilder: store => {
-        let connection    = this.entityManager.getStore(store).getConnection(Store.ROLE_MASTER);
-        let schemaBuilder = connection.schema;
+        const connection    = this.entityManager.getStore(store).getConnection(Store.ROLE_MASTER);
+        const schemaBuilder = connection.schema;
 
         this.builders.push(schemaBuilder);
 
@@ -146,7 +146,7 @@ export class SchemaBuilder {
       this.runCode();
     }
 
-    let queries = [];
+    const queries = [];
 
     this.builders.forEach(query => {
       queries.push(query.then());
@@ -165,16 +165,16 @@ export class SchemaBuilder {
   public process(instructionSets): this {
     let spaceCount = 4;
     let allCode    = [];
-    let spacing    = (change = 0): string => {
+    const spacing    = (change = 0): string => {
       spaceCount += change;
 
       return ' '.repeat(spaceCount - change);
     };
 
     Reflect.ownKeys(instructionSets).forEach((store: string) => {
-      let useForeignKeys = this.useForeignKeys(store);
-      let instructions   = instructionSets[store];
-      let code           = [];
+      const useForeignKeys = this.useForeignKeys(store);
+      const instructions   = instructionSets[store];
+      const code           = [];
 
       // Drop foreign keys
       useForeignKeys && this.buildDropForeignKeys(instructions.foreign.drop, code, spacing);
@@ -203,7 +203,7 @@ export class SchemaBuilder {
       useForeignKeys && this.buildCreateForeignKeys(instructions.foreign.create, code, spacing);
 
       if (code.length) {
-        allCode.push(`${spacing()}let builder = migration.getBuilder(${`'${store}'` || ''});`);
+        allCode.push(`${spacing()}const builder = migration.getBuilder(${`'${store}'` || ''});`);
 
         allCode = allCode.concat(code);
       }
@@ -302,11 +302,11 @@ export class SchemaBuilder {
                      code: Array<string>,
                      spacing: (change?: number)=>string) {
     instructions[action].forEach(actionData => {
-      let tableName      = actionData.tableName;
-      let table          = actionData.info;
-      let hasDropColumns = Array.isArray(table.dropColumn) && table.dropColumn.length;
+      const tableName      = actionData.tableName;
+      const table          = actionData.info;
+      const hasDropColumns = Array.isArray(table.dropColumn) && table.dropColumn.length;
       let pushedBuilder  = false;
-      let ensureBuilder  = () => {
+      const ensureBuilder  = () => {
         if (pushedBuilder) {
           return;
         }
@@ -315,7 +315,7 @@ export class SchemaBuilder {
         spacing(2);
 
         if (action === 'create' && actionData.info.meta) {
-          let meta = actionData.info.meta;
+          const meta = actionData.info.meta;
 
           if (meta.charset) {
             code.push(`${spacing()}table.charset('${meta.charset}');`);

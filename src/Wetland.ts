@@ -81,10 +81,10 @@ export class Wetland {
       this.config.merge(config);
     }
 
-    let stores      = this.config.fetch('stores');
-    let entities    = this.config.fetch('entities');
-    let entityPaths = this.config.fetch('entityPaths', []);
-    let entityPath  = this.config.fetch('entityPath');
+    const stores      = this.config.fetch('stores');
+    const entities    = this.config.fetch('entities');
+    const entityPaths = this.config.fetch('entityPaths', []);
+    const entityPath  = this.config.fetch('entityPath');
 
     if (stores) {
       this.registerStores(stores);
@@ -109,8 +109,8 @@ export class Wetland {
         .filter(match => match.search(entityFilterRegexp) > -1)
         .map(entity => entity.replace(entityExtensionRegexp, ''))
         .forEach(entity => {
-          let filePath     = path.resolve(entityPath, entity);
-          let entityModule = require(filePath);
+          const filePath     = path.resolve(entityPath, entity);
+          const entityModule = require(filePath);
           let ToRegister   = entityModule;
 
           if (typeof ToRegister !== 'function') {
@@ -173,7 +173,7 @@ export class Wetland {
    * @returns {Wetland}
    */
   public registerStores(stores: Object): Wetland {
-    for (let store in stores) {
+    for (const store in stores) {
       this.registerStore(store, stores[store]);
     }
 
@@ -215,7 +215,7 @@ export class Wetland {
       throw new Error('No store name supplied, and no default store found.');
     }
 
-    let store = this.stores[storeName];
+    const store = this.stores[storeName];
 
     if (!store) {
       throw new Error(`No store called "${storeName}" found.`);
@@ -245,7 +245,7 @@ export class Wetland {
   /**
    * Get a scoped entityManager. Example:
    *
-   *  let wet = new Wetland();
+   *  const wet = new Wetland();
    *  wet.getManager();
    *
    * @returns {Scope}
@@ -315,10 +315,10 @@ export class Wetland {
    * @returns {Promise<any>}
    */
   public destroyConnections(): Promise<any> {
-    let destroys = [];
+    const destroys = [];
 
     Object.getOwnPropertyNames(this.stores).forEach(storeName => {
-      let connections = this.stores[storeName].getConnections();
+      const connections = this.stores[storeName].getConnections();
 
       connections[Store.ROLE_SLAVE].forEach(connection => {
         destroys.push(connection.destroy().then());

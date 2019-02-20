@@ -47,7 +47,7 @@ export class Cleaner {
     return snapshotManager
       .fetch()
       .then(previous => {
-        let instructions = snapshotManager.diff(previous, {});
+        const instructions = snapshotManager.diff(previous, {});
 
         return schemaBuilder.process(instructions).apply();
       });
