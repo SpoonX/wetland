@@ -35,21 +35,17 @@
   },
   "homepage": "https://wetland.spoonx.org",
   "dependencies": {
-    "@types/knex": "0.0.35",
-    "bluebird": "^3.4.6",
+    "bluebird": "^3.5.3",
     "csv-parse": "^1.2.0",
     "del": "^3.0.0",
     "homefront": "^3.0.0",
-    "knex": "^0.12.6",
+    "knex": "^0.16.3",
     "mkdirp": "^0.5.1",
-    "tslint": "^5.11.0",
-    "tslint-config-prettier": "^1.15.0",
-    "tslint-eslint-rules": "^5.4.0",
     "stream-replace": "^1.0.0"
   },
   "devDependencies": {
     "@types/chai": "^3.4.30",
-    "@types/knex": "0.0.35",
+    "@types/knex": "^0.15.2",
     "@types/mkdirp": "^0.3.29",
     "@types/mocha": "^2.2.29",
     "@types/node": "^6.0.41",
@@ -62,6 +58,9 @@
     "rimraf": "^2.6.1",
     "sqlite3": "^4.0.2",
     "ts-node": "^5.0.1",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
+    "tslint-eslint-rules": "^5.4.0",
     "typescript": "^3.0.3"
   }
 }
