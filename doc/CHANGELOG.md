@@ -1,3 +1,12 @@
+# [5.0.0-0](https://github.com/SpoonX/wetland/compare/v4.1.5...v5.0.0-0) (2019-02-20)
+
+
+### Features
+
+* **project:** add support for unmanaged query builders ([2cae164](https://github.com/SpoonX/wetland/commit/2cae164))
+
+
+
 <a name="4.1.5"></a>
 ## [4.1.5](https://github.com/SpoonX/wetland/compare/v4.1.4...v4.1.5) (2018-11-20)
 
