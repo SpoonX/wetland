@@ -65,7 +65,7 @@ export class Query {
       console.log('Executing query:', query.toString());
     }
 
-    return query.then();
+    return Promise.resolve(query.then());
   }
 
   /**

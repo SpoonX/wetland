@@ -1,5 +1,4 @@
 import * as Knex from 'knex';
-import * as Bluebird from 'bluebird';
 import { Migrator } from './Migrator';
 
 export class MigrationTable {
@@ -39,11 +38,13 @@ export class MigrationTable {
    * @returns {Promise<boolean>}
    */
   private isLocked(transaction: Knex.Transaction): Promise<boolean> {
-    return this.connection(this.lockTableName)
+    const isLocked = this.connection(this.lockTableName)
       .transacting(transaction)
       .forUpdate()
       .select('*')
       .then(data => !!data[0] && !!data[0].locked);
+
+    return Promise.resolve(isLocked);
   }
 
   /**
@@ -54,7 +55,7 @@ export class MigrationTable {
    * @returns {QueryBuilder}
    */
   private lockMigrations(transaction): Promise<any> {
-    return this.connection(this.lockTableName).transacting(transaction).update({ locked: 1 });
+    return Promise.resolve(this.connection(this.lockTableName).transacting(transaction).update({ locked: 1 }));
   }
 
   /**
@@ -82,7 +83,7 @@ export class MigrationTable {
    * @returns {QueryBuilder}
    */
   public freeLock(): Promise<any> {
-    return this.connection(this.lockTableName).update({ locked: 0 });
+    return Promise.resolve(this.connection(this.lockTableName).update({ locked: 0 }));
   }
 
   /**
@@ -90,28 +91,32 @@ export class MigrationTable {
    *
    * @returns {Promise<any>}
    */
-  private ensureMigrationTables(): Promise<any> {
-    let schemaBuilder = this.connection.schema;
+  private async ensureMigrationTables(): Promise<any> {
+    const connection = this.connection;
+    const migrationTableExists = await connection.schema.hasTable(this.tableName);
 
-    return schemaBuilder.hasTable(this.tableName)
-      .then(exists => {
-        if (exists) {
-          return Bluebird.resolve();
-        }
+    if (migrationTableExists) {
+      return;
+    }
 
-        schemaBuilder.createTableIfNotExists(this.tableName, t => {
-          t.increments();
-          t.string('name');
-          t.integer('run');
-          t.timestamp('migration_time').defaultTo(this.connection.fn.now());
-          t.index([ 'run' ]);
-          t.index([ 'migration_time' ]);
-        });
+    await connection.schema.createTable(this.tableName, t => {
+      t.increments();
+      t.string('name');
+      t.integer('run');
+      t.timestamp('migration_time').defaultTo(connection.fn.now());
+      t.index([ 'run' ]);
+      t.index([ 'migration_time' ]);
+    });
 
-        schemaBuilder.createTableIfNotExists(this.lockTableName, t => t.boolean('locked'));
+    const lockTableExists = await connection.schema.hasTable(this.lockTableName);
 
-        return schemaBuilder;
-      });
+    if (lockTableExists) {
+      return;
+    }
+
+    await connection.schema.createTable(this.lockTableName, t => t.boolean('locked'));
+
+    return connection.schema;
   }
 
   /**
@@ -120,11 +125,13 @@ export class MigrationTable {
    * @returns {Promise<number|null>}
    */
   public getLastRunId(): Promise<number|null> {
-    return this.connection(this.tableName)
+    const lastRunId = this.connection(this.tableName)
       .select('run')
       .limit(1)
       .orderBy('run', 'desc')
       .then(result => result[0] ? result[0].run : null);
+
+    return Promise.resolve(lastRunId);
   }
 
   /**
@@ -156,7 +163,7 @@ export class MigrationTable {
       let connection = this.connection(this.tableName)
         .select('name')
         .where('run', lastRun)
-        .orderBy('id', 'desc') as Promise<Array<{name: string}>>;
+        .orderBy('id', 'desc');
 
       return connection.then(results => results.map(result => result.name));
     });
@@ -170,7 +177,7 @@ export class MigrationTable {
   public getAllRun(): Promise<Array<Object>|null> {
     return this.ensureMigrationTables().then(() => {
       return this.connection(this.tableName)
-        .orderBy('id', 'desc') as Promise<Array<Object>>;
+        .orderBy('id', 'desc');
     });
   }
 
@@ -184,7 +191,7 @@ export class MigrationTable {
    */
   public saveRun(direction: string, migrations: Array<string>): Promise<any> {
     if (direction === Migrator.DIRECTION_DOWN) {
-      return this.connection(this.tableName).whereIn('name', migrations).del();
+      return Promise.resolve(this.connection(this.tableName).whereIn('name', migrations).del());
     }
 
     return this.getLastRunId().then(lastRun => {

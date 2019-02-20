@@ -595,7 +595,7 @@ export class QueryBuilder<T> {
     if (this.derivedFrom) {
       let { derived, alias } = this.derivedFrom;
 
-      this.statement.from(this.statement['client'].raw(`(${this.derivedFrom.derived.getQuery().getSQL()}) as ${alias}`));
+      this.statement.from(this.statement['client'].raw(`(${derived.getQuery().getSQL()}) as ${alias}`));
 
       this.derivedFrom = null;
     }
@@ -742,7 +742,12 @@ export class QueryBuilder<T> {
   public insert(values, returning?: string): this {
     this.setCriteriaHostAlias();
 
-    this.statement.insert(this.mapToColumns(values), returning);
+    // Returning has no effect on sqlite as it's not supported.
+    if (this.statement['client'].config.client === 'sqlite3' || this.statement['client'].config.client === 'sqlite') {
+      this.statement.insert(this.mapToColumns(values));
+    } else {
+      this.statement.insert(this.mapToColumns(values), returning);
+    }
 
     return this;
   }
@@ -759,7 +764,13 @@ export class QueryBuilder<T> {
     this.setCriteriaHostAlias();
 
     this.statement.from(this.mappings[this.alias].getTableName());
-    this.statement.update(this.mapToColumns(values), returning);
+
+    // Returning has no effect on sqlite as it's not supported.
+    if (this.statement['client'].config.client === 'sqlite3' || this.statement['client'].config.client === 'sqlite') {
+      this.statement.update(this.mapToColumns(values));
+    } else {
+      this.statement.update(this.mapToColumns(values), returning);
+    }
 
     return this;
   }
