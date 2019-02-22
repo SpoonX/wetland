@@ -866,10 +866,11 @@ export class QueryBuilder<T> {
     } else {
       const mapping = this.mappings[propertyAlias];
       const fields = mapping.getFields();
+      let currentEntitysPrimaryKey = mapping.getPrimaryKeyField();
       alias = propertyAlias;
 
       Object.getOwnPropertyNames(fields).forEach(field => {
-        if (!fields[field].relationship) {
+        if (!fields[field].relationship && field != currentEntitysPrimaryKey) {
           const fieldName = fields[field].name || (fields[field].primary ? 'id' : null);
 
           if (!fieldName) {
@@ -886,6 +887,7 @@ export class QueryBuilder<T> {
       });
     }
 
+    this.applyPrimaryKeySelect(alias);
     this.statement.select(selectAliases);
     this.hydrator.getRecipe(alias).hydrate = true;
     this.hydrator.addColumns(alias, hydrateColumns);
