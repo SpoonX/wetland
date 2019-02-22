@@ -852,7 +852,7 @@ export class QueryBuilder<T> {
 
     const selectAliases = [];
     const hydrateColumns = {};
-
+    let addPrimaryKey = false;
     if (propertyAlias.indexOf('.') > -1) {
       const parts = propertyAlias.split('.');
       const property = parts[1];
@@ -884,10 +884,15 @@ export class QueryBuilder<T> {
 
           selectAliases.push(`${fieldAlias} as ${fieldAlias}`);
         }
+        else if(field == currentEntitysPrimaryKey) {
+          addPrimaryKey = true;
+        }
       });
     }
 
-    this.applyPrimaryKeySelect(alias);
+    if(addPrimaryKey) {
+      this.applyPrimaryKeySelect(alias);
+    }
     this.statement.select(selectAliases);
     this.hydrator.getRecipe(alias).hydrate = true;
     this.hydrator.addColumns(alias, hydrateColumns);
