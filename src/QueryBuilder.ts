@@ -852,7 +852,7 @@ export class QueryBuilder<T> {
 
     const selectAliases = [];
     const hydrateColumns = {};
-    let addPrimaryKey = false;
+
     if (propertyAlias.indexOf('.') > -1) {
       const parts = propertyAlias.split('.');
       const property = parts[1];
@@ -870,7 +870,7 @@ export class QueryBuilder<T> {
       alias = propertyAlias;
 
       Object.getOwnPropertyNames(fields).forEach(field => {
-        if (!fields[field].relationship && field != currentEntitysPrimaryKey) {
+        if (!fields[field].relationship && field !== currentEntitysPrimaryKey) {
           const fieldName = fields[field].name || (fields[field].primary ? 'id' : null);
 
           if (!fieldName) {
@@ -884,15 +884,12 @@ export class QueryBuilder<T> {
 
           selectAliases.push(`${fieldAlias} as ${fieldAlias}`);
         }
-        else if(field == currentEntitysPrimaryKey) {
-          addPrimaryKey = true;
+        else if(field === currentEntitysPrimaryKey) {
+          this.applyPrimaryKeySelect(alias);
         }
-      });
+      }, this);
     }
 
-    if(addPrimaryKey) {
-      this.applyPrimaryKeySelect(alias);
-    }
     this.statement.select(selectAliases);
     this.hydrator.getRecipe(alias).hydrate = true;
     this.hydrator.addColumns(alias, hydrateColumns);
