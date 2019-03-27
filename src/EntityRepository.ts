@@ -61,16 +61,37 @@ export class EntityRepository<T> {
    * @returns {QueryBuilder}
    */
   public getQueryBuilder(alias?: string, statement?: knex.QueryBuilder, managed: boolean = true): QueryBuilder<T> {
-    alias = alias || this.mapping.getTableName();
-
-    if (!statement) {
-      const connection = this.getConnection();
-
-      statement = connection(`${this.mapping.getTableName()} as ${alias}`);
-    }
+    const builderAlias = this.getAlias(alias);
 
     // Create a new QueryBuilder, pass in a scoped entity manager.
-    return new QueryBuilder(this.getScope(), statement, this.mapping, alias, managed);
+    return new QueryBuilder(this.getScope(), this.getStatement(builderAlias, statement), this.mapping, builderAlias, managed);
+  }
+
+  /**
+   * Resolve to an alias. If none was supplied the table name is used.
+   *
+   * @param {string} [alias]
+   */
+  protected getAlias(alias?: string) {
+    return alias || this.mapping.getTableName();
+  }
+
+  /**
+   * Resolve to a statement. If none was supplied a new one is created.
+   *
+   * @param {string}            alias
+   * @param {knex.QueryBuilder} [statement]
+   *
+   * @returns {knex.QueryBuilder}
+   */
+  protected getStatement(alias: string, statement?: knex.QueryBuilder) {
+    if (statement) {
+      return statement;
+    }
+
+    const connection = this.getConnection();
+
+    return connection(`${this.mapping.getTableName()} as ${alias}`);
   }
 
   /**
