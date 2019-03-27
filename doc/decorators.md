@@ -129,6 +129,24 @@ class Foo {}
 class Foo {}
 ```
 
+- Directly on a property
+
+```js
+class Foo {
+  @index()
+  public name: string;
+}
+```
+
+- Directly on a property with a custom index name
+
+```js
+class Foo {
+  @index('idx_custom')
+  public name: string;
+}
+```
+
 #### @uniqueConstraint
 
 Creates a unique constraint on one of the field of the entity.
@@ -154,6 +172,24 @@ class Foo {}
 @uniqueConstraint('property')
 @uniqueConstraint(['property1', 'property2'])
 class Foo {}
+```
+
+- Directly on a property
+
+```js
+class Foo {
+  @uniqueConstraint()
+  public name: string;
+}
+```
+
+- Directly on a property with a custom constraint name
+
+```js
+class Foo {
+  @uniqueConstraint('custom_constraint_name')
+  public name: string;
+}
 ```
 
 ### Properties decorators

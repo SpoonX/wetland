@@ -50,10 +50,20 @@ export function autoFields () {
  * @param {Array|string} indexName
  * @param {Array|string} [fields]
  *
- * @return {Mapping}
+ * @return {(target: Object, property: string) => void}
  */
 export function index (indexName: string | Array<string>, fields?: string | Array<string>) {
-  return (target: Object) => {
+  return (target: Object, property: string) => {
+    if (property) {
+      if (indexName) {
+        Mapping.forEntity(target).index(indexName, property);
+      } else {
+        Mapping.forEntity(target).index(property);
+      }
+
+      return;
+    }
+
     Mapping.forEntity(target).index(indexName, fields);
   };
 }
@@ -75,10 +85,21 @@ export function index (indexName: string | Array<string>, fields?: string | Arra
  * @param {Array|string} constraintName
  * @param {Array|string} [fields]
  *
- * @return {Function}
+ *
+ * @return {(target: Object, property: string) => void}
  */
 export function uniqueConstraint (constraintName: string | Array<string>, fields?: string | Array<string>) {
-  return (target: Object) => {
+  return (target: Object, property: string) => {
+    if (property) {
+      if (constraintName) {
+        Mapping.forEntity(target).uniqueConstraint(constraintName, property);
+      } else {
+        Mapping.forEntity(target).uniqueConstraint(property);
+      }
+
+      return;
+    }
+
     Mapping.forEntity(target).uniqueConstraint(constraintName, fields);
   };
 }
