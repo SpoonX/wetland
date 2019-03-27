@@ -501,7 +501,6 @@ export class UnitOfWork {
     this.relationshipsChangedObjects.forEach(changed => {
       const relationChanges = MetaData.forInstance(changed).fetch('entityState.relations');
       const mapping = Mapping.forEntity(changed);
-      const relations = mapping.getRelations();
       const processChanged = changedType => {
         Object.getOwnPropertyNames(relationChanges[changedType]).forEach(property => {
           const changes = relationChanges[changedType];
