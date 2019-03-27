@@ -54,17 +54,15 @@ export function autoFields () {
  */
 export function index (indexName: string | Array<string>, fields?: string | Array<string>) {
   return (target: Object, property: string) => {
-    if (property) {
-      if (indexName) {
-        Mapping.forEntity(target).index(indexName, property);
-      } else {
-        Mapping.forEntity(target).index(property);
-      }
-
-      return;
+    if (!property) {
+      return Mapping.forEntity(target).index(indexName, fields);
     }
 
-    Mapping.forEntity(target).index(indexName, fields);
+    if (indexName) {
+      return Mapping.forEntity(target).index(indexName, property);
+    }
+
+    Mapping.forEntity(target).index(property);
   };
 }
 
@@ -90,17 +88,15 @@ export function index (indexName: string | Array<string>, fields?: string | Arra
  */
 export function uniqueConstraint (constraintName: string | Array<string>, fields?: string | Array<string>) {
   return (target: Object, property: string) => {
-    if (property) {
-      if (constraintName) {
-        Mapping.forEntity(target).uniqueConstraint(constraintName, property);
-      } else {
-        Mapping.forEntity(target).uniqueConstraint(property);
-      }
-
-      return;
+    if (!property) {
+      return Mapping.forEntity(target).uniqueConstraint(constraintName, fields);
     }
 
-    Mapping.forEntity(target).uniqueConstraint(constraintName, fields);
+    if (constraintName) {
+      return Mapping.forEntity(target).uniqueConstraint(constraintName, property);
+    }
+
+    Mapping.forEntity(target).uniqueConstraint(property);
   };
 }
 
