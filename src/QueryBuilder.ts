@@ -842,7 +842,7 @@ export class QueryBuilder<T> {
    *
    * @returns {QueryBuilder}
    */
-  private applyRegularSelect(propertyAlias): this {
+  private applyRegularSelect(propertyAlias: string): this {
     let alias = this.alias;
 
     // Set default propertyAlias for context-entity properties.
