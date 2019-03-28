@@ -120,14 +120,14 @@ export class EntityRepository<T> {
   }
 
   /**
-   * Find entities based on provided criteria.
+   * Build a QueryBuilder to find entities based on provided criteria.
    *
    * @param {{}}          [criteria]
    * @param {FindOptions} [options]
    *
-   * @returns {Promise<Array>}
+   * @returns {QueryBuilder}
    */
-  public find(criteria?: {} | number | string, options: FindOptions = {}): Promise<Array<T>> {
+  public prepareFindQuery(criteria?: {} | number | string, options: FindOptions = {}): QueryBuilder<T> {
     options.alias = options.alias || this.mapping.getTableName();
     const queryBuilder = this.getQueryBuilder(options.alias);
 
@@ -148,7 +148,7 @@ export class EntityRepository<T> {
     this.applyOptions(queryBuilder, options);
 
     if (!options.populate) {
-      return queryBuilder.getQuery().getResult();
+      return queryBuilder;
     }
 
     if (options.populate === true) {
@@ -189,7 +189,19 @@ export class EntityRepository<T> {
       });
     }
 
-    return queryBuilder.getQuery().getResult();
+    return queryBuilder;
+  }
+
+  /**
+   * Find entities based on provided criteria.
+   *
+   * @param {{}}          [criteria]
+   * @param {FindOptions} [options]
+   *
+   * @returns {Promise<Array>}
+   */
+  public find(criteria?: {} | number | string, options: FindOptions = {}): Promise<Array<T>> {
+    return this.prepareFindQuery(criteria, options).getQuery().getResult();
   }
 
   /**
