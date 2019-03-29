@@ -91,7 +91,7 @@ export class Hydrator {
   /**
    * Get a recipe.
    *
-   * @param {string}alias
+   * @param {string} alias
    * @returns {any}
    */
   public getRecipe(alias?): Recipe {
@@ -100,6 +100,23 @@ export class Hydrator {
     }
 
     return this.recipe;
+  }
+
+  /**
+   * Completely remove a recipe.
+   *
+   * @param {string} alias
+   *
+   * @returns {void}
+   */
+  public removeRecipe(alias): void {
+    const recipe = this.recipeIndex[alias];
+
+    if (recipe && recipe.parentRecipe) {
+      delete recipe.parentRecipe.joins[alias];
+    }
+
+    delete this.recipeIndex[alias];
   }
 
   /**
@@ -116,7 +133,7 @@ export class Hydrator {
   public addRecipe(parent: null | string, alias: string, mapping: Mapping<Entity>, joinType?: string, property?: string): Recipe {
     const primaryKey = mapping.getPrimaryKey();
     const primaryKeyAliased = `${alias}.${primaryKey}`;
-    const recipe = {
+    const recipe: Recipe = {
       hydrate: false,
       parent: null,
       entity: mapping.getTarget() as EntityCtor<EntityInterface>,
@@ -133,6 +150,7 @@ export class Hydrator {
       const parentRecipe = this.recipeIndex[parent];
       parentRecipe.joins = parentRecipe.joins || {};
       parentRecipe.joins[alias] = recipe;
+      recipe.parentRecipe = parentRecipe;
     } else {
       this.recipe = recipe;
     }
@@ -363,6 +381,7 @@ export interface Recipe {
   columns: {};
   catalogue?: Catalogue;
   parent?: { property: string, column: string, entities: Object };
+  parentRecipe?: Recipe;
   joins?: { [key: string]: Recipe };
   property?: string;
   type?: string;
