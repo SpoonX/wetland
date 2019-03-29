@@ -12,7 +12,7 @@ export { Query } from './Query';
 export { Store } from './Store';
 export { UnitOfWork } from './UnitOfWork';
 export { ArrayCollection } from './ArrayCollection';
-export { EntityRepository } from './EntityRepository';
+export { EntityRepository, FindOptions } from './EntityRepository';
 export { Wetland } from './Wetland';
 export { Mapping, Field, FieldOptions, JoinColumn, JoinTable, Relationship } from './Mapping';
 export { QueryBuilder } from './QueryBuilder';
