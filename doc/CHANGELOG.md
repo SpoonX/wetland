@@ -1,3 +1,13 @@
+# [5.0.0](https://github.com/SpoonX/wetland/compare/v5.0.0-0...v5.0.0) (2019-03-29)
+
+
+### Features
+
+* **Hydrator:** add removeRecipe ([a560d50](https://github.com/SpoonX/wetland/commit/a560d50))
+* **Mapping:** allow indexes and constraints to be set on properties ([e0a352e](https://github.com/SpoonX/wetland/commit/e0a352e))
+
+
+
 # [5.0.0-0](https://github.com/SpoonX/wetland/compare/v4.1.5...v5.0.0-0) (2019-02-20)
 
 
