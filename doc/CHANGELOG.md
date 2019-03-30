@@ -1,3 +1,12 @@
+## [5.0.1](https://github.com/SpoonX/wetland/compare/v5.0.0...v5.0.1) (2019-03-30)
+
+
+### Bug Fixes
+
+* **decorators:** make index and constraint name optional ([86ce545](https://github.com/SpoonX/wetland/commit/86ce545))
+
+
+
 # [5.0.0](https://github.com/SpoonX/wetland/compare/v5.0.0-0...v5.0.0) (2019-03-29)
 
 
