@@ -1,3 +1,12 @@
+## [5.0.2](https://github.com/SpoonX/wetland/compare/v5.0.1...v5.0.2) (2019-03-30)
+
+
+### Bug Fixes
+
+* **decorators:** make property optional ([08b53f2](https://github.com/SpoonX/wetland/commit/08b53f2))
+
+
+
 ## [5.0.1](https://github.com/SpoonX/wetland/compare/v5.0.0...v5.0.1) (2019-03-30)
 
 
