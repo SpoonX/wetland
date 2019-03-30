@@ -87,7 +87,7 @@ export function index (indexName?: string | Array<string>, fields?: string | Arr
  * @return {(target: Object, property: string) => void}
  */
 export function uniqueConstraint (constraintName?: string | Array<string>, fields?: string | Array<string>) {
-  return (target: Object, property: string) => {
+  return (target: Object, property?: string) => {
     if (!property) {
       return Mapping.forEntity(target).uniqueConstraint(constraintName, fields);
     }
