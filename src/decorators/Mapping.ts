@@ -53,13 +53,17 @@ export function autoFields () {
  * @return {(target: Object, property: string) => void}
  */
 export function index (indexName?: string | Array<string>, fields?: string | Array<string>) {
-  return (target: Object, property: string) => {
+  return (target: Object, property?: string): void => {
     if (!property) {
-      return Mapping.forEntity(target).index(indexName, fields);
+      Mapping.forEntity(target).index(indexName, fields);
+
+      return;
     }
 
     if (indexName) {
-      return Mapping.forEntity(target).index(indexName, property);
+      Mapping.forEntity(target).index(indexName, property);
+
+      return;
     }
 
     Mapping.forEntity(target).index(property);
