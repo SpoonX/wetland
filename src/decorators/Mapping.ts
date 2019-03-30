@@ -52,7 +52,7 @@ export function autoFields () {
  *
  * @return {(target: Object, property: string) => void}
  */
-export function index (indexName: string | Array<string>, fields?: string | Array<string>) {
+export function index (indexName?: string | Array<string>, fields?: string | Array<string>) {
   return (target: Object, property: string) => {
     if (!property) {
       return Mapping.forEntity(target).index(indexName, fields);
@@ -86,7 +86,7 @@ export function index (indexName: string | Array<string>, fields?: string | Arra
  *
  * @return {(target: Object, property: string) => void}
  */
-export function uniqueConstraint (constraintName: string | Array<string>, fields?: string | Array<string>) {
+export function uniqueConstraint (constraintName?: string | Array<string>, fields?: string | Array<string>) {
   return (target: Object, property: string) => {
     if (!property) {
       return Mapping.forEntity(target).uniqueConstraint(constraintName, fields);
