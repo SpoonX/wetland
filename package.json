@@ -1,6 +1,6 @@
 {
   "name": "wetland",
-  "version": "5.0.3",
+  "version": "5.0.4",
   "description": "A modern object-relational mapper (ORM) for node.js.",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts",
