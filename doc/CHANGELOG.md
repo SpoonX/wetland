@@ -1,3 +1,12 @@
+## [5.0.3](https://github.com/SpoonX/wetland/compare/v5.0.2...v5.0.3) (2019-03-30)
+
+
+### Bug Fixes
+
+* **decorators:** fix return for decorators ([eac5cce](https://github.com/SpoonX/wetland/commit/eac5cce))
+
+
+
 ## [5.0.2](https://github.com/SpoonX/wetland/compare/v5.0.1...v5.0.2) (2019-03-30)
 
 
