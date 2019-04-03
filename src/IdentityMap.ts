@@ -10,6 +10,13 @@ export class IdentityMap {
   private map: WeakMap<Function, Object> = new WeakMap;
 
   /**
+   * Reset the map.
+   */
+  public reset() {
+    this.map = new WeakMap;
+  }
+
+  /**
    * Get the PK map for entity.
    *
    * @param {Function | EntityInterface} entity
