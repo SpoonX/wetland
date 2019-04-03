@@ -1,3 +1,12 @@
+## [5.0.5](https://github.com/SpoonX/wetland/compare/v5.0.4...v5.0.5) (2019-04-03)
+
+
+### Features
+
+* **IdentityMap:** add reset method ([274d907](https://github.com/SpoonX/wetland/commit/274d907))
+
+
+
 ## [5.0.4](https://github.com/SpoonX/wetland/compare/v5.0.3...v5.0.4) (2019-03-30)
 
 
