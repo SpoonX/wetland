@@ -101,7 +101,27 @@ export class Mapping<T> {
    * @returns {{}}
    */
   public static now(): { __raw: string } {
-    return { __raw: 'CURRENT_TIMESTAMP' };
+    return Mapping.raw('CURRENT_TIMESTAMP');
+  }
+
+  /**
+   * Raw command for current timestamp and update current timestamp.
+   *
+   * @returns {{}}
+   */
+  public static onUpdateNow(): { __raw: string } {
+    return Mapping.raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
+  }
+
+  /**
+   * Add something to be used as raw in defaultTo.
+   *
+   * @param {string} raw
+   *
+   * @returns {{ __raw: string }}
+   */
+  public static raw( raw: string ): { __raw: string } {
+    return { __raw: raw };
   }
 
   /**
@@ -146,12 +166,21 @@ export class Mapping<T> {
   }
 
   /**
-   * Raw command for current timestamp.
+   * Raw command for current timestamp and onUpdate current timestamp.
    *
-   * @returns {{}}
+   * @returns {{ __raw: string }}
    */
   public now(): { __raw: string } {
     return Mapping.now();
+  }
+
+  /**
+   * Raw command for current timestamp and onUpdate current timestamp.
+   *
+   * @returns {{ __raw: string }}
+   */
+  public onUpdateNow(): { __raw: string } {
+    return Mapping.onUpdateNow();
   }
 
   /**

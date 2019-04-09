@@ -51,6 +51,30 @@ describe('Mapping', () => {
     });
   });
 
+  describe('.raw()', () => {
+    it('should return the raw syntax the SchemaBuilder understands', () => {
+      assert.deepEqual(Mapping.raw('testing 987'), { __raw: 'testing 987' });
+    });
+  });
+
+  describe('.onUpdateNow()', () => {
+    it('should return the raw syntax for ON UPDATE and NOW the SchemaBuilder understands', () => {
+      let mapping = getMapping(wetland, ToUnderscore);
+
+      assert.deepEqual(mapping.onUpdateNow(), { __raw: 'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP' });
+      assert.deepEqual(Mapping.onUpdateNow(), { __raw: 'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP' });
+    });
+  });
+
+  describe('.now()', () => {
+    it('should return the raw syntax for NOW the SchemaBuilder understands', () => {
+      let mapping = getMapping(wetland, ToUnderscore);
+
+      assert.deepEqual(mapping.now(), { __raw: 'CURRENT_TIMESTAMP' });
+      assert.deepEqual(Mapping.now(), { __raw: 'CURRENT_TIMESTAMP' });
+    });
+  });
+
   describe('.setEntityManager()', () => {
     it('should set the entity manager and apply staged mappings', () => {
       let mapping       = new Mapping(FooEntity);
