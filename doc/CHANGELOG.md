@@ -1,3 +1,12 @@
+# [5.1.0](https://github.com/SpoonX/wetland/compare/v5.0.5...v5.1.0) (2019-04-09)
+
+
+### Features
+
+* **Mapping:** add defaultTo helper for onUpdate CURRENT_TIMESTAMP ([d8ce076](https://github.com/SpoonX/wetland/commit/d8ce076))
+
+
+
 ## [5.0.5](https://github.com/SpoonX/wetland/compare/v5.0.4...v5.0.5) (2019-04-03)
 
 
