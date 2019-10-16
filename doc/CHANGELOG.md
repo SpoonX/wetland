@@ -1,3 +1,7 @@
+## [5.1.2](https://github.com/SpoonX/wetland/compare/v5.1.1...v5.1.2) (2019-10-16)
+
+
+
 ## [5.1.1](https://github.com/SpoonX/wetland/compare/v5.1.0...v5.1.1) (2019-10-16)
 
 
