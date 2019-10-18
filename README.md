@@ -52,7 +52,7 @@ Typings are provided by default for TypeScript users. No additional typings need
 ## Compatibility
 
 * All operating systems
-* Node.js 6.0+
+* Node.js 8.0+
 
 ## Gotchas
 
