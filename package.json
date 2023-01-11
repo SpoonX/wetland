@@ -39,7 +39,7 @@
     "csv-parse": "^1.2.0",
     "del": "^3.0.0",
     "homefront": "^3.0.0",
-    "knex": "^0.19.5",
+    "knex": "^2.4.0",
     "mkdirp": "^0.5.1",
     "stream-replace": "^1.0.0"
   },
